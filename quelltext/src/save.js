@@ -48,28 +48,45 @@ export function importCode(code) {
   return Object.assign(newProfile(p.name), p);
 }
 
-// ---- Kurzcode: 20 Zeichen zum Aufschreiben. Enthält Figur, Spielart, Sterne je Level und den Einstiegspunkt,
-// aber nicht Namen, Übungstage und Noten-Statistik (dafür gibt es die vollständige Sicherung).
+// ---- Kurzcode: 12 Zeichen zum Aufschreiben. Merkt sich Figur, Spielart und wie weit man in jeder Welt ist.
+// Alles andere (Name, einzelne Sterne, Übungstage, Noten-Statistik) steckt im Spielstand-Link bzw. QR-Code.
 const B32 = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 function shortSum(body) { let s = 7; for (let i = 0; i < body.length; i++) s = (s * 31 + B32.indexOf(body[i]) * (i + 3)) % 1024; return B32[s >> 5] + B32[s & 31]; }
-export function exportShort(profile, levelIds) {
+/** worlds = Liste der Level-IDs je Welt (höchstens 4 Welten, je höchstens 15 Level). */
+export function exportShort(profile, worlds) {
   const bits = []; const push = (v, n) => { for (let i = n - 1; i >= 0; i--) bits.push((v >> i) & 1); };
-  push(1, 2); push(profile.hero & 7, 3); push(profile.mode === 'profi' ? 1 : 0, 1); push(profile.unlockAll ? 1 : 0, 1);
-  for (const id of levelIds) push(Math.min(3, (profile.levels[id] || {}).stars || 0), 2);
-  for (let w = 0; w < 3; w++) push(Math.min(15, (profile.skip || [])[w] || 0), 4);
+  push(2, 2); push(profile.hero & 7, 3); push(profile.mode === 'profi' ? 1 : 0, 1); push(profile.unlockAll ? 1 : 0, 1);
+  for (let w = 0; w < 4; w++) { const done = (worlds[w] || []).filter(id => profile.levels[id]); const sum = done.reduce((a, id) => a + (profile.levels[id].stars || 1), 0);
+    push(Math.min(15, done.length), 4); push(done.length ? Math.max(1, Math.min(3, Math.round(sum / done.length))) : 0, 2); push(Math.min(15, (profile.skip || [])[w] || 0), 4); }
   while (bits.length % 5) bits.push(0);
   let body = ''; for (let i = 0; i < bits.length; i += 5) body += B32[bits.slice(i, i + 5).reduce((a, b) => a * 2 + b, 0)];
-  return (body + shortSum(body)).replace(/(.{5})(?=.)/g, '$1-');
+  return (body + shortSum(body)).replace(/(.{4})(?=.)/g, '$1-');
 }
-export function importShort(code, levelIds) {
+export function importShort(code, worlds) {
   const c = String(code).toUpperCase().replace(/O/g, '0').replace(/[IL]/g, '1').replace(/U/g, 'V').replace(/[^0-9A-Z]/g, '');
-  const need = Math.ceil((7 + levelIds.length * 2 + 12) / 5) + 2;
-  if (c.length !== need || [...c].some(ch => !B32.includes(ch))) throw new Error(`Der Kurzcode hat ${need} Zeichen. Bitte prüfe, ob etwas fehlt.`);
+  if (c.length !== 12 || [...c].some(ch => !B32.includes(ch))) throw new Error('Der Kurzcode hat 12 Zeichen. Bitte prüfe, ob etwas fehlt.');
   const body = c.slice(0, -2); if (shortSum(body) !== c.slice(-2)) throw new Error('Der Kurzcode stimmt nicht. Bitte vergleiche ihn Zeichen für Zeichen.');
   const bits = []; for (const ch of body) { const v = B32.indexOf(ch); for (let i = 4; i >= 0; i--) bits.push((v >> i) & 1); }
   let k = 0; const take = n => { let v = 0; for (let i = 0; i < n; i++) v = v * 2 + bits[k++]; return v; };
-  if (take(2) !== 1) throw new Error('Dieser Kurzcode gehört zu einer anderen Spielversion.');
-  const p = newProfile('Spieler', take(3), take(1) ? 'profi' : 'abenteuer'); p.unlockAll = !!take(1);
-  for (const id of levelIds) { const s = take(2); if (s) p.levels[id] = { stars: s }; }
-  p.skip = [take(4), take(4), take(4)]; p.seenIntro = true; return p;
+  if (take(2) !== 2) throw new Error('Dieser Kurzcode gehört zu einer anderen Spielversion.');
+  const p = newProfile('Spieler', take(3), take(1) ? 'profi' : 'abenteuer'); p.unlockAll = !!take(1); p.skip = [];
+  for (let w = 0; w < 4; w++) { const n = take(4), avg = take(2); p.skip.push(take(4)); (worlds[w] || []).slice(0, n).forEach(id => { p.levels[id] = { stars: avg || 1 }; }); }
+  p.seenIntro = true; return p;
+}
+
+// ---- Spielstand-Link (für QR-Code oder zum Verschicken): enthält alles, wird zusammengepresst.
+async function pipe(bytes, stream) { const w = stream.writable.getWriter(); w.write(bytes).catch(() => {}); w.close().catch(() => {}); return new Uint8Array(await new Response(stream.readable).arrayBuffer()); }
+function b64(bytes) { let bin = ''; for (const c of bytes) bin += String.fromCharCode(c); return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+function unb64(str) { const bin = atob(str.replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from(bin, c => c.charCodeAt(0)); }
+export async function exportPayload(profile) {
+  const days = Object.fromEntries(Object.entries(profile.days).sort().slice(-120)); const raw = new TextEncoder().encode(JSON.stringify({ ...profile, days }));
+  if (typeof CompressionStream !== 'undefined') { try { return 'Z' + b64(await pipe(raw, new CompressionStream('deflate-raw'))); } catch (e) { /* ohne Pressen weiter */ } }
+  return 'J' + b64(raw);
+}
+export async function importPayload(payload) {
+  const kind = payload[0]; let bytes;
+  try { bytes = unb64(payload.slice(1)); if (kind === 'Z') bytes = await pipe(bytes, new DecompressionStream('deflate-raw')); else if (kind !== 'J') throw new Error('x'); } catch (e) { throw new Error('Der Spielstand-Link ist unvollständig oder beschädigt.'); }
+  let p; try { p = JSON.parse(new TextDecoder().decode(bytes)); } catch (e) { throw new Error('Der Spielstand-Link lässt sich nicht lesen.'); }
+  if (!p || typeof p.name !== 'string' || typeof p.levels !== 'object') throw new Error('Der Link enthält keinen Spielstand.');
+  return Object.assign(newProfile(p.name), p);
 }

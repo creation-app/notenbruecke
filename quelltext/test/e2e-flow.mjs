@@ -26,9 +26,9 @@ await act('map'); await wait(200); ok(!(await page.$eval('[data-w="1"]', e => e.
 ok(await page.$('.story'), 'Welt-2-Geschichte erscheint'); await act('next'); await act('next'); await wait(100); ok(!(await page.$eval('[data-id="t1"]', e => e.disabled)), 't1 offen');
 const pr = await page.evaluate(() => __nb.profile); ok(Object.values(pr.days)[0] > 5, 'Übungszeit gezählt: ' + JSON.stringify(pr.days)); ok(pr.levels.h1.time > 0, 'Bestzeit gespeichert'); ok(pr.creatures.length >= 7, 'Notenwesen: ' + pr.creatures.length);
 // Finale
-await page.evaluate(() => { const p = __nb.profile; __levels.forEach(l => { if (l.id !== 'z7') p.levels[l.id] = { stars: 1 }; }); p.seenWorld = { 0: 1, 1: 1, 2: 1 }; __screens.map(__nb, 2); }); await wait(200);
+await page.evaluate(() => { const p = __nb.profile; __levels.forEach(l => { if (l.id !== 'z7') p.levels[l.id] = { stars: 1 }; }); p.seenWorld = { 0: 1, 1: 1, 2: 1 }; p.levels.z7 = undefined; delete p.levels.z7; __screens.map(__nb, 2); }); await wait(200);
 await page.click('[data-id="z7"]'); await act('go'); await wait(300); await page.evaluate(() => { const s = __nb.scene; s.idx = s.targets.length - 2; s.hero.x = s.plats[s.idx].x; s.hero.y = 100 - s.plats[s.idx].pos * 5; }); await wait(700); await page.screenshot({ path: 'shots/f6-waechter.png' });
-await play('boss'); await wait(400); await act('next'); await wait(200); ok(await page.$('.story'), 'Finale erscheint'); await page.screenshot({ path: 'shots/f7-finale.png' }); await act('next'); await act('next'); await act('next'); await wait(200); ok(await page.$('.nodes'), 'zurück auf der Karte');
+await play('boss'); await wait(400); await act('next'); await wait(200); ok(await page.$('.story'), 'Finale erscheint'); await page.screenshot({ path: 'shots/f7-finale.png' }); await act('next'); await act('next'); await act('next'); await wait(200); if (await page.$('.story')) { await act('next'); await act('next'); await wait(200); } ok(await page.$('.nodes'), 'zurück auf der Karte');
 // Handy quer
 await page.setViewportSize({ width: 844, height: 390 }); await wait(200); await page.screenshot({ path: 'shots/f8-handy.png' });
 console.log(errors.length ? errors.join('\n') : 'ABLAUF OK'); await browser.close(); process.exit(errors.length ? 1 : 0);

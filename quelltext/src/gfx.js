@@ -1,5 +1,6 @@
 // Pixelgrafik: alles wird programmatisch auf ein festes Raster gezeichnet (keine Bilddateien).
 import { GLYPHS } from './glyphs.js';
+import { staffLines } from './music.js';
 
 export const C = { K: '#26364B', SKY: '#75CCF5', B1: '#2998E8', B2: '#174B83', G1: '#78B833', G2: '#467C35', GL: '#A5D84F',
   OR: '#FF9D35', YE: '#FFD966', CREAM: '#FFF1D6', RED: '#EF5350', W: '#FFFFFF' };
@@ -19,8 +20,8 @@ const HEAD = ['......KKKKKK....', '....KKOOOOOOKK..', '...KOOOOOOOOOOK.', '..KOO
   '..KSSSKKSSSKKSK.', '..KSSSKKSSSKKSK.', '..KSsSSSSSSSSsK.', '...KSSSSKKSSSSK.', '....KKSSSSSSKK..'];
 const BODY = ['.KKKRRKKKKKKK...', 'KRRRRKBBBBBBK...', 'KRRRRKBBYYBBKK..', 'KRRRrKBBYBBBSK..', '.KRRrKBBYBBBKK..', '.KRrrKBYYBBBK...', '..KrrKBBBBBBK...'];
 const BODY_FLY = ['KKKKRRKKKKKKK...', 'RRRRRKBBBBBBK...', 'KRRRRKBBYYBBKK..', '.KKRrKBBYBBBSK..', '...KKKBBYBBBKK..', '.....KBYYBBBK...', '.....KBBBBBBK...'];
-const LEGS = { stand: ['..KKKKbKKKKbK...', '.....KbbK.KbbK..', '.....KKKK.KKKK..'], tuck: ['.....KbKKKKbK...', '....KbbK.KbbK...', '....KKK..KKK....'] };
-const EYES = { open: ['WK', 'KK', 'KK'], closed: ['SS', 'KK', 'SS'], happy: ['KK', 'SS', 'SS'], side: ['KW', 'KK', 'KK'] };
+const LEGS = { run1: ['..KKKKbKKKKbK...', '....KbbK...KbbK.', '....KKKK...KKKK.'], run2: ['..KKKKbKKKKbK...', '......KbbKbbK...', '......KKKKKKK...'], stand: ['..KKKKbKKKKbK...', '.....KbbK.KbbK..', '.....KKKK.KKKK..'], tuck: ['.....KbKKKKbK...', '....KbbK.KbbK...', '....KKK..KKK....'] };
+const EYES = { up: ['KK', 'KK', 'SS'], down: ['SS', 'KK', 'KK'], open: ['WK', 'KK', 'KK'], closed: ['SS', 'KK', 'SS'], happy: ['KK', 'SS', 'SS'], side: ['KW', 'KK', 'KK'] };
 export const HEROES = [
   { name: 'Rot', R: '#EF5350', r: '#B83A3A', O: '#FF9D35', B: '#2998E8', b: '#174B83' },
   { name: 'Grün', R: '#78B833', r: '#467C35', O: '#6B4A2B', B: '#FFD966', b: '#8A5A2B' },
@@ -39,12 +40,16 @@ function heroFrame(look, o) {
   fromMap(LEGS[o.legs || 'stand'], pal, x, 1, by + 18);
   fromMap(o.fly ? BODY_FLY : BODY, pal, x, 1, by + 11);
   fromMap(head.map(r => r.join('')), pal, x, 1 + (o.hx || 0), by + (o.hy || 0));
+  const arm = (cOut, cIn) => { px(x, cIn, by + 5, C.K); px(x, cOut, by + 5, C.K); for (let y = by + 6; y <= by + 12; y++) { px(x, cIn, y, y < by + 8 ? pal.S : look.B); px(x, cOut, y, C.K); } };
+  if (o.arms === 'both' || o.arms === 'right') arm(17, 16); if (o.arms === 'both') arm(0, 1);
   return c;
 }
 export function makeHero(i) {
   const L = HEROES[i % HEROES.length];
-  return { idle0: heroFrame(L, {}), idle1: heroFrame(L, { hy: 1 }), blink: heroFrame(L, { eyes: 'closed' }), listen: heroFrame(L, { hx: 1, hy: 1, eyes: 'side' }),
-    jump: heroFrame(L, { legs: 'tuck', fly: true, hy: -1, eyes: 'happy', lift: -1 }), cheer: heroFrame(L, { eyes: 'happy', hy: -1, fly: true }), oops: heroFrame(L, { eyes: 'closed', hx: -1, hy: 1 }) };
+  return { idle0: heroFrame(L, {}), idle1: heroFrame(L, { hy: 1 }), blink: heroFrame(L, { eyes: 'closed' }), lookUp: heroFrame(L, { eyes: 'up', hy: -1 }), lookDown: heroFrame(L, { eyes: 'down', hy: 1 }),
+    listen: heroFrame(L, { hx: 1, hy: 1, eyes: 'side', arms: 'right' }), jump: heroFrame(L, { legs: 'tuck', fly: true, hy: -1, eyes: 'happy', lift: -1, arms: 'both' }),
+    cheer0: heroFrame(L, { eyes: 'happy', arms: 'both' }), cheer1: heroFrame(L, { eyes: 'happy', hy: -1, fly: true, arms: 'both', lift: -1, legs: 'tuck' }), oops: heroFrame(L, { eyes: 'closed', hx: -1, hy: 1 }),
+    run0: heroFrame(L, { legs: 'run1', eyes: 'side' }), run1: heroFrame(L, { legs: 'run2', eyes: 'side', hy: 1, fly: true }), wave0: heroFrame(L, { arms: 'right', eyes: 'happy' }), wave1: heroFrame(L, { eyes: 'happy', hy: 1 }) };
 }
 
 // ---------- Notenwesen ----------
@@ -96,8 +101,10 @@ const SHARP = ['..X..X.', '..X..XX', '..XXXX.', 'XXX..X.', '..X..X.', '..X..XX',
 const FLAT = ['X....', 'X....', 'X....', 'X....', 'X.XX.', 'XX..X', 'X...X', 'X..X.', 'XXX..'];
 export function drawAccidental(ctx, x, y, alt, col) { fromMap(alt > 0 ? SHARP : FLAT, { X: col }, ctx, x - 3, alt > 0 ? y - 4 : y - 6); }
 export function drawLedgers(ctx, x, w, positions, col) { ctx.fillStyle = col; for (const p of positions) ctx.fillRect(x, yOfPos(p), w, 1); }
-export function drawStaff(ctx, col, x0 = 4, x1 = VIEW_W - 4) { ctx.fillStyle = col; for (let p = 0; p <= 8; p += 2) ctx.fillRect(x0, yOfPos(p), x1 - x0, 1); }
-export function drawClef(ctx, clef, x, col) { const g = GLYPHS[clef]; fromMap(g.rows, { X: col }, ctx, x, STAFF_BOTTOM + g.dy); }
+export function drawStaff(ctx, col, x0 = 4, x1 = VIEW_W - 4, clef = 'treble') { ctx.fillStyle = col; for (const p of staffLines(clef)) ctx.fillRect(x0, yOfPos(p), x1 - x0, 1); }
+export function drawClef(ctx, clef, x, col) {
+  if (clef === 'grand') { fromMap(GLYPHS.treble.rows, { X: col }, ctx, x, STAFF_BOTTOM - 30 + GLYPHS.treble.dy); fromMap(GLYPHS.bass.rows, { X: col }, ctx, x, STAFF_BOTTOM + 30 + GLYPHS.bass.dy); return; }
+  const g = GLYPHS[clef]; fromMap(g.rows, { X: col }, ctx, x, STAFF_BOTTOM + g.dy); }
 
 let glowSprite = null;
 export function drawGlow(ctx, x, y, alpha) {
@@ -113,6 +120,8 @@ export const THEMES = {
     far: ['#8FC9EF', '#76B4E4', '#F2FAFF'], cloud: ['#FFFFFF', '#DDF0FB'], hill: ['#B9DE7A', '#9CCB5A', '#A5D84F', '#78B833', '#467C35'] },
   tiefe: { line: '#FFF1D6', grass: ['#7BE0D6', '#3FB5AC', '#1F7F78'], soil: ['#6B7FA6', '#4A5C82'], bands: ['#1F6FA8', '#185A90', '#124474', '#0D3058'],
     far: ['#0F3B66', '#0B2E52', '#1A5C8C'], cloud: ['#8FE3F2', '#4FB4D8'], hill: ['#1B5A7A', '#164B68', '#3FB5AC', '#12405C', '#0C2C44'] },
+  abend: { line: C.K, grass: ['#C7E36A', '#8FBF3F', '#557F2E'], soil: ['#C98A4B', '#A36A33'], bands: ['#F59A5A', '#FBB98A', '#FFDDB5', '#FFF1D6'],
+    far: ['#C98BB0', '#A86F9C', '#FFE9D6'], cloud: ['#FFFFFF', '#FFD9C2'], hill: ['#C9DE8A', '#A9C768', '#B5D85F', '#7FAE45', '#4E7A35'] },
   zauber: { line: '#FFF1D6', grass: ['#FFB3D1', '#E86FA6', '#A8457A'], soil: ['#8A6BB8', '#5F4690'], bands: ['#2F2466', '#4B2F86', '#8A479C', '#E0738E'],
     far: ['#5B3A8C', '#48307A', '#FFD966'], cloud: ['#FFC2D6', '#D98FB8'], hill: ['#6B3FA0', '#5A3590', '#E86FA6', '#4A2A70', '#2E1B4F'] },
 };

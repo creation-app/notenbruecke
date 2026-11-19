@@ -1,5 +1,5 @@
 // Spielart "Brückenbauer": Noten selbst ins System schreiben (einzeln oder als Wort aus Notennamen).
-import { N, note, midiOf, staffPos, nameHtml, nameStr, letterIdx, LETTERS, CLEFS, describePos, ledgerPositions } from './music.js';
+import { stemUp, N, note, midiOf, staffPos, nameHtml, nameStr, letterIdx, LETTERS, CLEFS, describePos, ledgerPositions } from './music.js';
 import { pickNext, update as srsUpdate, newStat } from './srs.js';
 import * as G from './gfx.js';
 import { label, noteLabel } from './text.js';
@@ -8,7 +8,7 @@ export class BauScene {
   constructor(app, level) { this.app = app; this.level = level; this.isLevel = true; }
   enter() {
     const { app, level } = this; this.clef = level.clef; this.theme = level.theme; this.bg = app.background(level.theme); this.line = G.THEMES[level.theme].line;
-    const ps = level.notes.map(k => staffPos(N(k), this.clef)); this.minPos = Math.max(-4, Math.min(...ps) - 2); this.maxPos = Math.min(12, Math.max(...ps) + 2);
+    const ps = level.notes.map(k => staffPos(N(k), this.clef)); const g = this.clef === 'grand'; this.minPos = Math.max(g ? -8 : -4, Math.min(...ps) - 2); this.maxPos = Math.min(g ? 16 : 12, Math.max(...ps) + 2);
     this.tasks = this.buildTasks(); this.ti = 0; this.firstTry = 0; this.t = 0; this.parts = new G.Particles(); this.freed = [];
     app.panel.showMic(false); app.panel.bau(!!level.accidentals, { move: d => this.move(d), acc: a => this.setAcc(this.alt === a ? 0 : a), place: () => this.place() });
     app.hud.show(level.title, true); this.startTask();
@@ -20,7 +20,7 @@ export class BauScene {
     return out;
   }
   startTask() {
-    const tk = this.tasks[this.ti], { app } = this; this.slot = 0; this.placed = []; this.pos = 4; this.alt = 0; this.tries = 0; this.taskClean = true; this.wrongT = 0; this.msg = null; app.panel.setAcc(0);
+    const tk = this.tasks[this.ti], { app } = this; this.slot = 0; this.placed = []; this.pos = Math.max(this.minPos, Math.min(this.maxPos, 4)); this.alt = 0; this.tries = 0; this.taskClean = true; this.wrongT = 0; this.msg = null; app.panel.setAcc(0);
     this.n = tk.word ? tk.word.length : 1; this.xs = Array.from({ length: this.n }, (_, i) => 176 + (i - (this.n - 1) / 2) * 40);
     app.hud.progress(this.ti, this.tasks.length);
     app.bubble(tk.word ? `Schreibe das Wort <b>${tk.word}</b> – Note für Note.` : `Setze die Note <b>${nameHtml(tk.notes[0])}</b> ins System.`, 0);
@@ -41,17 +41,17 @@ export class BauScene {
     } else {
       this.tries++; this.taskClean = false; this.wrongT = 0.5; const want = tk.word ? tk.word[this.slot].toLowerCase() : null;
       if (!tk.word) { const ck = `${tk.notes[0].key}>${cand.key}`; p.conf[ck] = (p.conf[ck] || 0) + 1; p.notes[tk.notes[0].key] = srsUpdate(p.notes[tk.notes[0].key] || newStat(), false); }
-      app.bubble(`Das ist <b>${nameHtml(cand)}</b> (${describePos(this.pos)}). Gesucht ist <b>${tk.word ? want : nameHtml(tk.notes[0])}</b>.`, 0);
+      app.bubble(`Das ist <b>${nameHtml(cand)}</b> (${describePos(this.pos, this.clef)}). Gesucht ist <b>${tk.word ? want : nameHtml(tk.notes[0])}</b>.`, 0);
     }
   }
   update(dt) { this.t += dt; this.parts.update(dt); if (this.wrongT > 0) this.wrongT -= dt; }
   draw(ctx, tx) {
-    const line = this.line, tk = this.tasks[Math.min(this.ti, this.tasks.length - 1)]; G.drawBackground(ctx, this.bg, this.t * 3, this.t); G.drawStaff(ctx, line); G.drawClef(ctx, this.clef, 6, line);
+    const line = this.line, tk = this.tasks[Math.min(this.ti, this.tasks.length - 1)]; G.drawBackground(ctx, this.bg, this.t * 3, this.t); G.drawStaff(ctx, line, 4, G.VIEW_W - 4, this.clef); G.drawClef(ctx, this.clef, 6, line);
     const dark = this.theme === 'himmel' ? G.C.K : G.C.CREAM;
     for (let i = 0; i < this.n; i++) { const x = Math.round(this.xs[i]);
-      if (i < this.placed.length) { const n = this.placed[i], pos = staffPos(n, this.clef); G.drawLedgers(ctx, x - 9, 19, ledgerPositions(pos), line); G.drawNote(ctx, x, G.yOfPos(pos), { style: 'ok', up: pos < 4, alt: n.alt, line: G.C.K }); }
+      if (i < this.placed.length) { const n = this.placed[i], pos = staffPos(n, this.clef); G.drawLedgers(ctx, x - 9, 19, ledgerPositions(pos, this.clef), line); G.drawNote(ctx, x, G.yOfPos(pos), { style: 'ok', up: stemUp(pos, this.clef), alt: n.alt, line: G.C.K }); }
       else if (i === this.slot && !this.locked) { const sx = x + (this.wrongT > 0 ? Math.round(Math.sin(this.wrongT * 50) * 2) : 0), y = G.yOfPos(this.pos);
-        G.drawLedgers(ctx, x - 9, 19, ledgerPositions(this.pos), line); G.drawGlow(ctx, sx, y, 0.55 + 0.25 * Math.sin(this.t * 5)); G.drawNote(ctx, sx, y, { style: 'gold', up: this.pos < 4, alt: this.alt, line: G.C.K });
+        G.drawLedgers(ctx, x - 9, 19, ledgerPositions(this.pos, this.clef), line); G.drawGlow(ctx, sx, y, 0.55 + 0.25 * Math.sin(this.t * 5)); G.drawNote(ctx, sx, y, { style: 'gold', up: stemUp(this.pos, this.clef), alt: this.alt, line: G.C.K });
         if (this.tries >= 2 && !tk.word) { const tp = staffPos(tk.notes[0], this.clef); ctx.globalAlpha = 0.45; G.drawNote(ctx, x, G.yOfPos(tp), { style: 'ghost', stem: false, line: G.C.G2 }); ctx.globalAlpha = 1; } }
       if (tk.word) label(tx, tk.word[i], x, 126, { size: 30, color: i < this.placed.length ? '#B4EB6B' : '#FFFFFF', stroke: G.C.K }); }
     this.parts.draw(ctx);

@@ -46,8 +46,8 @@ await page.evaluate(() => window.__screens.map(__nb, 1)); await wait(200); await
 await page.click('[data-act="coll"]'); await wait(150); await page.click('[data-act="cr"]:not([disabled])'); await wait(150); await shot('26-sammlung'); await act('back');
 await page.evaluate(() => { const p = __nb.profile, d = new Date(); for (let i = 1; i < 9; i++) { const x = new Date(d); x.setDate(d.getDate() - i); if (i !== 5) p.days[`${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`] = 200 * i; } p.conf['e1>g1'] = 4; });
 await page.click('[data-act="pass"]'); await wait(150); await shot('27-uebungspass'); await act('back'); await page.click('[data-act="board"]'); await wait(100); await shot('28-bestenliste'); await act('back');
-await page.click('[data-act="set"]'); await wait(100); await page.click('[data-act="exp"]'); await wait(100); await shot('29-einstellungen');
-const code = await page.inputValue('#codeOut'); assert(/^NB1\./.test(code), 'Code erzeugt');
+await page.click('[data-act="set"]'); await wait(100); await shot('29-einstellungen'); await page.click('[data-act="exp"]'); await wait(400);
+const code = await page.inputValue('#codeOut'); assert(code.includes('#s='), 'Link erzeugt');
 // Neu laden: Spielstand bleibt
 await page.reload(); await wait(600); await act('go'); await wait(100); await shot('30-profile'); const names = await page.$$eval('.pcard b', e => e.map(x => x.textContent)); assert(names.includes('Mika'), 'Profil nach Neuladen da');
 // Code auf "anderem Gerät"

@@ -55,16 +55,21 @@ export function noteOfMidi(midi, preferFlat = false) {
   return make(l + 7 * (Math.floor(midi / 12) - 5), alt);
 }
 
-export const CLEFS = { treble: { bottom: 2 }, bass: { bottom: -10 } };
+export const CLEFS = { treble: { bottom: 2 }, bass: { bottom: -10 }, grand: { bottom: -4 } };
+/** Linien des Systems als Positionen. Im großen System liegen Bass (unten) und Violine (oben) so, dass c¹ genau dazwischen sitzt. */
+export function staffLines(clef) { return clef === 'grand' ? [-6, -4, -2, 0, 2, 6, 8, 10, 12, 14] : [0, 2, 4, 6, 8]; }
+export function stemUp(pos, clef) { return clef === 'grand' ? (pos >= 4 ? pos < 10 : pos < -2) : pos < 4; }
 /** Position im System: 0 = unterste Linie, 1 = erster Zwischenraum ... */
 export function staffPos(n, clef) { return n.step - CLEFS[clef].bottom; }
-export function ledgerPositions(pos) {
+export function ledgerPositions(pos, clef) {
   const out = [];
+  if (clef === 'grand') { if (pos === 4) out.push(4); for (let p = -8; p >= pos; p -= 2) out.push(p); for (let p = 16; p <= pos; p += 2) out.push(p); return out; }
   for (let p = -2; p >= pos; p -= 2) out.push(p);
   for (let p = 10; p <= pos; p += 2) out.push(p);
   return out;
 }
-export function describePos(pos) {
+export function describePos(pos, clef) {
+  if (clef === 'grand') return pos >= 4 ? describePos(pos - 6) + ' im Violinschlüssel' : describePos(pos + 6) + ' im Bassschlüssel';
   if (pos < 0 || pos > 8) { const below = pos < 0, d = below ? -pos : pos - 8, side = below ? 'unter' : 'über';
     return d === 1 ? `direkt ${side} dem System` : d % 2 === 0 ? `${d / 2}. Hilfslinie ${side} dem System` : `${side} der ${(d - 1) / 2}. Hilfslinie`; }
   return pos % 2 === 0 ? `${pos / 2 + 1}. Linie` : `${(pos + 1) / 2}. Zwischenraum`;

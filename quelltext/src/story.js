@@ -9,11 +9,13 @@ export const WORLD_INTRO = [
   ['Der Himmel der hohen Töne. Irgendwo dort oben, auf der schwebenden Insel, steht das Schloss der Klänge – stumm und grau verhangen.', 'Der Violinschlüssel zeigt dir den Weg: Er ringelt sich um die Linie, auf der das g¹ wohnt.'],
   ['Unter der Brücke am mittleren c beginnt die Tiefe. Hier hat der Nebel die dunklen Töne versteckt.', 'Der Bassschlüssel ist dein Kompass: Seine zwei Punkte bewachen die Linie, auf der das kleine f wohnt.'],
   ['Hinter dem Meer liegt das Land der Zauberzeichen. Hier trägt mancher Ton ein Zeichen: Das Kreuz hebt ihn einen halben Schritt, das b senkt ihn.', 'Die schwarzen Tasten kennt der Nebel am wenigsten. Genau deshalb hat er sich hier verkrochen.'],
+  ['Zwischen Himmel und Tiefe spannt sich die größte aller Brücken: zwei Systeme übereinander, oben für die rechte Hand, unten für die linke.', 'Genau in der Mitte, auf einer einzigen kleinen Linie, wohnt das mittlere c. Von dort aus erreichst du beide Welten.'],
 ];
 export const WORLD_OUTRO = [
   ['Das Schloss der Klänge leuchtet wieder! Aus allen Fenstern klingt es – und die Notenwesen des Himmels tanzen auf den Linien.', 'Doch aus der Tiefe steigt noch immer grauer Dunst. Unter dem mittleren c wartet der nächste Weg.'],
   ['Die Tiefe singt wieder. Vom höchsten Schloss bis zum Meeresgrund sind die Brücken zurück – und das mittlere c hält beide Welten zusammen.', 'Der Graue Nebel flieht dorthin, wo er sich am sichersten fühlt: ins Land der Zauberzeichen.'],
   ['Mit dem letzten Ton zerreißt der Graue Nebel wie ein alter Vorhang. Dahinter: Farben, Stimmen, Musik.', 'Das Klangreich ist frei. Und du kannst jetzt etwas, das dir niemand mehr nimmt: Du kannst Noten lesen.', 'Die Notenwesen bleiben bei dir. Besuche sie in deiner Sammlung – und komm wieder, damit kein Ton je wieder verstummt.'],
+  ['Beide Hände, beide Schlüssel, eine Melodie: Die große Brücke trägt. Wer hier hinüberkommt, liest Klaviernoten so, wie sie wirklich im Heft stehen.'],
 ];
 export const LEVEL_STORY = {
   h1: 'Zwei Notenwesen rufen leise durch den Nebel: das mittlere c und das g auf der Schlüssel-Linie. Hol sie zurück!',
@@ -51,4 +53,9 @@ export const LEVEL_STORY = {
   z5: 'Ein Rätsel: Zwei verschiedene Namen, aber dieselbe Taste. gis und as sind Zwillinge.',
   z6: 'Der Nebel sprüht Funken. Sein letzter Trick!',
   z7: 'Im Herzen des Nebels wartet der letzte Wächter. Nur eine berühmte Melodie kann ihn lösen.',
+  b1: 'Unten die linke Hand, oben die rechte. Die Brücke wächst nur, wenn beide mitbauen.',
+  b2: 'Noten aus beiden Systemen wirbeln durcheinander. Schau genau hin: oben oder unten?',
+  b3: 'Rund um das mittlere c liegen die Töne dicht beieinander – mal im oberen, mal im unteren System.',
+  b4: 'Jetzt schreibst du selbst ins große System. Achte darauf, in welches der beiden die Note gehört.',
+  b5: 'Der Wächter der großen Brücke lässt nur durch, wer mit beiden Händen spielt.',
 };

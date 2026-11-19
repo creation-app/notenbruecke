@@ -17,7 +17,7 @@ export class Panel {
   clear() { this.right.innerHTML = ''; this.keys.clear(); this.heard = this.hint = null; }
 
   keyboard(clef) {
-    this.clear(); const base = clef === 'bass' ? 36 : 60; const kb = document.createElement('div'); kb.className = 'kb'; kb.setAttribute('role', 'group'); kb.setAttribute('aria-label', 'Klaviatur');
+    this.clear(); const base = clef === 'bass' ? 36 : clef === 'grand' ? 48 : 60; const kb = document.createElement('div'); kb.className = 'kb'; kb.setAttribute('role', 'group'); kb.setAttribute('aria-label', 'Klaviatur');
     for (let i = 0; i < 15; i++) { const midi = base + 12 * Math.floor(i / 7) + WHITE[i % 7], n = noteOfMidi(midi);
       const k = this.key(midi, 'wk', i % 7 === 0 ? nameHtml(n) : ''); k.style.left = i * 36 + 'px'; kb.appendChild(k);
       if (i < 14 && BLACK_AFTER.includes(i % 7)) { const b = this.key(midi + 1, 'bk', ''); b.style.left = i * 36 + 25 + 'px'; kb.appendChild(b); } }

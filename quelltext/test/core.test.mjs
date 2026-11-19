@@ -88,18 +88,40 @@ test('Erkennung mit halber Abtastrate (wie im Spiel): C bis c³', () => {
   for (let m = 36; m <= 84; m++) { const full = piano(m, 0, 0.2).subarray(2000, 2000 + 4096), d = new Float32Array(2048); for (let i = 0; i < 2048; i++) d[i] = (full[2 * i] + full[2 * i + 1]) / 2;
     const r = detectPitch(d, SR / 2); assert.ok(r, 'kein Ergebnis ' + m); const mf = M.midiOfFreq(r.freq); assert.equal(Math.round(mf), m, 'MIDI ' + m); assert.ok(Math.abs(mf - m) < 0.2, 'Abweichung ' + m + ': ' + (mf - m)); }
 });
-test('Kurzcode: 20 Zeichen, übersteht Abtippfehler-Varianten, erkennt Fehler', async () => {
-  const { LEVELS } = await import('../src/levels.js'); const ids = LEVELS.map(l => l.id);
-  const p = V.newProfile('Mika', 4, 'profi'); p.levels.h1 = { stars: 3 }; p.levels.h2 = { stars: 1 }; p.levels.z7 = { stars: 2 }; p.skip = [11, 0, 0];
-  const code = V.exportShort(p, ids); assert.match(code, /^[0-9A-Z]{5}(-[0-9A-Z]{5}){3}$/);
-  for (const variant of [code, code.toLowerCase(), code.replace(/-/g, ' '), code.replace(/0/g, 'O').replace(/1/g, 'l')]) { const q = V.importShort(variant, ids);
-    assert.equal(q.hero, 4); assert.equal(q.mode, 'profi'); assert.deepEqual(q.skip, [11, 0, 0]); assert.equal(q.levels.h1.stars, 3); assert.equal(q.levels.h2.stars, 1); assert.equal(q.levels.z7.stars, 2); assert.equal(Object.keys(q.levels).length, 3); }
-  const wrong = code.slice(0, 3) + (code[3] === 'A' ? 'B' : 'A') + code.slice(4); assert.throws(() => V.importShort(wrong, ids)); assert.throws(() => V.importShort(code.slice(0, -2), ids));
-  assert.equal(V.exportShort(V.newProfile('X'), ids).length, 23);
+test('Kurzcode: 12 Zeichen, übersteht Abtippfehler-Varianten, erkennt Fehler', async () => {
+  const L = await import('../src/levels.js'); const worlds = L.WORLDS.map((w, i) => L.levelsOf(i).map(l => l.id));
+  const p = V.newProfile('Mika', 4, 'profi'); ['h1', 'h2', 'h3'].forEach(id => { p.levels[id] = { stars: 3 }; }); p.levels.t1 = { stars: 1 }; p.skip = [11, 0, 0, 0];
+  const code = V.exportShort(p, worlds); assert.match(code, /^[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{4}$/);
+  for (const variant of [code, code.toLowerCase(), code.replace(/-/g, ' '), code.replace(/0/g, 'O').replace(/1/g, 'l')]) { const q = V.importShort(variant, worlds);
+    assert.equal(q.hero, 4); assert.equal(q.mode, 'profi'); assert.deepEqual(q.skip, [11, 0, 0, 0]); assert.deepEqual(Object.keys(q.levels), ['h1', 'h2', 'h3', 't1']); assert.equal(q.levels.h2.stars, 3); assert.equal(q.levels.t1.stars, 1); }
+  const wrong = code.slice(0, 2) + (code[2] === 'A' ? 'B' : 'A') + code.slice(3); assert.throws(() => V.importShort(wrong, worlds)); assert.throws(() => V.importShort(code.slice(0, -2), worlds));
+});
+test('Spielstand-Link enthält alles und ist gepresst kürzer', async () => {
+  const p = V.newProfile('Mika Müller', 2, 'profi'); for (let i = 0; i < 30; i++) { p.notes['n' + i] = { box: i % 5, seen: i, ok: i >> 1 }; p.days['2026-10-' + String(i + 1).padStart(2, '0')] = 300 + i; p.conf[`a${i}>b${i}`] = i; } p.levels.h1 = { stars: 3, time: 12.5 }; p.creatures = ['c1', 'g1'];
+  const pay = await V.exportPayload(p); assert.equal(pay[0], 'Z'); assert.deepEqual(await V.importPayload(pay), p); assert.ok(pay.length < JSON.stringify(p).length * 0.75, 'gepresst: ' + pay.length + ' von ' + JSON.stringify(p).length);
+  await assert.rejects(V.importPayload('Zabc')); await assert.rejects(V.importPayload('Qabc'));
 });
 test('Einstieg nach Einstufung schaltet Level frei', async () => {
   const L = await import('../src/levels.js'); const p = V.newProfile('A'); const h = L.levelsOf(0), t = L.levelsOf(1);
-  assert.ok(!L.levelUnlocked(p, h[5])); p.skip = [6, 0, 0]; assert.ok(L.levelUnlocked(p, h[5])); assert.ok(!L.levelUnlocked(p, h[6])); assert.ok(!L.worldUnlocked(p, 1));
-  p.skip = [15, 9, 0]; assert.ok(L.worldUnlocked(p, 1)); assert.ok(L.levelUnlocked(p, t[8])); assert.ok(!L.levelUnlocked(p, t[9])); assert.ok(!L.worldUnlocked(p, 2));
+  assert.ok(!L.levelUnlocked(p, h[5])); p.skip = [6, 0, 0, 0]; assert.ok(L.levelUnlocked(p, h[5])); assert.ok(!L.levelUnlocked(p, h[6])); assert.ok(!L.worldUnlocked(p, 1));
+  p.skip = [15, 9, 0, 0]; assert.ok(L.worldUnlocked(p, 1)); assert.ok(L.levelUnlocked(p, t[8])); assert.ok(!L.levelUnlocked(p, t[9])); assert.ok(!L.worldUnlocked(p, 2)); assert.ok(!L.worldUnlocked(p, 3));
+  for (let i = 0; i < 6; i++) p.levels[t[i].id] = { stars: 1 }; assert.ok(L.worldUnlocked(p, 3), 'Große Brücke öffnet nach 6 Bass-Leveln');
   for (const s of L.PLACEMENT) s.notes.forEach(k => M.N(k));
+});
+
+test('Großes System: Positionen, Linien, Hilfslinien', () => {
+  const pos = k => M.staffPos(M.N(k), 'grand'); assert.equal(pos('c1'), 4); assert.equal(pos('e1'), 6); assert.equal(pos('f2'), 14); assert.equal(pos('a'), 2); assert.equal(pos('G'), -6);
+  assert.deepEqual(M.staffLines('grand'), [-6, -4, -2, 0, 2, 6, 8, 10, 12, 14]); assert.deepEqual(M.ledgerPositions(4, 'grand'), [4]); assert.deepEqual(M.ledgerPositions(3, 'grand'), []); assert.deepEqual(M.ledgerPositions(5, 'grand'), []);
+  assert.deepEqual(M.ledgerPositions(16, 'grand'), [16]); assert.deepEqual(M.ledgerPositions(-8, 'grand'), [-8]); assert.equal(M.describePos(8, 'grand'), '2. Linie im Violinschlüssel'); assert.equal(M.describePos(0, 'grand'), '4. Linie im Bassschlüssel');
+  assert.ok(M.stemUp(6, 'grand')); assert.ok(!M.stemUp(12, 'grand')); assert.ok(M.stemUp(-4, 'grand')); assert.ok(!M.stemUp(0, 'grand'));
+});
+test('Freischalt-Schlüssel: echt, gefälscht, abgelaufen', async () => {
+  const fs = await import('node:fs'); const { verifyKey, signKey, isActive } = await import('../src/license.js');
+  const priv = JSON.parse(fs.readFileSync('../geheim/privat.jwk.json', 'utf8'));
+  const once = await signKey(priv, { type: 'einmal', until: null, serial: 7 }); let lic = await verifyKey('  ' + once.replace(/(.{20})/g, '$1\n')); assert.equal(lic.type, 'einmal'); assert.equal(lic.until, null); assert.equal(lic.serial, 7); assert.ok(isActive(lic));
+  lic = await verifyKey('https://example.org/#k=' + once); assert.equal(lic.serial, 7);
+  const abo = await signKey(priv, { type: 'abo', until: new Date(2027, 0, 31), serial: 70000 }); lic = await verifyKey(abo); assert.equal(lic.type, 'abo'); assert.equal(lic.serial, 70000);
+  assert.ok(isActive(lic, new Date(2027, 0, 31, 12))); assert.ok(!isActive(lic, new Date(2027, 1, 2))); assert.ok(!isActive(null));
+  const forged = once.slice(0, 6) + (once[6] === 'A' ? 'B' : 'A') + once.slice(7); await assert.rejects(verifyKey(forged)); await assert.rejects(verifyKey('NBKabc')); await assert.rejects(verifyKey('Quatsch'));
+  const other = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']); const fake = await signKey(await crypto.subtle.exportKey('jwk', other.privateKey), { type: 'einmal', until: null, serial: 1 }); await assert.rejects(verifyKey(fake));
 });

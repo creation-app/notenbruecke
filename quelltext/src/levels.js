@@ -5,7 +5,9 @@ export const WORLDS = [
   { id: 'himmel', name: 'Himmel der hohen Töne', short: 'Himmel', clef: 'treble', theme: 'himmel', need: 0 },
   { id: 'tiefe', name: 'Tiefen der tiefen Töne', short: 'Tiefe', clef: 'bass', theme: 'tiefe', need: 8 },
   { id: 'zauber', name: 'Land der Zauberzeichen', short: 'Zauberzeichen', clef: 'treble', theme: 'zauber', need: 6 },
+  { id: 'beide', name: 'Die große Brücke', short: 'Große Brücke', clef: 'grand', theme: 'abend', need: 6, after: 1 },
 ];
+export function prevWorld(world) { return WORLDS[world].after != null ? WORLDS[world].after : world - 1; }
 export const TYPE_LABEL = { jump: 'Springen', regen: 'Notenregen', bau: 'Brückenbauer', boss: 'Melodie' };
 
 const L = (id, world, type, title, notes, fresh, extra = {}) => ({ id, world, type, title, notes, fresh: fresh || [], len: 10, ...extra });
@@ -16,6 +18,7 @@ const FREUDE = 'e1 e1 f1 g1 g1 f1 e1 d1 c1 c1 d1 e1 e1 d1 d1 e1 e1 f1 g1 g1 f1 e
 const HAENSCHEN = 'g2 e2 e2 f2 d2 d2 c2 d2 e2 f2 g2 g2 g2 g2 e2 e2 f2 d2 d2 c2 e2 g2 g2 c2'.split(' ');
 const JAKOB = 'c d e c c d e c e f g e f g'.split(' ');
 const TIEFSEE = 'C E G c G E C F A c A F G H d G C'.split(' ');
+const JAKOB2 = 'c d e c c1 d1 e1 c1 e f g e1 f1 g1 g a g f e c g1 a1 g1 f1 e1 c1 c g c c1 g1 c1'.split(' ');
 const ELISE = 'e2 dis2 e2 dis2 e2 h1 d2 c2 a1 c1 e1 a1 h1 e1 gis1 h1 c2'.split(' ');
 
 export const LEVELS = [
@@ -56,14 +59,21 @@ export const LEVELS = [
   L('z5', 2, 'jump', 'Zwei Namen, eine Taste', ['gis1', 'as1', 'cis2', 'des2', 'fis1', 'b1', 'es2'], ['gis1', 'as1', 'des2']),
   L('z6', 2, 'regen', 'Funkensturm', ['fis1', 'b1', 'cis2', 'es2', 'gis1', 'as1', 'des2', 'g1', 'a1']),
   L('z7', 2, 'boss', 'Für Elise', [...new Set(ELISE)], ['dis2'], { melody: ELISE }),
+
+  L('b1', 3, 'jump', 'Zwei Hände, eine Brücke', ['c', 'e', 'g', 'c1', 'e1', 'g1']),
+  L('b2', 3, 'regen', 'Links und rechts', ['c', 'd', 'e', 'f', 'g', 'c1', 'd1', 'e1', 'f1', 'g1']),
+  L('b3', 3, 'jump', 'Rund um das mittlere c', ['f', 'g', 'a', 'h', 'c1', 'd1', 'e1', 'f1', 'g1'], [], { len: 12 }),
+  L('b4', 3, 'bau', 'Schreiben im großen System', ['c', 'e', 'g', 'a', 'c1', 'd1', 'f1', 'a1', 'c2'], [], { words: ['FACH', 'CAFE'] }),
+  L('b5', 3, 'boss', 'Bruder Jakob für zwei Hände', [...new Set(JAKOB2)], [], { melody: JAKOB2 }),
 ];
 LEVELS.forEach(l => { l.clef = WORLDS[l.world].clef; l.theme = WORLDS[l.world].theme; [...l.notes, ...(l.melody || [])].forEach(N); });
 
-export const ALL_NOTES = WORLDS.map((w, wi) => { const seen = []; LEVELS.filter(l => l.world === wi).forEach(l => l.notes.forEach(k => { if (!seen.includes(k)) seen.push(k); })); return seen; });
+const earlier = new Set();
+export const ALL_NOTES = WORLDS.map((w, wi) => { const seen = []; LEVELS.filter(l => l.world === wi).forEach(l => l.notes.forEach(k => { if (!seen.includes(k) && !(w.clef === 'grand' && earlier.has(k))) seen.push(k); })); seen.forEach(k => earlier.add(k)); return seen; });
 export function creatureTotal() { return new Set(ALL_NOTES.flat()).size; }
 export function levelsOf(world) { return LEVELS.filter(l => l.world === world); }
 export function doneCount(profile, world) { return levelsOf(world).filter(l => profile.levels[l.id]).length; }
-export function worldUnlocked(profile, world) { return world === 0 || profile.unlockAll || (profile.skip || [])[world] > 0 || doneCount(profile, world - 1) >= WORLDS[world].need; }
+export function worldUnlocked(profile, world) { return world === 0 || profile.unlockAll || (profile.skip || [])[world] > 0 || doneCount(profile, prevWorld(world)) >= WORLDS[world].need; }
 export function levelUnlocked(profile, level) {
   if (profile.unlockAll) return true; if (!worldUnlocked(profile, level.world)) return false;
   const ls = levelsOf(level.world), i = ls.indexOf(level); return i === 0 || i < ((profile.skip || [])[level.world] || 0) || !!profile.levels[ls[i - 1].id];
@@ -74,11 +84,11 @@ export function totalStars(profile) { return Object.values(profile.levels).reduc
 
 /** Einstufung: Wer eine Stufe besteht, darf entsprechend weit vorne einsteigen. skip = freigeschaltete Level je Welt. */
 export const PLACEMENT = [
-  { name: 'Violinschlüssel: c¹ bis g¹', clef: 'treble', notes: T1, skip: [6, 0, 0] },
-  { name: 'Violinschlüssel: bis d²', clef: 'treble', notes: ['a1', 'h1', 'c2', 'd2', 'g1', 'f1'], skip: [11, 0, 0] },
-  { name: 'Violinschlüssel: bis a²', clef: 'treble', notes: ['e2', 'f2', 'g2', 'a2', 'd2', 'h1'], skip: [15, 1, 0] },
-  { name: 'Bassschlüssel: kleines c bis c¹', clef: 'bass', notes: B3, skip: [15, 9, 0] },
-  { name: 'Bassschlüssel: bis zum großen C', clef: 'bass', notes: ['G', 'A', 'H', 'C', 'D', 'E', 'F'], skip: [15, 13, 1] },
-  { name: 'Vorzeichen', clef: 'treble', notes: ['fis1', 'b1', 'cis2', 'es2', 'gis1', 'as1', 'des2'], skip: [15, 13, 7] },
+  { name: 'Violinschlüssel: c¹ bis g¹', clef: 'treble', notes: T1, skip: [6, 0, 0, 0] },
+  { name: 'Violinschlüssel: bis d²', clef: 'treble', notes: ['a1', 'h1', 'c2', 'd2', 'g1', 'f1'], skip: [11, 0, 0, 0] },
+  { name: 'Violinschlüssel: bis a²', clef: 'treble', notes: ['e2', 'f2', 'g2', 'a2', 'd2', 'h1'], skip: [15, 1, 0, 0] },
+  { name: 'Bassschlüssel: kleines c bis c¹', clef: 'bass', notes: B3, skip: [15, 9, 0, 0] },
+  { name: 'Bassschlüssel: bis zum großen C', clef: 'bass', notes: ['G', 'A', 'H', 'C', 'D', 'E', 'F'], skip: [15, 13, 1, 1] },
+  { name: 'Vorzeichen', clef: 'treble', notes: ['fis1', 'b1', 'cis2', 'es2', 'gis1', 'as1', 'des2'], skip: [15, 13, 7, 1] },
 ];
 export const PLACEMENT_Q = 5, PLACEMENT_PASS = 4;

@@ -1,5 +1,5 @@
 // Spielart "Notenregen": Noten wandern auf das Tor zu; den Namen rechtzeitig antippen. Das Tempo passt sich an.
-import { N, staffPos, letterName, nameHtml, ledgerPositions } from './music.js';
+import { stemUp, N, staffPos, letterName, nameHtml, ledgerPositions } from './music.js';
 import { pickNext, update as srsUpdate, newStat } from './srs.js';
 import * as G from './gfx.js';
 import { label } from './text.js';
@@ -43,11 +43,11 @@ export class RegenScene {
       app.profile.notes[a.n.key] = srsUpdate(app.profile.notes[a.n.key] || newStat(), false); app.audio.sfx('miss'); app.bubble(`Das war <b>${nameHtml(a.n)}</b>.`, 1.3); this.hudUpdate(); }
   }
   draw(ctx, tx) {
-    const line = this.line; G.drawBackground(ctx, this.bg, this.t * 6, this.t); G.drawStaff(ctx, line);
+    const line = this.line; G.drawBackground(ctx, this.bg, this.t * 6, this.t); G.drawStaff(ctx, line, 4, G.VIEW_W - 4, this.clef);
     ctx.fillStyle = G.C.RED; for (let y = G.yOfPos(11); y < G.yOfPos(-3); y += 4) ctx.fillRect(GATE - 9, y, 1, 2);
-    this.notes.forEach((n, i) => { if (n.x > G.VIEW_W + 12) return; const y = G.yOfPos(n.pos); G.drawLedgers(ctx, G.q(n.x) - 9, 19, ledgerPositions(n.pos), line);
-      if (i === 0) { G.drawGlow(ctx, G.q(n.x), y, 0.6 + 0.3 * Math.sin(this.t * 6)); G.drawNote(ctx, G.q(n.x), y, { style: n.missed ? 'ghost' : 'gold', up: n.pos < 4, alt: n.n.alt, line: n.missed ? G.C.RED : G.C.K }); }
-      else G.drawNote(ctx, G.q(n.x), y, { style: 'ink', up: n.pos < 4, alt: n.n.alt, line }); });
+    this.notes.forEach((n, i) => { if (n.x > G.VIEW_W + 12) return; const y = G.yOfPos(n.pos); G.drawLedgers(ctx, G.q(n.x) - 9, 19, ledgerPositions(n.pos, this.clef), line);
+      if (i === 0) { G.drawGlow(ctx, G.q(n.x), y, 0.6 + 0.3 * Math.sin(this.t * 6)); G.drawNote(ctx, G.q(n.x), y, { style: n.missed ? 'ghost' : 'gold', up: stemUp(n.pos, this.clef), alt: n.n.alt, line: n.missed ? G.C.RED : G.C.K }); }
+      else G.drawNote(ctx, G.q(n.x), y, { style: 'ink', up: stemUp(n.pos, this.clef), alt: n.n.alt, line }); });
     G.drawClef(ctx, this.clef, 6, line); this.parts.draw(ctx);
     label(tx, 'Tor', GATE - 9, G.yOfPos(12.6), { size: 18, color: '#FFFFFF', stroke: G.C.RED });
   }
