@@ -123,6 +123,9 @@ textarea{width:100%;font:16px/1.3 ui-monospace,monospace;border:4px solid var(--
 .cal{display:grid;grid-template-columns:repeat(7,26px);gap:5px;margin:8px 0 4px}.cal i{width:26px;height:26px;background:#E3D5B8}.cal .l1{background:#B9DE7A}.cal .l2{background:var(--g1)}.cal .l3{background:var(--g2)}
 .tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.tag{background:var(--k);color:var(--cream);padding:3px 10px;font-weight:700}
 .board{width:100%;border-collapse:collapse;font-size:22px;background:#fff}.board th,.board td{border:3px solid var(--k);padding:8px 12px;text-align:left}.board th{background:var(--k);color:var(--cream)}.board .me{background:#FFE9A8;font-weight:700}
+.shortcode{font-family:"Press Start 2P",monospace;font-size:19px;letter-spacing:1px;background:#F3E3C3;padding:12px 8px;text-align:center;user-select:text;-webkit-user-select:text;margin:6px 0}
+.place{display:flex;gap:24px;align-items:center;justify-content:center;margin:6px 0 12px}.place .staffpic{width:245px;height:280px}.place p{min-width:300px}
+.answers.small{width:auto}.answers.small .ans{min-width:84px;min-height:72px;font-size:36px}
 .toggle{display:flex;align-items:center;gap:14px;width:100%;min-height:60px;background:none;border:none;text-align:left;padding:6px 0}.toggle span{display:flex;flex-direction:column}
 .toggle i{flex:none;width:60px;height:32px;background:#B9A98A;border:4px solid var(--k);position:relative}.toggle i::after{content:"";position:absolute;left:2px;top:2px;width:20px;height:20px;background:var(--k)}
 .toggle.on i{background:var(--g1)}.toggle.on i::after{left:30px}
@@ -243,6 +246,56 @@ textarea{width:100%;font:16px/1.3 ui-monospace,monospace;border:4px solid var(--
     }
     if (!p || typeof p.name !== "string" || typeof p.levels !== "object") throw new Error("Der Code enth\xE4lt keinen Spielstand.");
     return Object.assign(newProfile(p.name), p);
+  }
+  var B32 = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+  function shortSum(body) {
+    let s = 7;
+    for (let i = 0; i < body.length; i++) s = (s * 31 + B32.indexOf(body[i]) * (i + 3)) % 1024;
+    return B32[s >> 5] + B32[s & 31];
+  }
+  function exportShort(profile, levelIds) {
+    const bits = [];
+    const push = (v, n) => {
+      for (let i = n - 1; i >= 0; i--) bits.push(v >> i & 1);
+    };
+    push(1, 2);
+    push(profile.hero & 7, 3);
+    push(profile.mode === "profi" ? 1 : 0, 1);
+    push(profile.unlockAll ? 1 : 0, 1);
+    for (const id of levelIds) push(Math.min(3, (profile.levels[id] || {}).stars || 0), 2);
+    for (let w = 0; w < 3; w++) push(Math.min(15, (profile.skip || [])[w] || 0), 4);
+    while (bits.length % 5) bits.push(0);
+    let body = "";
+    for (let i = 0; i < bits.length; i += 5) body += B32[bits.slice(i, i + 5).reduce((a, b) => a * 2 + b, 0)];
+    return (body + shortSum(body)).replace(/(.{5})(?=.)/g, "$1-");
+  }
+  function importShort(code, levelIds) {
+    const c = String(code).toUpperCase().replace(/O/g, "0").replace(/[IL]/g, "1").replace(/U/g, "V").replace(/[^0-9A-Z]/g, "");
+    const need = Math.ceil((7 + levelIds.length * 2 + 12) / 5) + 2;
+    if (c.length !== need || [...c].some((ch) => !B32.includes(ch))) throw new Error(`Der Kurzcode hat ${need} Zeichen. Bitte pr\xFCfe, ob etwas fehlt.`);
+    const body = c.slice(0, -2);
+    if (shortSum(body) !== c.slice(-2)) throw new Error("Der Kurzcode stimmt nicht. Bitte vergleiche ihn Zeichen f\xFCr Zeichen.");
+    const bits = [];
+    for (const ch of body) {
+      const v = B32.indexOf(ch);
+      for (let i = 4; i >= 0; i--) bits.push(v >> i & 1);
+    }
+    let k = 0;
+    const take = (n) => {
+      let v = 0;
+      for (let i = 0; i < n; i++) v = v * 2 + bits[k++];
+      return v;
+    };
+    if (take(2) !== 1) throw new Error("Dieser Kurzcode geh\xF6rt zu einer anderen Spielversion.");
+    const p = newProfile("Spieler", take(3), take(1) ? "profi" : "abenteuer");
+    p.unlockAll = !!take(1);
+    for (const id of levelIds) {
+      const s = take(2);
+      if (s) p.levels[id] = { stars: s };
+    }
+    p.skip = [take(4), take(4), take(4)];
+    p.seenIntro = true;
+    return p;
   }
 
   // src/music.js
@@ -1315,13 +1368,13 @@ textarea{width:100%;font:16px/1.3 ui-monospace,monospace;border:4px solid var(--
     return levelsOf(world).filter((l) => profile.levels[l.id]).length;
   }
   function worldUnlocked(profile, world) {
-    return world === 0 || profile.unlockAll || doneCount(profile, world - 1) >= WORLDS[world].need;
+    return world === 0 || profile.unlockAll || (profile.skip || [])[world] > 0 || doneCount(profile, world - 1) >= WORLDS[world].need;
   }
   function levelUnlocked(profile, level) {
     if (profile.unlockAll) return true;
     if (!worldUnlocked(profile, level.world)) return false;
     const ls = levelsOf(level.world), i = ls.indexOf(level);
-    return i === 0 || !!profile.levels[ls[i - 1].id];
+    return i === 0 || i < ((profile.skip || [])[level.world] || 0) || !!profile.levels[ls[i - 1].id];
   }
   function nextLevel(level) {
     const i = LEVELS.indexOf(level);
@@ -1333,6 +1386,16 @@ textarea{width:100%;font:16px/1.3 ui-monospace,monospace;border:4px solid var(--
   function totalStars(profile) {
     return Object.values(profile.levels).reduce((a, l) => a + (l.stars || 0), 0);
   }
+  var PLACEMENT = [
+    { name: "Violinschl\xFCssel: c\xB9 bis g\xB9", clef: "treble", notes: T1, skip: [6, 0, 0] },
+    { name: "Violinschl\xFCssel: bis d\xB2", clef: "treble", notes: ["a1", "h1", "c2", "d2", "g1", "f1"], skip: [11, 0, 0] },
+    { name: "Violinschl\xFCssel: bis a\xB2", clef: "treble", notes: ["e2", "f2", "g2", "a2", "d2", "h1"], skip: [15, 1, 0] },
+    { name: "Bassschl\xFCssel: kleines c bis c\xB9", clef: "bass", notes: B3, skip: [15, 9, 0] },
+    { name: "Bassschl\xFCssel: bis zum gro\xDFen C", clef: "bass", notes: ["G", "A", "H", "C", "D", "E", "F"], skip: [15, 13, 1] },
+    { name: "Vorzeichen", clef: "treble", notes: ["fis1", "b1", "cis2", "es2", "gis1", "as1", "des2"], skip: [15, 13, 7] }
+  ];
+  var PLACEMENT_Q = 5;
+  var PLACEMENT_PASS = 4;
 
   // src/srs.js
   var WEIGHT = [9, 6, 3.5, 2, 1];
@@ -1969,6 +2032,7 @@ textarea{width:100%;font:16px/1.3 ui-monospace,monospace;border:4px solid var(--
     map: () => map,
     pass: () => pass,
     pause: () => pause,
+    placement: () => placement,
     profiles: () => profiles,
     result: () => result,
     settings: () => settings,
@@ -2118,7 +2182,7 @@ textarea{width:100%;font:16px/1.3 ui-monospace,monospace;border:4px solid var(--
         story(app, INTRO, () => {
           p.seenIntro = true;
           app.save();
-          map(app);
+          askLevel(app);
         });
       }
     });
@@ -2128,12 +2192,29 @@ textarea{width:100%;font:16px/1.3 ui-monospace,monospace;border:4px solid var(--
     render();
   }
   function importScreen(app, back) {
-    app.screen(`<h2>Spielstand-Code eingeben</h2><p>F\xFCge hier den Code ein, den du auf einem anderen Ger\xE4t gesichert hast.</p><textarea id="codeIn" rows="6" spellcheck="false" aria-label="Spielstand-Code"></textarea><p class="err" id="cerr" role="alert"></p>
+    app.screen(`<h2>Spielstand-Code eingeben</h2><p>Tippe deinen Kurzcode ein (20 Zeichen) oder f\xFCge eine vollst\xE4ndige Sicherung ein.</p><textarea id="codeIn" rows="3" spellcheck="false" autocapitalize="characters" aria-label="Spielstand-Code"></textarea>
+    <label class="fld">Dein Name (nur beim Kurzcode n\xF6tig)<input id="codeName" maxlength="14" autocomplete="off"></label><p class="err" id="cerr" role="alert"></p>
     <div class="row"><button class="btn" data-act="back">Zur\xFCck</button><button class="btn go" data-act="ok">Laden</button></div>`, {
       back: () => (back || profiles)(app),
       ok: () => {
         try {
-          const p = importCode(document.getElementById("codeIn").value);
+          const raw = document.getElementById("codeIn").value.trim();
+          let p;
+          if (/^NB1\./.test(raw)) p = importCode(raw);
+          else {
+            p = importShort(raw, LEVELS.map((l) => l.id));
+            const nm = document.getElementById("codeName").value.trim();
+            if (!nm) throw new Error("Bitte gib noch deinen Namen ein.");
+            p.name = nm.slice(0, 14);
+            LEVELS.forEach((l) => {
+              if (p.levels[l.id] && l.type !== "regen") l.notes.forEach((k) => {
+                if (!p.creatures.includes(k)) p.creatures.push(k);
+                p.notes[k] = p.notes[k] || { box: 2, seen: 1, ok: 1 };
+              });
+            });
+            p.seenWorld = { 0: 1, 1: 1, 2: 1 };
+            p.calibrated = false;
+          }
           const i = app.state.profiles.findIndex((q2) => q2.id === p.id);
           if (i >= 0) app.state.profiles[i] = p;
           else app.state.profiles.push(p);
@@ -2146,6 +2227,67 @@ textarea{width:100%;font:16px/1.3 ui-monospace,monospace;border:4px solid var(--
         }
       }
     });
+  }
+  function askLevel(app) {
+    app.screen(`<h2>Kennst du schon Noten?</h2><p>Wer schon Noten lesen kann, muss nicht ganz vorne anfangen. Ein kurzer Test (ohne Klavier, etwa zwei Minuten) findet den passenden Einstieg.</p>
+    <div class="row"><button class="btn opt" data-act="new"><b>Ich fange neu an</b><small>Los geht es mit den ersten zwei T\xF6nen</small></button><button class="btn opt go" data-act="test"><b>Ich kann schon etwas</b><small>Kurzer Test f\xFCr den richtigen Einstieg</small></button></div>`, { new: () => map(app), test: () => placement(app, () => map(app)) });
+  }
+  function placement(app, then) {
+    const p = app.profile;
+    let si = 0, qi = 0, right = 0, cur = null, last = null, reached = null, fb = "";
+    const order = ["c", "cis", "des", "d", "es", "e", "f", "fis", "g", "gis", "as", "a", "b", "h"];
+    const pick = () => {
+      const st = PLACEMENT[si];
+      let k;
+      do {
+        k = st.notes[Math.floor(Math.random() * st.notes.length)];
+      } while (k === last && st.notes.length > 1);
+      last = k;
+      cur = N(k);
+    };
+    const finish = () => {
+      const done = reached;
+      if (done) {
+        p.skip = done.skip.map((v, i) => Math.max(v, (p.skip || [])[i] || 0));
+        p.seenWorld = p.seenWorld || {};
+      }
+      app.save();
+      const w = done ? done.skip[2] ? 2 : done.skip[1] ? 1 : 0 : 0, start2 = done ? levelsOf(w)[Math.min(done.skip[w], levelsOf(w).length) - 1] : null;
+      app.screen(`<h2>${done ? "Dein Einstieg steht fest" : "Du startest am Anfang"}</h2><p class="lead">${done ? `Sicher gelesen: <b>${esc(done.name)}</b>.` : "Das macht nichts: Im ersten Level lernst du die Noten Schritt f\xFCr Schritt."}</p>
+      ${start2 ? `<p>Du kannst jetzt direkt bei <b>${esc(start2.title)}</b> in \u201E${esc(WORLDS[w].name)}\u201C einsteigen. Alle Level davor sind offen, falls du sie trotzdem spielen m\xF6chtest.</p>` : ""}<div class="row"><button class="btn go" data-act="ok">Zur Karte</button></div>`, { ok: () => {
+        if (done) p.lastWorld = w;
+        then();
+      } });
+    };
+    const render = () => {
+      const st = PLACEMENT[si], names = [...new Set((si === 5 ? [...st.notes, "f1", "h1", "c2", "e2", "g1", "a1", "d2"] : ["c1", "d1", "e1", "f1", "g1", "a1", "h1"]).map((k) => letterName(N(k))))].sort((a, b) => order.indexOf(a) - order.indexOf(b));
+      app.screen(`<small class="kicker">Einstufung \xB7 Stufe ${si + 1} von ${PLACEMENT.length} \xB7 ${esc(st.name)}</small><h2>Wie hei\xDFt diese Note?</h2><div class="place"><div id="plStaff"></div><div><p>Frage ${qi + 1} von ${PLACEMENT_Q}</p><p class="note ${fb.startsWith("Richtig") ? "ok" : "warn"}" role="status">${fb}</p></div></div>
+      <div class="answers small">${names.map((n) => `<button class="btn ans" data-act="a" data-n="${n}">${n}</button>`).join("")}</div><div class="row"><button class="btn sm" data-act="stop">Test beenden</button></div>`, {
+        stop: () => finish(),
+        a: (e) => {
+          const ok = letterName(cur) === e.dataset.n;
+          if (ok) right++;
+          fb = ok ? "Richtig!" : `Das war ${nameStr(cur)}.`;
+          app.audio.sfx(ok ? "ok" : "miss");
+          qi++;
+          if (qi >= PLACEMENT_Q) {
+            if (right >= PLACEMENT_PASS) {
+              reached = st;
+              si++;
+              qi = 0;
+              right = 0;
+              fb = "Stufe geschafft! Weiter geht es.";
+              if (si >= PLACEMENT.length) return finish();
+            } else return finish();
+          }
+          pick();
+          render();
+        }
+      }, "wide");
+      document.getElementById("plStaff").appendChild(staffCanvas(cur, st.clef));
+    };
+    pick();
+    render();
   }
   function story(app, pages, then, theme) {
     app.backdrop(theme || app.scene && app.scene.theme || "himmel");
@@ -2365,8 +2507,8 @@ textarea{width:100%;font:16px/1.3 ui-monospace,monospace;border:4px solid var(--
     const tg = (act, on, label2, hint) => `<button class="toggle ${on ? "on" : ""}" role="switch" aria-checked="${on}" data-act="${act}"><i></i><span><b>${label2}</b><small>${hint}</small></span></button>`;
     app.screen(`<div class="maphead"><h2>Einstellungen</h2><button class="btn sm" data-act="back">Zur\xFCck</button></div><div class="setgrid">
     <div class="card"><h3>Spielen</h3>${tg("mode", p.mode === "profi", "Profi-Spielart", "Stoppuhr, Serien und weniger Tipps")}${tg("keys", p.keys, "Bildschirm-Tasten", "Ohne Klavier spielen: Tasten antippen")}${tg("mute", !app.audio.muted, "Spielkl\xE4nge", "Kurze T\xF6ne bei Erfolg und Fehler")}</div>
-    <div class="card"><h3>Mikrofon</h3><p>Mikrofon: <b>${mic}</b></p><p>Kammerton: <b>${Math.round(p.a4 * 10) / 10} Hz</b></p><button class="btn sm" data-act="cal">Mikrofon testen und Klavier einstimmen</button></div>
-    <div class="card"><h3>Spielstand sichern</h3><p>Mit diesem Code kannst du auf einem anderen Ger\xE4t weiterspielen.</p><button class="btn sm" data-act="exp">Code anzeigen</button> <button class="btn sm" data-act="imp">Code eingeben</button><div id="codeBox"></div></div>
+    <div class="card"><h3>Mikrofon</h3><p>Mikrofon: <b>${mic}</b></p><p>Kammerton: <b>${Math.round(p.a4 * 10) / 10} Hz</b></p><button class="btn sm" data-act="cal">Mikrofon testen und Klavier einstimmen</button><h3>Einstieg</h3><button class="btn sm" data-act="place">Einstufung machen</button></div>
+    <div class="card"><h3>Spielstand mitnehmen</h3><p>Dein Kurzcode zum Aufschreiben:</p><p class="shortcode" aria-label="Kurzcode">${exportShort(p, LEVELS.map((l) => l.id))}</p><p class="muted">Er merkt sich Figur, Sterne und freigeschaltete Level. \xDCbungstage und Noten-Statistik bleiben auf diesem Ger\xE4t.</p><button class="btn sm" data-act="exp">Vollst\xE4ndige Sicherung</button> <button class="btn sm" data-act="imp">Code eingeben</button><div id="codeBox"></div></div>
     <div class="card"><h3>F\xFCr Lehrkr\xE4fte</h3>${tg("unlock", p.unlockAll, "Alle Level freischalten", "Zum gezielten \xDCben einzelner Noten")}<button class="btn sm ${app._del ? "danger" : ""}" data-act="del">${app._del ? "Wirklich l\xF6schen? Nochmal tippen" : "Dieses Profil l\xF6schen"}</button></div></div><p class="note" role="status">${msg}</p>`, {
       back: () => {
         app._del = false;
@@ -2414,6 +2556,7 @@ textarea{width:100%;font:16px/1.3 ui-monospace,monospace;border:4px solid var(--
         });
       },
       imp: () => importScreen(app, (a) => settings(a)),
+      place: () => placement(app, () => map(app)),
       del: () => {
         if (!app._del) {
           app._del = true;
