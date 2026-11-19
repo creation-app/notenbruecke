@@ -125,3 +125,8 @@ test('Freischalt-Schlüssel: echt, gefälscht, abgelaufen', async () => {
   const forged = once.slice(0, 6) + (once[6] === 'A' ? 'B' : 'A') + once.slice(7); await assert.rejects(verifyKey(forged)); await assert.rejects(verifyKey('NBKabc')); await assert.rejects(verifyKey('Quatsch'));
   const other = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']); const fake = await signKey(await crypto.subtle.exportKey('jwk', other.privateKey), { type: 'einmal', until: null, serial: 1 }); await assert.rejects(verifyKey(fake));
 });
+test('Titelsong: 8 Takte, alle Töne gültig, bleibt in C-Dur', async () => {
+  const { SONG, pitch } = await import('../src/audio.js'); assert.equal(SONG.lead.length, 64); assert.equal(SONG.bass.length, 8); assert.equal(SONG.pad.length, 8);
+  for (const t of SONG.lead) { if (t === '-' || t === '.') continue; assert.match(t, /^[A-G][4-6]$/); assert.ok(pitch(t) > 250 && pitch(t) < 1700); }
+  assert.ok(Math.abs(pitch('A4') - 440) < 1e-9); assert.ok(Math.abs(pitch('C4') - 261.626) < 0.01); assert.notEqual(SONG.lead[0], '-');
+});

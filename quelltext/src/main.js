@@ -37,6 +37,7 @@ class App {
       if (e.key === 'Escape') S.pause(this); else if (sc.move && e.key === 'ArrowUp') { sc.move(1); e.preventDefault(); } else if (sc.move && e.key === 'ArrowDown') { sc.move(-1); e.preventDefault(); } else if (sc.place && e.key === 'Enter') sc.place(); });
     document.addEventListener('visibilitychange', () => { if (!document.hidden) { this.audio.ensure(); if (this.scene && this.scene.isLevel) this.audio.keepAwake(true); }
       if (document.hidden && this.scene && this.scene.isLevel && !this.paused && $('screen').hidden) S.pause(this); });
+    window.addEventListener('error', () => { if (!this._err) { this._err = true; this.toast('Etwas ist schiefgegangen. Bitte lade die Seite neu – dein Spielstand bleibt erhalten.'); } });
     const fit = () => { const s = Math.min(window.innerWidth / 1280, window.innerHeight / 800); $('stage').style.transform = `translate(-50%,-50%) scale(${s})`; $('rotate').hidden = window.innerWidth >= window.innerHeight; };
     window.addEventListener('orientationchange', () => setTimeout(fit, 250)); window.addEventListener('resize', fit); fit();
     this.applyProfile(); this.hud.hide(); S.title(this); this.last = performance.now(); requestAnimationFrame(t => this.loop(t)); track('start'); this.ready = this.boot();
@@ -55,7 +56,7 @@ class App {
   get profile() { return this.state.profiles.find(p => p.id === this.state.current) || null; }
   get keysOn() { const p = this.profile; return this.keysSession || !!(p && p.keys); }
   get listening() { return this.audio.micState === 'on' && !this.keysOn; }
-  applyProfile() { const p = this.profile; this.heroFrames = G.makeHero(p ? p.hero : 0); if (p) { this.audio.setA4(p.a4); this.audio.muted = !!p.muted; } }
+  applyProfile() { const p = this.profile; this.heroFrames = G.makeHero(p ? p.hero : 0); if (p) { this.audio.setA4(p.a4); this.audio.muted = !!p.muted; this.audio.musicOff = p.music === false; if (this.audio.muted || this.audio.musicOff) this.audio.stopMusic(); } }
   save() { return persist(this.store, this.state); }
   flush() {
     const p = this.profile;
@@ -65,7 +66,7 @@ class App {
     this.save();
   }
   background(theme) { return this.bgCache[theme] || (this.bgCache[theme] = G.makeBackground(theme)); }
-  backdrop(theme) { this.$('toast').hidden = true; if (this.scene && this.scene.isLevel) this.flush(); if (!(this.scene instanceof Backdrop) || this.scene.theme !== theme) this.scene = new Backdrop(this, theme); this.hud.hide(); this.bubble(null); this.calib = null; this.audio.keepAwake(false); }
+  backdrop(theme) { this.$('toast').hidden = true; if (this.musicReady) this.audio.startMusic(); if (this.scene && this.scene.isLevel) this.flush(); if (!(this.scene instanceof Backdrop) || this.scene.theme !== theme) this.scene = new Backdrop(this, theme); this.hud.hide(); this.bubble(null); this.calib = null; this.audio.keepAwake(false); }
   levelNoteKeys(level) { return level.notes; }
   keyTap(midi) { const sc = this.scene; if (sc && sc.onNote && this.keysOn && !this.paused && this.$('screen').hidden) { this.audio.ensure(); sc.onNote(midi); } }
   hudCr() { const p = this.profile; this.$('hudCr').innerHTML = `Notenwesen <b>${p ? p.creatures.length : 0}</b>`; }
@@ -81,7 +82,7 @@ class App {
 
   runLevel(level) {
     this.closeScreen(); this.paused = false; this.calib = null; this.bubble(null); this.hud.extra('');
-    this.audio.keepAwake(true);
+    this.audio.keepAwake(true); this.audio.stopMusic();
     const Cls = { jump: JumpScene, boss: JumpScene, regen: RegenScene, bau: BauScene }[level.type]; this.scene = new Cls(this, level); this.scene.enter();
   }
   finishLevel(level, res) {

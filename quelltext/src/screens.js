@@ -25,7 +25,7 @@ export function fill(root) { root.querySelectorAll('[data-cr]').forEach(e => e.a
 export function title(app) {
   app.backdrop('himmel'); const has = app.state.profiles.length > 0;
   app.screen(`<div class="title"><div class="logo">DIE<br>NOTENBRÜCKE</div><p class="sub">Ein Abenteuer auf fünf Linien</p>
-    <button class="btn big" data-act="go">${has ? 'Spielen' : 'Neues Spiel'}</button></div>`, { go: () => { app.audio.ensure(); app.audio.sfx('click'); has ? profiles(app) : newProf(app); } }, 'clear');
+    <button class="btn big" data-act="go">${has ? 'Spielen' : 'Neues Spiel'}</button><p><button class="btn sm" data-act="info">Info und Datenschutz</button></p></div>`, { go: () => { app.audio.ensure(); app.musicReady = true; app.audio.startMusic(); has ? profiles(app) : newProf(app); }, info: () => about(app, () => title(app)) }, 'clear');
 }
 export function profiles(app) {
   app.backdrop('himmel');
@@ -66,7 +66,7 @@ function askLevel(app) {
 export async function startPlacement(app, then) { app.audio.ensure(); const r = await app.audio.startMic(); if (r === 'on' && !app.profile.calibrated) calibrate(app, () => placement(app, then)); else placement(app, then); }
 /** Einstufung: je Stufe erst Noten benennen, dann (mit Mikrofon) Noten am Klavier spielen. Bei der ersten nicht bestandenen Stufe ist Schluss. */
 export function placement(app, then) {
-  const p = app.profile, mic = app.audio.micState === 'on'; let si = 0, qi = 0, right = 0, cur = null, last = null, reached = null, fb = '', mode = 'read', busy = false;
+  app.audio.stopMusic(); const p = app.profile, mic = app.audio.micState === 'on'; let si = 0, qi = 0, right = 0, cur = null, last = null, reached = null, fb = '', mode = 'read', busy = false;
   const order = ['c', 'cis', 'des', 'd', 'es', 'e', 'f', 'fis', 'g', 'gis', 'as', 'a', 'b', 'h'], PLAY_Q = 3, PLAY_PASS = 2;
   const pick = () => { const st = PLACEMENT[si]; let k; do { k = st.notes[Math.floor(Math.random() * st.notes.length)]; } while (k === last && st.notes.length > 1); last = k; cur = N(k); };
   const finish = () => { app.calib = null; const done = reached; if (done) { p.skip = done.skip.map((v, i) => Math.max(v, (p.skip || [])[i] || 0)); p.seenWorld = p.seenWorld || {}; } app.save(); track('einstufung-' + (done ? PLACEMENT.indexOf(done) + 1 : 0));
@@ -124,7 +124,7 @@ export function levelCard(app, level) {
 }
 
 export function calibrate(app, then) {
-  const p = app.profile, cents = []; app.audio.setA4(440); let last = 'Ich höre noch nichts.';
+  app.audio.stopMusic(); const p = app.profile, cents = []; app.audio.setA4(440); let last = 'Ich höre noch nichts.';
   const finish = (skip) => { app.calib = null; if (!skip) { p.a4 = a4FromCents(cents); } p.calibrated = true; app.audio.setA4(p.a4); app.save(); then(); };
   const render = () => app.screen(`<h2>Klavier einstimmen</h2><p>Spiele dreimal nacheinander das <b>c<sup>1</sup></b> – das mittlere c. So stellt sich das Spiel auf dein Klavier ein.</p>
     <div class="calib"><div class="dots">${[0, 1, 2].map(i => `<i class="${i < cents.length ? 'on' : ''}"></i>`).join('')}</div><p id="calMsg" role="status">${last}</p><div class="meter big" id="calMeter" aria-hidden="true">${'<i></i>'.repeat(12)}</div></div>
@@ -145,7 +145,7 @@ export function result(app, level, res) {
     <div class="row"><button class="btn" data-act="map">Karte</button><button class="btn" data-act="again">Nochmal</button>${canNext || (lastOfWorld && res.firstClear) ? '<button class="btn go" data-act="next">Weiter</button>' : ''}</div>`, {
     map: () => map(app), again: () => levelCard(app, level),
     next: () => { if (lastOfWorld && res.firstClear) return story(app, WORLD_OUTRO[level.world], () => map(app, nx && worldUnlocked(p, nx.world) ? nx.world : level.world)); levelCard(app, nx); } });
-  app.audio.sfx('star');
+  app.audio.fanfare(res.stars);
 }
 export function pause(app) {
   app.paused = true;
@@ -189,12 +189,13 @@ export function settings(app, msg = '') {
   const p = app.profile, mic = { on: 'an', off: 'noch nicht eingeschaltet', denied: 'nicht erlaubt', unsupported: 'hier nicht verfügbar' }[app.audio.micState];
   const tg = (act, on, label, hint) => `<button class="toggle ${on ? 'on' : ''}" role="switch" aria-checked="${on}" data-act="${act}"><i></i><span><b>${label}</b><small>${hint}</small></span></button>`;
   app.screen(`<div class="maphead"><h2>Einstellungen</h2><button class="btn sm" data-act="back">Zurück</button></div><div class="setgrid">
-    <div class="card"><h3>Spielen</h3>${tg('mode', p.mode === 'profi', 'Profi-Spielart', 'Stoppuhr, Serien und weniger Tipps')}${tg('keys', p.keys, 'Bildschirm-Tasten', 'Ohne Klavier spielen: Tasten antippen')}${tg('mute', !app.audio.muted, 'Spielklänge', 'Kurze Töne bei Erfolg und Fehler')}<button class="btn sm" data-act="goal">Tagesziel: ${p.goal || 5} Minuten (ändern)</button></div>
-    <div class="card"><h3>Mikrofon</h3><p>Mikrofon: <b>${mic}</b></p><p>Kammerton: <b>${Math.round(p.a4 * 10) / 10} Hz</b></p><button class="btn sm" data-act="cal">Mikrofon testen und Klavier einstimmen</button><h3>Einstieg</h3><button class="btn sm" data-act="place">Einstufung machen</button></div>
+    <div class="card"><h3>Spielen</h3>${tg('mode', p.mode === 'profi', 'Profi-Spielart', 'Stoppuhr, Serien und weniger Tipps')}${tg('keys', p.keys, 'Bildschirm-Tasten', 'Ohne Klavier spielen: Tasten antippen')}${tg('mute', !app.audio.muted, 'Spielklänge', 'Töne bei Erfolg und Fehler, Erfolgsmelodie')}${tg('music', p.music !== false, 'Titelmusik', 'Läuft nur in den Menüs, nie im Level')}<button class="btn sm" data-act="goal">Tagesziel: ${p.goal || 5} Minuten (ändern)</button></div>
+    <div class="card"><h3>Mikrofon</h3><p>Mikrofon: <b>${mic}</b></p><p>Kammerton: <b>${Math.round(p.a4 * 10) / 10} Hz</b></p><button class="btn sm" data-act="cal">Mikrofon testen und Klavier einstimmen</button><h3>Einstieg</h3><button class="btn sm" data-act="place">Einstufung machen</button> <button class="btn sm" data-act="info">Info und Datenschutz</button></div>
     <div class="card"><h3>Spielstand mitnehmen</h3><p>Dein Kurzcode zum Aufschreiben:</p><p class="shortcode" aria-label="Kurzcode">${exportShort(p, worldIds())}</p><p class="muted">Der Kurzcode merkt sich, wie weit du bist. Alles (Name, Sterne, Übungspass) steckt im QR-Code.</p><button class="btn sm" data-act="exp">QR-Code und Link</button> <button class="btn sm" data-act="imp">Code eingeben</button></div>
     <div class="card"><h3>Für Lehrkräfte</h3>${tg('unlock', p.unlockAll, 'Alle Level freischalten', 'Zum gezielten Üben einzelner Noten')}<button class="btn sm ${app._del ? 'danger' : ''}" data-act="del">${app._del ? 'Wirklich löschen? Nochmal tippen' : 'Dieses Profil löschen'}</button>${CONFIG.shop ? `<h3>Vollversion</h3><p>${app.licensed ? (app.license.until ? `Abo aktiv bis ${app.license.until.toLocaleDateString('de-DE')}` : 'Freigeschaltet (Einmalkauf)') : 'Noch nicht freigeschaltet'}</p>${app.licensed ? '' : '<button class="btn sm" data-act="buy">Vollversion ansehen</button>'}` : ''}</div></div><p class="note" role="status">${msg}</p>`, {
     back: () => { app._del = false; map(app); }, mode: () => { p.mode = p.mode === 'profi' ? 'abenteuer' : 'profi'; app.save(); settings(app); }, keys: () => { p.keys = !p.keys; app.save(); settings(app); },
-    mute: () => { app.audio.muted = !app.audio.muted; p.muted = app.audio.muted; app.save(); settings(app); }, unlock: () => { p.unlockAll = !p.unlockAll; app.save(); settings(app); },
+    mute: () => { app.audio.muted = !app.audio.muted; p.muted = app.audio.muted; app.save(); app.applyProfile(); if (!p.muted) app.audio.startMusic(); settings(app); },
+    music: () => { p.music = p.music === false; app.save(); app.applyProfile(); if (p.music) app.audio.startMusic(); settings(app); }, info: () => about(app, () => settings(app)), unlock: () => { p.unlockAll = !p.unlockAll; app.save(); settings(app); },
     cal: async () => { app.audio.ensure(); const r = await app.audio.startMic(); if (r !== 'on') return settings(app, r === 'denied' ? 'Das Mikrofon wurde nicht erlaubt. Erlaube es in den Einstellungen deines Browsers.' : 'Auf dieser Seite gibt es kein Mikrofon.'); calibrate(app, () => settings(app, 'Gespeichert.')); },
     exp: () => shareSave(app),
     goal: () => { p.goal = { 5: 10, 10: 15, 15: 20, 20: 5 }[p.goal || 5]; app.save(); settings(app); }, buy: () => paywall(app, null),
@@ -247,4 +248,17 @@ export async function shareSave(app) {
     <p>Darin steckt alles: Name, Sterne, Notenwesen und der Übungspass von <b>${esc(p.name)}</b>.</p><p class="muted">Oder den Link verschicken:</p><textarea id="codeOut" rows="4" readonly aria-label="Spielstand-Link">${link}</textarea><button class="btn sm" data-act="copy">Link kopieren</button><p class="note" id="copyMsg" role="status"></p></div></div>`, {
     back: () => settings(app), copy: async () => { const ta = document.getElementById('codeOut'); ta.select(); let msg = 'Kopiert.'; try { await navigator.clipboard.writeText(link); } catch (e) { msg = 'Bitte den markierten Link von Hand kopieren.'; } document.getElementById('copyMsg').textContent = msg; } }, 'wide');
   document.getElementById('qrHere').appendChild(qrCanvas(link));
+}
+
+export const VERSION = '1.4 · 19.11.2026';
+/** Info, Datenschutz und Quellen. */
+export function about(app, back) {
+  app.screen(`<div class="maphead"><h2>Info und Datenschutz</h2><button class="btn sm" data-act="back">Zurück</button></div><div class="book">
+    <h3>Die Notenbrücke</h3><p>Ein Lernspiel zum Notenlesen am Klavier. Version ${VERSION}${CONFIG.shop ? ' · Kauf-Fassung' : ' · Test-Fassung'}.</p>
+    <h3>Datenschutz in Kürze</h3><p><b>Mikrofon:</b> Das Spiel wertet den Ton direkt auf diesem Gerät aus, um die gespielte Note zu erkennen. Es wird nichts aufgenommen, gespeichert oder übertragen.</p>
+    <p><b>Spielstände:</b> Name, Fortschritt und Übungszeiten liegen nur im Browser dieses Geräts. Sie verlassen das Gerät nur, wenn du selbst einen Code, QR-Code oder Link weitergibst.</p>
+    <p><b>Zählung:</b> ${CONFIG.statsCode ? 'Es wird anonym gezählt, wie oft gespielt wird (ohne Namen, ohne Cookies, über den Dienst GoatCounter).' : 'Derzeit wird nichts gezählt und nichts an Dritte gesendet.'}</p>
+    <p><b>Bereitstellung:</b> Die Seite wird über GitHub Pages ausgeliefert. Dabei verarbeitet GitHub technisch notwendige Verbindungsdaten wie die IP-Adresse.</p>
+    <h3>Verantwortlich</h3><p>Die Angaben zum Anbieter werden vor der allgemeinen Veröffentlichung ergänzt. Fragen bitte an die Lehrkraft, von der du den Link bekommen hast.</p>
+    <h3>Quellen</h3><p>Schriften: Atkinson Hyperlegible und Press Start 2P (SIL Open Font License). Notenschlüssel aus Noto Music (SIL Open Font License). QR-Code: qrcode-generator (MIT-Lizenz). Musik und Grafik entstanden eigens für dieses Spiel. Die Melodien in den Leveln sind überlieferte Lieder sowie Werke von Beethoven.</p></div>`, { back }, 'wide');
 }
