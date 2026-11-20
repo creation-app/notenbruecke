@@ -27,15 +27,21 @@ class App {
     this.world = $('world'); this.ctx = this.world.getContext('2d'); this.ctx.setTransform(4, 0, 0, 4, 0, 0); this.ctx.imageSmoothingEnabled = false; this.tx = $('text').getContext('2d');
     this.store = (() => { try { const s = window.localStorage; s.getItem('x'); return s; } catch (e) { return null; } })();
     this.state = load(this.store); this.audio = new GameAudio(); this.panel = new Panel($('panel'), this); this.bgCache = {}; this.sec = 0; this.playTotal = 0; this.license = null; this.keysSession = false; this.paused = false;
-    this.hud = { show: (t) => { $('hud').hidden = false; $('panel').hidden = false; $('hudTitle').textContent = t; this.hudCr(); }, hide: () => { $('hud').hidden = true; $('panel').hidden = true; },
+    this.hud = { show: (t) => { $('hud').hidden = false; $('panel').hidden = false; $('sndBtn').hidden = true; $('hudTitle').textContent = t; this.hudCr(); }, hide: () => { $('hud').hidden = true; $('panel').hidden = true; $('sndBtn').hidden = false; },
       extra: h => { $('hudExtra').innerHTML = h; $('hudExtra').hidden = !h; },
       progress: (i, n) => { const e = $('hudProg'); e.hidden = !n; if (n) { e.innerHTML = n <= 16 ? Array.from({ length: n }, (_, k) => `<i class="${k < i ? 'on' : ''}"></i>`).join('') : `${i} / ${n}`; e.setAttribute('aria-label', `${i} von ${n}`); } } };
+    const SPK = on => `<svg aria-hidden="true" width="30" height="30" viewBox="0 0 10 10" shape-rendering="crispEdges"><g fill="#26364B"><rect x="1" y="4" width="2" height="2"/><rect x="3" y="3" width="1" height="4"/><rect x="4" y="2" width="1" height="6"/>${on ? '<rect x="6" y="3" width="1" height="1"/><rect x="7" y="4" width="1" height="2"/><rect x="6" y="6" width="1" height="1"/><rect x="8" y="2" width="1" height="1"/><rect x="9" y="3" width="1" height="4"/><rect x="8" y="7" width="1" height="1"/>' : '<rect x="6" y="3" width="1" height="1"/><rect x="7" y="4" width="1" height="1"/><rect x="8" y="5" width="1" height="1"/><rect x="9" y="6" width="1" height="1"/><rect x="9" y="3" width="1" height="1"/><rect x="8" y="4" width="1" height="1"/><rect x="7" y="5" width="1" height="1"/><rect x="6" y="6" width="1" height="1"/>'}</g></svg>`;
+    this.paintSound = () => { for (const id of ['sndHud', 'sndBtn']) { const b = $(id), m = this.audio.muted; b.innerHTML = SPK(!m); b.classList.toggle('off', m); b.setAttribute('aria-label', m ? 'Ton einschalten' : 'Ton ausschalten'); b.setAttribute('aria-pressed', String(m)); } };
+    for (const id of ['sndHud', 'sndBtn']) $(id).addEventListener('click', () => this.setMuted(!this.audio.muted));
+    // Gerät zugeklappt, Tab gewechselt oder App verlassen: sofort alles stumm schalten
+    const quiet = () => { this.audio.stopMusic(); try { if (this.audio.bus) this.audio.bus.gain.value = 0; if (this.audio.ctx && this.audio.ctx.state === 'running') this.audio.ctx.suspend(); } catch (e) { /* egal */ } };
+    window.addEventListener('pagehide', quiet); window.addEventListener('freeze', quiet); this.quiet = quiet;
     $('pauseBtn').addEventListener('click', () => { if (this.scene && this.scene.isLevel) S.pause(this); });
     const pt = e => { if (!this.scene || !this.scene.pointer || this.paused) return; const r = this.world.getBoundingClientRect(); this.scene.pointer((e.clientX - r.left) / r.width * 320, (e.clientY - r.top) / r.height * 200); };
     $('stage').addEventListener('pointerdown', e => { if (e.target.closest('#panel,#screen,#hud')) return; pt(e); }); $('stage').addEventListener('pointermove', e => { if (e.buttons && !e.target.closest('#panel,#screen,#hud')) pt(e); });
     document.addEventListener('keydown', e => { const sc = this.scene; if (!sc || !sc.isLevel || this.paused || !$('screen').hidden) return;
       if (e.key === 'Escape') S.pause(this); else if (sc.move && e.key === 'ArrowUp') { sc.move(1); e.preventDefault(); } else if (sc.move && e.key === 'ArrowDown') { sc.move(-1); e.preventDefault(); } else if (sc.place && e.key === 'Enter') sc.place(); });
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) { this.audio.ensure(); if (this.scene && this.scene.isLevel) this.audio.keepAwake(true); }
+    document.addEventListener('visibilitychange', () => { if (document.hidden) this.quiet(); else { this.audio.ensure(); if (this.scene && this.scene.isLevel) this.audio.keepAwake(true); else if (this.musicReady && this.scene instanceof Backdrop && !this.calib) this.audio.startMusic(); }
       if (document.hidden && this.scene && this.scene.isLevel && !this.paused && $('screen').hidden) S.pause(this); });
     window.addEventListener('error', () => { if (!this._err) { this._err = true; this.toast('Etwas ist schiefgegangen. Bitte lade die Seite neu – dein Spielstand bleibt erhalten.'); } });
     const fit = () => { const s = Math.min(window.innerWidth / 1280, window.innerHeight / 800); $('stage').style.transform = `translate(-50%,-50%) scale(${s})`; $('rotate').hidden = window.innerWidth >= window.innerHeight; };
@@ -56,7 +62,9 @@ class App {
   get profile() { return this.state.profiles.find(p => p.id === this.state.current) || null; }
   get keysOn() { const p = this.profile; return this.keysSession || !!(p && p.keys); }
   get listening() { return this.audio.micState === 'on' && !this.keysOn; }
-  applyProfile() { const p = this.profile; this.heroFrames = G.makeHero(p ? p.hero : 0); if (p) { this.audio.setA4(p.a4); this.audio.muted = !!p.muted; this.audio.musicOff = p.music === false; if (this.audio.muted || this.audio.musicOff) this.audio.stopMusic(); } }
+  applyProfile() { const p = this.profile; this.heroFrames = G.makeHero(p ? p.hero : 0); this.audio.muted = !!this.state.muted; if (p) { this.audio.setA4(p.a4); this.audio.musicOff = p.music === false; } if (this.audio.muted || this.audio.musicOff) this.audio.stopMusic(); if (this.paintSound) this.paintSound(); }
+  /** Ton für das ganze Gerät an oder aus (Musik, Spielklänge, Erfolgsmelodie). */
+  setMuted(m) { this.state.muted = !!m; this.audio.muted = !!m; this.save(); if (m) { this.audio.stopMusic(); if (this.audio.bus) this.audio.bus.gain.value = 0; } else { this.audio.ensure(); if (this.musicReady && this.scene instanceof Backdrop && !this.calib) this.audio.startMusic(); } this.paintSound(); }
   save() { return persist(this.store, this.state); }
   flush() {
     const p = this.profile;
@@ -90,7 +98,7 @@ class App {
     const out = { ...res, stars, firstClear: !prev }; rec.stars = Math.max(rec.stars, stars);
     if (res.time != null) { const nb = !rec.time || res.time < rec.time; if (nb) rec.time = Math.round(res.time * 10) / 10; if (p.mode === 'profi') { out.newBest = nb; out.bestTime = rec.time; } }
     if (res.score != null) { out.newBest = !rec.score || res.score > rec.score; rec.score = Math.max(rec.score || 0, res.score); out.bestScore = rec.score; p.regenBest = Math.max(p.regenBest || 0, res.score); }
-    p.levels[level.id] = rec; this.scene.isLevel = false; track('level/' + level.id); this.flush(); this.bubble(null); this.$('hud').hidden = true; S.result(this, level, out);
+    p.levels[level.id] = rec; this.$('sndBtn').hidden = false; this.scene.isLevel = false; track('level/' + level.id); this.flush(); this.bubble(null); this.$('hud').hidden = true; S.result(this, level, out);
   }
   loop(ts) {
     const dt = Math.min(0.05, (ts - this.last) / 1000); this.last = ts; const sc = this.scene;

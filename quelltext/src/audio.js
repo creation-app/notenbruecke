@@ -79,7 +79,8 @@ export class GameAudio {
   startMusic() {
     if (this.muted || this.musicOff || this.musicTimer || !this.ensureBus()) return; const c = this.ctx, step = 60 / SONG.bpm / 2; let i = 0, next = c.currentTime + 0.08;
     this.bus.gain.cancelScheduledValues(c.currentTime); this.bus.gain.setValueAtTime(this.bus.gain.value, c.currentTime); this.bus.gain.linearRampToValueAtTime(1, c.currentTime + 0.4);
-    const tick = () => { while (next < c.currentTime + 0.3) { const tok = SONG.lead[i], bar = i >> 3, k = i & 7;
+    const tick = () => { if (typeof document !== 'undefined' && document.hidden) { next = c.currentTime + 0.1; return; } if (next < c.currentTime - 0.5) next = c.currentTime + 0.05;
+      while (next < c.currentTime + 0.3) { const tok = SONG.lead[i], bar = i >> 3, k = i & 7;
         try { if (tok !== '-' && tok !== '.') { let n = 1; while (SONG.lead[(i + n) % 64] === '-' && n < 8) n++; const f = pitch(tok); this.voice(f, next, step * n * 0.94, 'square', 0.045); this.voice(f / 2, next, step * n * 0.9, 'triangle', 0.05); }
           const b = SONG.bass[bar]; if (k % 2 === 0) this.voice(pitch(k === 4 ? b[1] : b[0]) * (k === 2 || k === 6 ? 2 : 1), next, step * 1.7, 'triangle', 0.11);
           if (k === 2 || k === 6) for (const p of SONG.pad[bar]) this.voice(pitch(p), next, step * 1.2, 'sine', 0.035);

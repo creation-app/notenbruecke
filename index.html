@@ -52,6 +52,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:4px soli
 #hudProg i.on{background:var(--ye)}
 .pause{pointer-events:auto;width:56px;height:56px;border:none;background:var(--red);box-shadow:4px 4px 0 var(--k);display:flex;align-items:center;justify-content:center;gap:8px}
 .pause i{width:8px;height:22px;background:var(--k)}
+.snd{background:var(--cream)}.snd.off{background:#B9A98A}.snd.float{position:absolute;right:14px;bottom:14px;z-index:7}
 #bubble{position:absolute;left:40px;top:530px;max-width:1000px;padding:10px 18px;background:var(--cream);border:4px solid var(--k);box-shadow:4px 4px 0 rgba(38,54,75,.35);font-size:25px;font-weight:700;pointer-events:none}
 #toast{position:absolute;left:50%;top:14px;z-index:2;transform:translateX(-50%);display:flex;align-items:center;gap:12px;padding:10px 20px;background:var(--k);color:var(--cream);box-shadow:4px 4px 0 var(--or);font-size:26px;font-weight:700;pointer-events:none;white-space:nowrap}
 #toast canvas{width:48px;height:48px}#toast b{color:var(--ye)}
@@ -150,7 +151,8 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   <canvas id="world" width="1280" height="800" aria-label="Spielwelt"></canvas>
   <canvas id="text" width="1280" height="800" aria-hidden="true"></canvas>
   <div id="hud" hidden><div class="hl"><div class="box" id="hudTitle"></div><div class="box" id="hudProg" role="img"></div></div>
-    <div class="hr"><div class="box" id="hudExtra" hidden></div><div class="box" id="hudCr"></div><button class="pause" id="pauseBtn" aria-label="Pause"><i></i><i></i></button></div></div>
+    <div class="hr"><div class="box" id="hudExtra" hidden></div><div class="box" id="hudCr"></div><button class="pause snd" id="sndHud" aria-label="Ton ausschalten"></button><button class="pause" id="pauseBtn" aria-label="Pause"><i></i><i></i></button></div></div>
+  <button class="pause snd float" id="sndBtn" aria-label="Ton ausschalten"></button>
   <div id="bubble" hidden role="status"></div>
   <div id="toast" hidden role="status"></div>
   <div id="panel" hidden></div>
@@ -846,6 +848,11 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       this.bus.gain.setValueAtTime(this.bus.gain.value, c.currentTime);
       this.bus.gain.linearRampToValueAtTime(1, c.currentTime + 0.4);
       const tick = () => {
+        if (typeof document !== "undefined" && document.hidden) {
+          next = c.currentTime + 0.1;
+          return;
+        }
+        if (next < c.currentTime - 0.5) next = c.currentTime + 0.05;
         while (next < c.currentTime + 0.3) {
           const tok = SONG.lead[i], bar = i >> 3, k = i & 7;
           try {
@@ -4412,10 +4419,14 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   }
   function pause(app) {
     app.paused = true;
-    app.screen(`<h2>Pause</h2><div class="col"><button class="btn go" data-act="go">Weiterspielen</button><button class="btn" data-act="again">Level neu starten</button><button class="btn" data-act="map">Zur Karte</button></div>`, {
+    app.screen(`<h2>Pause</h2><div class="col"><button class="btn go" data-act="go">Weiterspielen</button><button class="btn" data-act="snd">${app.audio.muted ? "Ton einschalten" : "Ton ausschalten"}</button><button class="btn" data-act="again">Level neu starten</button><button class="btn" data-act="map">Zur Karte</button></div>`, {
       go: () => {
         app.paused = false;
         app.closeScreen();
+      },
+      snd: () => {
+        app.setMuted(!app.audio.muted);
+        pause(app);
       },
       again: () => {
         app.paused = false;
@@ -4494,7 +4505,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     const p = app.profile, mic = { on: "an", off: "noch nicht eingeschaltet", denied: "nicht erlaubt", unsupported: "hier nicht verf\xFCgbar" }[app.audio.micState];
     const tg = (act, on, label2, hint) => `<button class="toggle ${on ? "on" : ""}" role="switch" aria-checked="${on}" data-act="${act}"><i></i><span><b>${label2}</b><small>${hint}</small></span></button>`;
     app.screen(`<div class="maphead"><h2>Einstellungen</h2><button class="btn sm" data-act="back">Zur\xFCck</button></div><div class="setgrid">
-    <div class="card"><h3>Spielen</h3>${tg("mode", p.mode === "profi", "Profi-Spielart", "Stoppuhr, Serien und weniger Tipps")}${tg("keys", p.keys, "Bildschirm-Tasten", "Ohne Klavier spielen: Tasten antippen")}${tg("mute", !app.audio.muted, "Spielkl\xE4nge", "T\xF6ne bei Erfolg und Fehler, Erfolgsmelodie")}${tg("music", p.music !== false, "Titelmusik", "L\xE4uft nur in den Men\xFCs, nie im Level")}<button class="btn sm" data-act="goal">Tagesziel: ${p.goal || 5} Minuten (\xE4ndern)</button></div>
+    <div class="card"><h3>Spielen</h3>${tg("mode", p.mode === "profi", "Profi-Spielart", "Stoppuhr, Serien und weniger Tipps")}${tg("keys", p.keys, "Bildschirm-Tasten", "Ohne Klavier spielen: Tasten antippen")}${tg("mute", !app.audio.muted, "Ton", "Alles an oder aus: Musik, Spielkl\xE4nge, Erfolgsmelodie")}${tg("music", p.music !== false, "Titelmusik", "L\xE4uft nur in den Men\xFCs, nie im Level")}<button class="btn sm" data-act="goal">Tagesziel: ${p.goal || 5} Minuten (\xE4ndern)</button></div>
     <div class="card"><h3>Mikrofon</h3><p>Mikrofon: <b>${mic}</b></p><p>Kammerton: <b>${Math.round(p.a4 * 10) / 10} Hz</b></p><button class="btn sm" data-act="cal">Mikrofon testen und Klavier einstimmen</button><h3>Einstieg</h3><button class="btn sm" data-act="place">Einstufung machen</button> <button class="btn sm" data-act="info">Info und Datenschutz</button></div>
     <div class="card"><h3>Spielstand mitnehmen</h3><p>Dein Kurzcode zum Aufschreiben:</p><p class="shortcode" aria-label="Kurzcode">${exportShort(p, worldIds())}</p><p class="muted">Der Kurzcode merkt sich, wie weit du bist. Alles (Name, Sterne, \xDCbungspass) steckt im QR-Code.</p><button class="btn sm" data-act="exp">QR-Code und Link</button> <button class="btn sm" data-act="imp">Code eingeben</button></div>
     <div class="card"><h3>F\xFCr Lehrkr\xE4fte</h3>${tg("unlock", p.unlockAll, "Alle Level freischalten", "Zum gezielten \xDCben einzelner Noten")}<button class="btn sm ${app._del ? "danger" : ""}" data-act="del">${app._del ? "Wirklich l\xF6schen? Nochmal tippen" : "Dieses Profil l\xF6schen"}</button>${CONFIG.shop ? `<h3>Vollversion</h3><p>${app.licensed ? app.license.until ? `Abo aktiv bis ${app.license.until.toLocaleDateString("de-DE")}` : "Freigeschaltet (Einmalkauf)" : "Noch nicht freigeschaltet"}</p>${app.licensed ? "" : '<button class="btn sm" data-act="buy">Vollversion ansehen</button>'}` : ""}</div></div><p class="note" role="status">${msg}</p>`, {
@@ -4513,11 +4524,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         settings(app);
       },
       mute: () => {
-        app.audio.muted = !app.audio.muted;
-        p.muted = app.audio.muted;
-        app.save();
-        app.applyProfile();
-        if (!p.muted) app.audio.startMusic();
+        app.setMuted(!app.audio.muted);
         settings(app);
       },
       music: () => {
@@ -4652,7 +4659,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     }, "wide");
     document.getElementById("qrHere").appendChild(qrCanvas(link));
   }
-  var VERSION = "1.4 \xB7 19.11.2026";
+  var VERSION = "1.5 \xB7 20.11.2026";
   function about(app, back) {
     app.screen(`<div class="maphead"><h2>Info und Datenschutz</h2><button class="btn sm" data-act="back">Zur\xFCck</button></div><div class="book">
     <h3>Die Notenbr\xFCcke</h3><p>Ein Lernspiel zum Notenlesen am Klavier. Version ${VERSION}${CONFIG.shop ? " \xB7 Kauf-Fassung" : " \xB7 Test-Fassung"}.</p>
@@ -4721,12 +4728,14 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         show: (t) => {
           $("hud").hidden = false;
           $("panel").hidden = false;
+          $("sndBtn").hidden = true;
           $("hudTitle").textContent = t;
           this.hudCr();
         },
         hide: () => {
           $("hud").hidden = true;
           $("panel").hidden = true;
+          $("sndBtn").hidden = false;
         },
         extra: (h) => {
           $("hudExtra").innerHTML = h;
@@ -4741,6 +4750,28 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
           }
         }
       };
+      const SPK = (on) => `<svg aria-hidden="true" width="30" height="30" viewBox="0 0 10 10" shape-rendering="crispEdges"><g fill="#26364B"><rect x="1" y="4" width="2" height="2"/><rect x="3" y="3" width="1" height="4"/><rect x="4" y="2" width="1" height="6"/>${on ? '<rect x="6" y="3" width="1" height="1"/><rect x="7" y="4" width="1" height="2"/><rect x="6" y="6" width="1" height="1"/><rect x="8" y="2" width="1" height="1"/><rect x="9" y="3" width="1" height="4"/><rect x="8" y="7" width="1" height="1"/>' : '<rect x="6" y="3" width="1" height="1"/><rect x="7" y="4" width="1" height="1"/><rect x="8" y="5" width="1" height="1"/><rect x="9" y="6" width="1" height="1"/><rect x="9" y="3" width="1" height="1"/><rect x="8" y="4" width="1" height="1"/><rect x="7" y="5" width="1" height="1"/><rect x="6" y="6" width="1" height="1"/>'}</g></svg>`;
+      this.paintSound = () => {
+        for (const id of ["sndHud", "sndBtn"]) {
+          const b = $(id), m = this.audio.muted;
+          b.innerHTML = SPK(!m);
+          b.classList.toggle("off", m);
+          b.setAttribute("aria-label", m ? "Ton einschalten" : "Ton ausschalten");
+          b.setAttribute("aria-pressed", String(m));
+        }
+      };
+      for (const id of ["sndHud", "sndBtn"]) $(id).addEventListener("click", () => this.setMuted(!this.audio.muted));
+      const quiet = () => {
+        this.audio.stopMusic();
+        try {
+          if (this.audio.bus) this.audio.bus.gain.value = 0;
+          if (this.audio.ctx && this.audio.ctx.state === "running") this.audio.ctx.suspend();
+        } catch (e) {
+        }
+      };
+      window.addEventListener("pagehide", quiet);
+      window.addEventListener("freeze", quiet);
+      this.quiet = quiet;
       $("pauseBtn").addEventListener("click", () => {
         if (this.scene && this.scene.isLevel) pause(this);
       });
@@ -4769,9 +4800,11 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         } else if (sc.place && e.key === "Enter") sc.place();
       });
       document.addEventListener("visibilitychange", () => {
-        if (!document.hidden) {
+        if (document.hidden) this.quiet();
+        else {
           this.audio.ensure();
           if (this.scene && this.scene.isLevel) this.audio.keepAwake(true);
+          else if (this.musicReady && this.scene instanceof Backdrop && !this.calib) this.audio.startMusic();
         }
         if (document.hidden && this.scene && this.scene.isLevel && !this.paused && $("screen").hidden) pause(this);
       });
@@ -4860,12 +4893,27 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     applyProfile() {
       const p = this.profile;
       this.heroFrames = makeHero(p ? p.hero : 0);
+      this.audio.muted = !!this.state.muted;
       if (p) {
         this.audio.setA4(p.a4);
-        this.audio.muted = !!p.muted;
         this.audio.musicOff = p.music === false;
-        if (this.audio.muted || this.audio.musicOff) this.audio.stopMusic();
       }
+      if (this.audio.muted || this.audio.musicOff) this.audio.stopMusic();
+      if (this.paintSound) this.paintSound();
+    }
+    /** Ton für das ganze Gerät an oder aus (Musik, Spielklänge, Erfolgsmelodie). */
+    setMuted(m) {
+      this.state.muted = !!m;
+      this.audio.muted = !!m;
+      this.save();
+      if (m) {
+        this.audio.stopMusic();
+        if (this.audio.bus) this.audio.bus.gain.value = 0;
+      } else {
+        this.audio.ensure();
+        if (this.musicReady && this.scene instanceof Backdrop && !this.calib) this.audio.startMusic();
+      }
+      this.paintSound();
     }
     save() {
       return persist(this.store, this.state);
@@ -4993,6 +5041,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         p.regenBest = Math.max(p.regenBest || 0, res.score);
       }
       p.levels[level.id] = rec;
+      this.$("sndBtn").hidden = false;
       this.scene.isLevel = false;
       track("level/" + level.id);
       this.flush();

@@ -149,8 +149,8 @@ export function result(app, level, res) {
 }
 export function pause(app) {
   app.paused = true;
-  app.screen(`<h2>Pause</h2><div class="col"><button class="btn go" data-act="go">Weiterspielen</button><button class="btn" data-act="again">Level neu starten</button><button class="btn" data-act="map">Zur Karte</button></div>`, {
-    go: () => { app.paused = false; app.closeScreen(); }, again: () => { app.paused = false; app.runLevel(app.scene.level); }, map: () => { app.paused = false; app.flush(); map(app); } });
+  app.screen(`<h2>Pause</h2><div class="col"><button class="btn go" data-act="go">Weiterspielen</button><button class="btn" data-act="snd">${app.audio.muted ? 'Ton einschalten' : 'Ton ausschalten'}</button><button class="btn" data-act="again">Level neu starten</button><button class="btn" data-act="map">Zur Karte</button></div>`, {
+    go: () => { app.paused = false; app.closeScreen(); }, snd: () => { app.setMuted(!app.audio.muted); pause(app); }, again: () => { app.paused = false; app.runLevel(app.scene.level); }, map: () => { app.paused = false; app.flush(); map(app); } });
 }
 
 function staffCanvas(n, clef) { const c = cv(70, 80), x = c.getContext('2d'); x.translate(0, -35); const pos = staffPos(n, clef); drawStaff(x, C.K, 2, 68); drawClef(x, clef, 3, C.K); drawLedgers(x, 39, 19, ledgerPositions(pos, clef), C.K); drawNote(x, 48, yOfPos(pos), { style: 'ink', up: pos < 4, alt: n.alt });
@@ -189,12 +189,12 @@ export function settings(app, msg = '') {
   const p = app.profile, mic = { on: 'an', off: 'noch nicht eingeschaltet', denied: 'nicht erlaubt', unsupported: 'hier nicht verfügbar' }[app.audio.micState];
   const tg = (act, on, label, hint) => `<button class="toggle ${on ? 'on' : ''}" role="switch" aria-checked="${on}" data-act="${act}"><i></i><span><b>${label}</b><small>${hint}</small></span></button>`;
   app.screen(`<div class="maphead"><h2>Einstellungen</h2><button class="btn sm" data-act="back">Zurück</button></div><div class="setgrid">
-    <div class="card"><h3>Spielen</h3>${tg('mode', p.mode === 'profi', 'Profi-Spielart', 'Stoppuhr, Serien und weniger Tipps')}${tg('keys', p.keys, 'Bildschirm-Tasten', 'Ohne Klavier spielen: Tasten antippen')}${tg('mute', !app.audio.muted, 'Spielklänge', 'Töne bei Erfolg und Fehler, Erfolgsmelodie')}${tg('music', p.music !== false, 'Titelmusik', 'Läuft nur in den Menüs, nie im Level')}<button class="btn sm" data-act="goal">Tagesziel: ${p.goal || 5} Minuten (ändern)</button></div>
+    <div class="card"><h3>Spielen</h3>${tg('mode', p.mode === 'profi', 'Profi-Spielart', 'Stoppuhr, Serien und weniger Tipps')}${tg('keys', p.keys, 'Bildschirm-Tasten', 'Ohne Klavier spielen: Tasten antippen')}${tg('mute', !app.audio.muted, 'Ton', 'Alles an oder aus: Musik, Spielklänge, Erfolgsmelodie')}${tg('music', p.music !== false, 'Titelmusik', 'Läuft nur in den Menüs, nie im Level')}<button class="btn sm" data-act="goal">Tagesziel: ${p.goal || 5} Minuten (ändern)</button></div>
     <div class="card"><h3>Mikrofon</h3><p>Mikrofon: <b>${mic}</b></p><p>Kammerton: <b>${Math.round(p.a4 * 10) / 10} Hz</b></p><button class="btn sm" data-act="cal">Mikrofon testen und Klavier einstimmen</button><h3>Einstieg</h3><button class="btn sm" data-act="place">Einstufung machen</button> <button class="btn sm" data-act="info">Info und Datenschutz</button></div>
     <div class="card"><h3>Spielstand mitnehmen</h3><p>Dein Kurzcode zum Aufschreiben:</p><p class="shortcode" aria-label="Kurzcode">${exportShort(p, worldIds())}</p><p class="muted">Der Kurzcode merkt sich, wie weit du bist. Alles (Name, Sterne, Übungspass) steckt im QR-Code.</p><button class="btn sm" data-act="exp">QR-Code und Link</button> <button class="btn sm" data-act="imp">Code eingeben</button></div>
     <div class="card"><h3>Für Lehrkräfte</h3>${tg('unlock', p.unlockAll, 'Alle Level freischalten', 'Zum gezielten Üben einzelner Noten')}<button class="btn sm ${app._del ? 'danger' : ''}" data-act="del">${app._del ? 'Wirklich löschen? Nochmal tippen' : 'Dieses Profil löschen'}</button>${CONFIG.shop ? `<h3>Vollversion</h3><p>${app.licensed ? (app.license.until ? `Abo aktiv bis ${app.license.until.toLocaleDateString('de-DE')}` : 'Freigeschaltet (Einmalkauf)') : 'Noch nicht freigeschaltet'}</p>${app.licensed ? '' : '<button class="btn sm" data-act="buy">Vollversion ansehen</button>'}` : ''}</div></div><p class="note" role="status">${msg}</p>`, {
     back: () => { app._del = false; map(app); }, mode: () => { p.mode = p.mode === 'profi' ? 'abenteuer' : 'profi'; app.save(); settings(app); }, keys: () => { p.keys = !p.keys; app.save(); settings(app); },
-    mute: () => { app.audio.muted = !app.audio.muted; p.muted = app.audio.muted; app.save(); app.applyProfile(); if (!p.muted) app.audio.startMusic(); settings(app); },
+    mute: () => { app.setMuted(!app.audio.muted); settings(app); },
     music: () => { p.music = p.music === false; app.save(); app.applyProfile(); if (p.music) app.audio.startMusic(); settings(app); }, info: () => about(app, () => settings(app)), unlock: () => { p.unlockAll = !p.unlockAll; app.save(); settings(app); },
     cal: async () => { app.audio.ensure(); const r = await app.audio.startMic(); if (r !== 'on') return settings(app, r === 'denied' ? 'Das Mikrofon wurde nicht erlaubt. Erlaube es in den Einstellungen deines Browsers.' : 'Auf dieser Seite gibt es kein Mikrofon.'); calibrate(app, () => settings(app, 'Gespeichert.')); },
     exp: () => shareSave(app),
@@ -250,7 +250,7 @@ export async function shareSave(app) {
   document.getElementById('qrHere').appendChild(qrCanvas(link));
 }
 
-export const VERSION = '1.4 · 19.11.2026';
+export const VERSION = '1.5 · 20.11.2026';
 /** Info, Datenschutz und Quellen. */
 export function about(app, back) {
   app.screen(`<div class="maphead"><h2>Info und Datenschutz</h2><button class="btn sm" data-act="back">Zurück</button></div><div class="book">
