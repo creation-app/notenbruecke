@@ -45,9 +45,7 @@ class App {
     $('stage').addEventListener('pointerdown', e => { if (e.target.closest('#panel,#screen,#hud')) return; pt(e); }); $('stage').addEventListener('pointermove', e => { if (e.buttons && !e.target.closest('#panel,#screen,#hud')) pt(e); });
     document.addEventListener('keydown', e => { const sc = this.scene; if (!sc || !sc.isLevel || this.paused || !$('screen').hidden) return;
       if (e.key === 'Escape') S.pause(this); else if (sc.move && e.key === 'ArrowUp') { sc.move(1); e.preventDefault(); } else if (sc.move && e.key === 'ArrowDown') { sc.move(-1); e.preventDefault(); } else if (sc.place && e.key === 'Enter') sc.place(); });
-    // Jeder Fingertipp weckt Ton und Mikrofon wieder auf (iPad und iPhone erlauben das nur aus einer Berührung heraus).
-    document.addEventListener('pointerdown', () => { this.audio.ensure(); if (this.audio.micState === 'on' && !this.audio.micHealthy()) this.audio.reviveMic(); }, true);
-    document.addEventListener('visibilitychange', () => { if (document.hidden) this.quiet(); else { this.audio.ensure(); if (this.audio.micState === 'on') setTimeout(() => { if (!this.audio.micHealthy()) this.audio.reviveMic(); }, 300); if (this.scene && this.scene.isLevel) this.audio.keepAwake(true); else if (this.musicReady && this.scene instanceof Backdrop && !this.calib) this.audio.startMusic(); }
+    document.addEventListener('visibilitychange', () => { if (document.hidden) this.quiet(); else { this.audio.ensure(); if (this.scene && this.scene.isLevel) this.audio.keepAwake(true); else if (this.musicReady && this.scene instanceof Backdrop && !this.calib) this.audio.startMusic(); }
       if (document.hidden && this.scene && this.scene.isLevel && !this.paused && $('screen').hidden) S.pause(this); });
     window.addEventListener('error', () => { if (!this._err) { this._err = true; this.toast('Etwas ist schiefgegangen. Bitte lade die Seite neu – dein Spielstand bleibt erhalten.'); } });
     // Hochkant (z. B. Handy mit Drehsperre): Das Spiel wird um 90° gedreht und füllt den Bildschirm, statt den Weg zu versperren.
@@ -124,7 +122,6 @@ class App {
   loop(ts) {
     const dt = Math.min(0.05, (ts - this.last) / 1000); this.last = ts; const sc = this.scene;
     if (!this.paused) {
-      const deaf = !!(sc && sc.isLevel && sc.onNote && this.listening && this.audio.dead && this.$('screen').hidden && !(sc.cfg && sc.cfg.input === 'name')); if (deaf !== !!this.deaf) { this.deaf = deaf; this.$('micDead').hidden = !deaf; }
       const ev = this.audio.poll(ts), sink = this.calib || (this.$('screen').hidden ? sc : null);
       if (ev && sink && sink.onNote && (this.calib || this.listening)) sink.onNote(ev.midi, ev);
       if (this.calib) this.calib.level(this.audio.level);
