@@ -6,7 +6,7 @@ import { track } from './stats.js';
 import { GameAudio } from './audio.js';
 import { Panel } from './panel.js';
 import * as G from './gfx.js';
-import { starsFor, LEVELS } from './levels.js';
+import { starsFor, LEVELS, totalStars } from './levels.js';
 import { JumpScene } from './jump.js';
 import { RegenScene } from './regen.js';
 import { BauScene } from './bau.js';
@@ -69,8 +69,11 @@ class App {
   drawBuddy(ctx, o, tx, ty, t, hop = 0) { const b = this.buddy; if (!b) return; if (o.bx === undefined || Math.abs(o.bx - tx) > 140) { o.bx = tx; o.by = ty; o.bt = t; }
     const dt = Math.min(0.1, Math.max(0, t - o.bt)), k = 1 - Math.exp(-dt * 5); o.bt = t; o.bx += (tx - o.bx) * k; o.by += (ty - o.by) * k;
     const y = o.by + Math.sin(t * 3) * 2 - hop; if (this.buddySure && Math.floor(t * 6) % 3 === 0) { ctx.fillStyle = '#FFF1D6'; ctx.fillRect(G.q(o.bx - 11 + (Math.floor(t * 6) % 5)), G.q(y + 4 - (Math.floor(t * 4) % 7)), 1, 1); }
-    ctx.drawImage(b, G.q(o.bx - 8), G.q(y - 8)); }
-  applyProfile() { const p = this.profile; this.heroFrames = G.makeHero(p ? p.hero : 0); this.buddy = null; if (p && p.buddy && p.creatures.includes(p.buddy)) { const n = N(p.buddy); this.buddy = G.makeCreature(((n.step % 7) + 7) % 7, n.alt); this.buddySure = !!(p.notes[p.buddy] && p.notes[p.buddy].box >= 3); } this.audio.muted = !!this.state.muted; this.audio.song = this.state.song || 'tanz'; if (p) { this.audio.setA4(p.a4); this.audio.musicOff = p.music === false; } if (this.audio.muted || this.audio.musicOff) this.audio.stopMusic(); if (this.paintSound) this.paintSound(); }
+    ctx.drawImage(b, G.q(o.bx - 11), G.q(y - 14)); }
+  /** Figur (mit Hut) und Begleiter (mit Stufe) neu zeichnen – nach Profilwechsel und immer, wenn die Karte erscheint. */
+  refreshLook() { const p = this.profile; this.heroFrames = G.makeHero(p ? p.hero : 0, p ? G.hatOf(p, totalStars(p)) : 0); this.buddy = null; this.buddySure = false;
+    if (p && p.buddy && p.creatures.includes(p.buddy)) { const n = N(p.buddy), st = G.buddyStage(p.notes[p.buddy]); this.buddy = G.makeBuddy(((n.step % 7) + 7) % 7, n.alt, st); this.buddySure = st === 2; } }
+  applyProfile() { const p = this.profile; this.refreshLook(); this.audio.muted = !!this.state.muted; this.audio.song = this.state.song || 'tanz'; if (p) { this.audio.setA4(p.a4); this.audio.musicOff = p.music === false; } if (this.audio.muted || this.audio.musicOff) this.audio.stopMusic(); if (this.paintSound) this.paintSound(); }
   /** Ton für das ganze Gerät an oder aus (Musik, Spielklänge, Erfolgsmelodie). */
   setMuted(m) { this.state.muted = !!m; this.audio.muted = !!m; this.save(); if (m) { this.audio.stopMusic(); if (this.audio.bus) this.audio.bus.gain.value = 0; } else { this.audio.ensure(); if (this.musicReady && this.scene instanceof Backdrop && !this.calib) this.audio.startMusic(); } this.paintSound(); }
   save() { return persist(this.store, this.state); }

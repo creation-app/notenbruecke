@@ -2,7 +2,7 @@
 import { N, nameHtml, nameStr, noteOfMidi, midiOf, staffPos, describePos, ledgerPositions } from './music.js';
 import { WORLDS, LEVELS, TYPE_LABEL, ALL_NOTES, levelsOf, doneCount, worldUnlocked, levelUnlocked, nextLevel, totalStars, creatureTotal, PLACEMENT, PLACEMENT_Q, PLACEMENT_PASS } from './levels.js';
 import { letterName } from './music.js';
-import { HEROES, makeHero, makeCreature, cv, drawStaff, drawClef, drawNote, drawLedgers, yOfPos, C } from './gfx.js';
+import { HEROES, HATS, hatOf, buddyStage, BUDDY_STAGE, makeHero, makeCreature, cv, drawStaff, drawClef, drawNote, drawLedgers, yOfPos, C } from './gfx.js';
 import { newProfile, importCode, exportShort, importShort, exportPayload, importPayload, streak, dayKey } from './save.js';
 import { CONFIG } from './config.js';
 import { SONGS } from './audio.js';
@@ -20,8 +20,8 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 const stars = (n, cls = '') => `<span class="stars ${cls}" role="img" aria-label="${n} von 3 Sternen">${[0, 1, 2].map(i => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}</span>`;
 const safeN = k => { try { return N(k); } catch (e) { return null; } };
 function crCanvas(key, locked, size = 64) { const n = N(key), c = makeCreature(((n.step % 7) + 7) % 7, n.alt, locked); c.style.width = c.style.height = size + 'px'; c.className = 'pix'; c.setAttribute('aria-hidden', 'true'); return c; }
-function heroCanvas(i, size = 72) { const c = makeHero(i).idle0; c.style.width = size + 'px'; c.style.height = size * 24 / 18 + 'px'; c.className = 'pix'; c.setAttribute('aria-hidden', 'true'); return c; }
-export function fill(root) { root.querySelectorAll('[data-cr]').forEach(e => e.appendChild(crCanvas(e.dataset.cr, e.dataset.locked === '1', +e.dataset.size || 64))); root.querySelectorAll('[data-hero]').forEach(e => e.appendChild(heroCanvas(+e.dataset.hero, +e.dataset.size || 72))); }
+function heroCanvas(i, size = 72, hat = 0) { const c = makeHero(i, hat).idle0; c.style.width = size + 'px'; c.style.height = size * 24 / 18 + 'px'; c.className = 'pix'; c.setAttribute('aria-hidden', 'true'); return c; }
+export function fill(root) { root.querySelectorAll('[data-cr]').forEach(e => e.appendChild(crCanvas(e.dataset.cr, e.dataset.locked === '1', +e.dataset.size || 64))); root.querySelectorAll('[data-hero]').forEach(e => e.appendChild(heroCanvas(+e.dataset.hero, +e.dataset.size || 72, +e.dataset.hat || 0))); }
 
 export function title(app) {
   app.backdrop('himmel'); const has = app.state.profiles.length > 0;
@@ -30,7 +30,7 @@ export function title(app) {
 }
 export function profiles(app) {
   app.backdrop('himmel');
-  app.screen(`<h2>Wer spielt?</h2><div class="plist">${app.state.profiles.map(p => `<button class="pcard" data-act="pick" data-id="${p.id}"><span data-hero="${p.hero}"></span><b>${esc(p.name)}</b><small>${totalStars(p)} Sterne · ${p.creatures.length} Notenwesen</small></button>`).join('')}
+  app.screen(`<h2>Wer spielt?</h2><div class="plist">${app.state.profiles.map(p => `<button class="pcard" data-act="pick" data-id="${p.id}"><span data-hero="${p.hero}" data-hat="${hatOf(p, totalStars(p))}"></span><b>${esc(p.name)}</b><small>${totalStars(p)} Sterne · ${p.creatures.length} Notenwesen</small></button>`).join('')}
     <button class="pcard new" data-act="new"><span class="plus">+</span><b>Neu</b><small>Neues Profil</small></button></div>
     <div class="row"><button class="btn" data-act="code">Spielstand-Code eingeben</button></div>`, {
     pick: e => { app.state.current = e.dataset.id; app.save(); app.applyProfile(); map(app); }, new: () => newProf(app), code: () => importScreen(app) });
@@ -94,23 +94,24 @@ export function placement(app, then) {
 /** Erzählbild: Text Seite für Seite. */
 export function story(app, pages, then, theme) {
   app.backdrop(theme || (app.scene && app.scene.theme) || 'himmel'); let i = 0;
-  const render = () => app.screen(`<div class="story"><span data-hero="${app.profile ? app.profile.hero : 0}" data-size="90"></span><p>${esc(pages[i])}</p></div>
+  const render = () => app.screen(`<div class="story"><span data-hero="${app.profile ? app.profile.hero : 0}" data-hat="${app.profile ? hatOf(app.profile, totalStars(app.profile)) : 0}" data-size="90"></span><p>${esc(pages[i])}</p></div>
     <div class="row"><button class="btn quiet" data-act="skip">Geschichte überspringen</button><button class="btn go" data-act="next">${i < pages.length - 1 ? 'Weiter' : 'Los!'}</button></div>`, {
     next: () => { app.audio.sfx('click'); if (++i >= pages.length) then(); else render(); }, skip: () => then() }, 'low');
   render();
 }
 
 export function map(app, world) {
+  app.refreshLook();
   const p = app.profile; if (world == null) world = p.lastWorld || 0; if (!worldUnlocked(p, world)) world = 0; p.lastWorld = world; p.seenWorld = p.seenWorld || {};
   const W = WORLDS[world]; app.backdrop(W.theme);
   if (!p.seenWorld[world]) { p.seenWorld[world] = 1; app.save(); return story(app, WORLD_INTRO[world], () => map(app, world), W.theme); }
   const ls = levelsOf(world), goal = p.goal || 5, today = Math.floor((p.days[dayKey()] || 0) / 60);
-  app.screen(`<div class="maphead"><button class="chip" data-act="prof" aria-label="Profil wechseln"><span data-hero="${p.hero}" data-size="36"></span><b>${esc(p.name)}</b></button>
+  app.screen(`<div class="maphead"><button class="chip" data-act="prof" aria-label="Profil wechseln"><span data-hero="${p.hero}" data-hat="${hatOf(p, totalStars(p))}" data-size="36"></span><b>${esc(p.name)}</b></button>
     <div class="row tight"><span class="pill goal ${today >= goal ? 'ok' : ''}" role="img" aria-label="Tagesziel: ${today} von ${goal} Minuten">Heute geübt: ${Math.min(today, goal)} von ${goal} Minuten<i style="width:${Math.min(100, 100 * today / goal)}%"></i></span><span class="pill">${totalStars(p)} Sterne</span></div></div>
     <h3 class="mapq">Wähle eine Welt und dann ein Level:</h3>
     <div class="tabs" role="tablist">${WORLDS.map((w, i) => { const open = worldUnlocked(p, i); return `<button role="tab" aria-selected="${i === world}" class="tab ${i === world ? 'sel' : ''}" ${open ? '' : 'disabled'} data-act="world" data-w="${i}">${open ? esc(w.name) : `Noch im Nebel: ${WORLDS[i].need} Level in „${WORLDS[prevWorld(i)].short}“ schaffen`}</button>`; }).join('')}</div>
     <div class="nodes">${ls.map((l, i) => { const open = levelUnlocked(p, l), rec = p.levels[l.id]; return `<button class="node t-${l.type} ${rec ? 'done' : ''}" ${open ? '' : 'disabled'} data-act="lvl" data-id="${l.id}"><span class="num">${i + 1}</span><b>${esc(l.title)}</b><small>${TYPE_LABEL[l.type]}</small>${!open ? '<small class="lock">im Nebel</small>' : app.locked(l) ? '<small class="lock full">Vollversion</small>' : stars(rec ? rec.stars : 0)}</button>`; }).join('')}</div>
-    <nav class="mapnav" aria-label="Bereiche"><button class="btn" data-act="coll"><b>Sammlung</b><small>${p.creatures.length} von ${creatureTotal()} Notenwesen</small></button><button class="btn" data-act="pass"><b>Übungspass</b><small>Was du geübt hast</small></button><button class="btn" data-act="book"><b>Geschichte</b><small>Nachlesen</small></button><button class="btn" data-act="board"><b>Bestenliste</b><small>Auf diesem Gerät</small></button><button class="btn" data-act="set"><b>Einstellungen</b><small>Ton, Mikrofon, Code</small></button></nav>`, {
+    <nav class="mapnav" aria-label="Bereiche"><button class="btn" data-act="coll"><b>Sammlung</b><small>${p.creatures.length} von ${creatureTotal()} Wesen · Hüte</small></button><button class="btn" data-act="pass"><b>Übungspass</b><small>Was du geübt hast</small></button><button class="btn" data-act="book"><b>Geschichte</b><small>Nachlesen</small></button><button class="btn" data-act="board"><b>Bestenliste</b><small>Auf diesem Gerät</small></button><button class="btn" data-act="set"><b>Einstellungen</b><small>Ton, Mikrofon, Code</small></button></nav>`, {
     prof: () => profiles(app), coll: () => collection(app), pass: () => pass(app), board: () => board(app), set: () => settings(app), book: () => storyBook(app, null, () => map(app, world)),
     world: e => map(app, +e.dataset.w), lvl: e => levelCard(app, LEVELS.find(l => l.id === e.dataset.id)) }, 'wide');
 }
@@ -162,13 +163,13 @@ export function pause(app) {
 function staffCanvas(n, clef) { const c = cv(70, 80), x = c.getContext('2d'); x.translate(0, -35); const pos = staffPos(n, clef); drawStaff(x, C.K, 2, 68); drawClef(x, clef, 3, C.K); drawLedgers(x, 39, 19, ledgerPositions(pos, clef), C.K); drawNote(x, 48, yOfPos(pos), { style: 'ink', up: pos < 4, alt: n.alt });
   c.className = 'pix staffpic'; c.setAttribute('role', 'img'); c.setAttribute('aria-label', `${describePos(pos)} im ${clef === 'bass' ? 'Bassschlüssel' : 'Violinschlüssel'}`); return c; }
 export function collection(app, sel) {
-  const p = app.profile; let detail = '';
+  const p = app.profile, stars = totalStars(p), worn = hatOf(p, stars); let detail = '';
   if (sel) { const n = N(sel.key), st = p.notes[sel.key] || { box: 0, seen: 0, ok: 0 };
-    detail = `<div class="crdetail"><span data-cr="${sel.key}" data-size="128"></span><div><h3>${nameHtml(n)}</h3><button class="btn sm ${p.buddy === sel.key ? '' : 'go'}" data-act="buddy" style="margin-bottom:8px">${p.buddy === sel.key ? 'Begleiter ablegen' : 'Als Begleiter mitnehmen'}</button><div id="staffHere"></div><p>${describePos(staffPos(n, sel.clef))}</p>
+    detail = `<div class="crdetail"><span data-cr="${sel.key}" data-size="128"></span><div><h3>${nameHtml(n)}</h3><button class="btn sm ${p.buddy === sel.key ? '' : 'go'}" data-act="buddy" style="margin-bottom:8px">${p.buddy === sel.key ? 'Begleiter ablegen' : 'Als Begleiter mitnehmen'}</button><p class="muted" style="margin:0 0 8px;font-size:17px">Als Begleiter: <b>${BUDDY_STAGE[buddyStage(st)]}</b>.${buddyStage(st) < 2 ? ' Er wächst, wenn du diese Note sicherer spielst.' : ''}</p><div id="staffHere"></div><p>${describePos(staffPos(n, sel.clef))}</p>
       <p>Sicherheit <span class="bar"><i style="width:${st.box * 25}%"></i></span></p><p>${st.ok} von ${st.seen} Mal beim ersten Versuch</p><button class="btn sm" data-act="play">Anhören</button></div></div>`; }
-  app.screen(`<div class="maphead"><h2>Deine Notenwesen</h2><button class="btn sm" data-act="back">Zurück</button></div><p class="muted" style="margin:0 0 8px">${p.buddy && p.creatures.includes(p.buddy) ? `Dein Begleiter: <b>${nameHtml(N(p.buddy))}</b>. Er fliegt dir im Spiel hinterher.` : 'Tippe ein Notenwesen an und nimm es als Begleiter mit. Es fliegt dir dann im Spiel hinterher.'}</p><div class="collwrap"><div class="coll">${WORLDS.map((w, wi) => `<h3>${esc(w.name)}</h3><div class="crgrid">${ALL_NOTES[wi].map(k => { const has = p.creatures.includes(k);
+  app.screen(`<div class="maphead"><h2>Deine Sammlung</h2><button class="btn sm" data-act="back">Zurück</button></div><p class="muted" style="margin:0 0 8px">${p.buddy && p.creatures.includes(p.buddy) ? `Dein Begleiter: <b>${nameHtml(N(p.buddy))}</b>. Er fliegt dir im Spiel hinterher.` : 'Tippe ein Notenwesen an und nimm es als Begleiter mit. Es fliegt dir dann im Spiel hinterher.'}</p><div class="collwrap"><div class="coll"><h3>Hüte für deine Figur <small class="muted">· du hast ${stars} Sterne</small></h3><div class="crgrid">${HATS.map((h, i) => { const open = stars >= h.stars; return `<button class="crcard hat ${worn === i ? 'bud' : ''}" ${open ? '' : 'disabled'} data-act="hat" data-i="${i}"><span data-hero="${p.hero}" data-hat="${open ? i : 0}" data-size="42"></span><b>${esc(h.name)}</b>${open ? '' : `<small>ab ${h.stars} Sternen</small>`}</button>`; }).join('')}</div>${WORLDS.map((w, wi) => `<h3>${esc(w.name)}</h3><div class="crgrid">${ALL_NOTES[wi].map(k => { const has = p.creatures.includes(k);
       return `<button class="crcard ${sel && sel.key === k && sel.clef === w.clef ? 'sel' : ''} ${p.buddy === k ? 'bud' : ''}" ${has ? '' : 'disabled'} data-act="cr" data-k="${k}" data-clef="${w.clef}"><span data-cr="${k}" data-locked="${has ? 0 : 1}" data-size="56"></span><b>${has ? nameHtml(N(k)) : '?'}</b>${has && isMastered(p.notes[k]) ? '<i class="tick" title="sicher"></i>' : ''}</button>`; }).join('')}</div>`).join('')}</div>${detail}</div>`, {
-    back: () => map(app), cr: e => collection(app, { key: e.dataset.k, clef: e.dataset.clef }), play: () => app.audio.playNote(midiOf(N(sel.key))), buddy: () => { p.buddy = p.buddy === sel.key ? null : sel.key; app.save(); app.applyProfile(); app.audio.sfx('ok'); collection(app, sel); } }, 'wide');
+    back: () => map(app), cr: e => collection(app, { key: e.dataset.k, clef: e.dataset.clef }), play: () => app.audio.playNote(midiOf(N(sel.key))), hat: e => { p.hat = +e.dataset.i; app.save(); app.refreshLook(); app.audio.sfx('ok'); collection(app, sel); }, buddy: () => { p.buddy = p.buddy === sel.key ? null : sel.key; app.save(); app.refreshLook(); app.audio.sfx('ok'); collection(app, sel); } }, 'wide');
   if (sel) { const h = document.getElementById('staffHere'); if (h) h.appendChild(staffCanvas(N(sel.key), sel.clef)); }
 }
 
@@ -257,7 +258,7 @@ export async function shareSave(app) {
   document.getElementById('qrHere').appendChild(qrCanvas(link));
 }
 
-export const VERSION = '1.9 · 21.11.2026';
+export const VERSION = '2.0 · 21.11.2026';
 /** Info, Datenschutz und Quellen. */
 export function about(app, back) {
   app.screen(`<div class="maphead"><h2>Info und Datenschutz</h2><button class="btn sm" data-act="back">Zurück</button></div><div class="book">

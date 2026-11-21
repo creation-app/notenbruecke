@@ -124,7 +124,7 @@ textarea{width:100%;font:16px/1.3 ui-monospace,monospace;border:4px solid var(--
 .stars.pop i.on{animation:pop .5s backwards}.stars.pop i:nth-child(2){animation-delay:.25s}.stars.pop i:nth-child(3){animation-delay:.5s}@keyframes pop{0%{transform:scale(0)}70%{transform:scale(1.25)}}
 .freed{background:#F3E3C3;padding:8px 12px;margin-top:8px}
 .crcard{position:relative;display:inline-flex;flex-direction:column;align-items:center;background:#fff;border:4px solid var(--k);padding:6px 8px;min-width:84px;min-height:96px;font-size:20px}
-.crcard:disabled{background:#C9CFD9;border-color:#6B7890}.crcard.sel{background:var(--ye)}.crcard.bud{box-shadow:0 0 0 4px var(--or)}.crcard.bud::after{content:"dabei";position:absolute;top:-10px;right:-6px;background:var(--or);border:2px solid var(--k);font-size:13px;font-weight:700;padding:0 4px}
+.crcard:disabled{background:#C9CFD9;border-color:#6B7890}.crcard.hat{min-width:104px}.crcard.hat small{font-size:14px;font-weight:400}.crcard.sel{background:var(--ye)}.crcard.bud{box-shadow:0 0 0 4px var(--or)}.crcard.bud::after{content:"dabei";position:absolute;top:-10px;right:-6px;background:var(--or);border:2px solid var(--k);font-size:13px;font-weight:700;padding:0 4px}
 .tick{position:absolute;right:4px;top:4px;width:14px;height:14px;background:var(--g1);border:2px solid var(--k)}
 .collwrap{display:flex;gap:20px;align-items:flex-start}.coll{flex:1}.crgrid{display:flex;flex-wrap:wrap;gap:8px}
 .crdetail{width:300px;flex:none;background:#fff;border:4px solid var(--k);padding:14px;text-align:center;position:sticky;top:0}
@@ -1170,7 +1170,19 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   ];
   var HERO_W = 18;
   var HERO_H = 24;
-  function heroFrame(look, o) {
+  var HATS = [
+    { name: "Ohne Hut", stars: 0, rows: [] },
+    { name: "Stirnband", stars: 5, rows: ["", "", "", "", "..KEEEEEEEEEEEKE"] },
+    { name: "M\xFCtze", stars: 15, rows: [".......WW.......", ".....KKWWKK.....", "....KEEEEEEEK...", "...KEEEEEEEEEEK.", "..KWWWWWWWWWWWK."] },
+    { name: "Zauberhut", stars: 30, rows: [".......KPK......", "......KPPPK.....", ".....KPPYPPK....", "....KPPPPPPPPK..", ".KKPPPPPPPPPPPKK"] },
+    { name: "Krone", stars: 50, rows: ["...Y...YY...Y...", "...YY.YYYY.YY...", "...YYYYYYYYYY...", "..KYEYYBBYYEYK..", "..KKKKKKKKKKKK.."] }
+  ];
+  var HAT_PAL = { K: C.K, W: "#FFFFFF", Y: C.YE, E: "#EF5350", P: "#9B6BD6", B: "#2998E8" };
+  function hatOf(profile, stars2) {
+    const h = profile && profile.hat | 0;
+    return HATS[h] && stars2 >= HATS[h].stars ? h : 0;
+  }
+  function heroFrame(look, o, hat = 0) {
     const c = cv(HERO_W, HERO_H), x = c.getContext("2d");
     const pal = { K: C.K, O: look.O, S: "#FFE1C4", s: "#F2B8A0", W: "#FFFFFF", R: look.R, r: look.r, B: look.B, b: look.b, Y: C.YE };
     const head = HEAD.map((r) => r.split(""));
@@ -1183,6 +1195,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     fromMap(LEGS[o.legs || "stand"], pal, x, 1, by + 18);
     fromMap(o.fly ? BODY_FLY : BODY, pal, x, 1, by + 11);
     fromMap(head.map((r) => r.join("")), pal, x, 1 + (o.hx || 0), by + (o.hy || 0));
+    if (hat) fromMap(HATS[hat].rows, HAT_PAL, x, 1 + (o.hx || 0), by + (o.hy || 0) - 2);
     const arm = (cOut, cIn) => {
       px(x, cIn, by + 5, C.K);
       px(x, cOut, by + 5, C.K);
@@ -1195,24 +1208,56 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     if (o.arms === "both") arm(0, 1);
     return c;
   }
-  function makeHero(i) {
+  function makeHero(i, hat = 0) {
     const L2 = HEROES[i % HEROES.length];
     return {
-      idle0: heroFrame(L2, {}),
-      idle1: heroFrame(L2, { hy: 1 }),
-      blink: heroFrame(L2, { eyes: "closed" }),
-      lookUp: heroFrame(L2, { eyes: "up", hy: -1 }),
-      lookDown: heroFrame(L2, { eyes: "down", hy: 1 }),
-      listen: heroFrame(L2, { hx: 1, hy: 1, eyes: "side", arms: "right" }),
-      jump: heroFrame(L2, { legs: "tuck", fly: true, hy: -1, eyes: "happy", lift: -1, arms: "both" }),
-      cheer0: heroFrame(L2, { eyes: "happy", arms: "both" }),
-      cheer1: heroFrame(L2, { eyes: "happy", hy: -1, fly: true, arms: "both", lift: -1, legs: "tuck" }),
-      oops: heroFrame(L2, { eyes: "closed", hx: -1, hy: 1 }),
-      run0: heroFrame(L2, { legs: "run1", eyes: "side" }),
-      run1: heroFrame(L2, { legs: "run2", eyes: "side", hy: 1, fly: true }),
-      wave0: heroFrame(L2, { arms: "right", eyes: "happy" }),
-      wave1: heroFrame(L2, { eyes: "happy", hy: 1 })
+      idle0: heroFrame(L2, {}, hat),
+      idle1: heroFrame(L2, { hy: 1 }, hat),
+      blink: heroFrame(L2, { eyes: "closed" }, hat),
+      lookUp: heroFrame(L2, { eyes: "up", hy: -1 }, hat),
+      lookDown: heroFrame(L2, { eyes: "down", hy: 1 }, hat),
+      listen: heroFrame(L2, { hx: 1, hy: 1, eyes: "side", arms: "right" }, hat),
+      jump: heroFrame(L2, { legs: "tuck", fly: true, hy: -1, eyes: "happy", lift: -1, arms: "both" }, hat),
+      cheer0: heroFrame(L2, { eyes: "happy", arms: "both" }, hat),
+      cheer1: heroFrame(L2, { eyes: "happy", hy: -1, fly: true, arms: "both", lift: -1, legs: "tuck" }, hat),
+      oops: heroFrame(L2, { eyes: "closed", hx: -1, hy: 1 }, hat),
+      run0: heroFrame(L2, { legs: "run1", eyes: "side" }, hat),
+      run1: heroFrame(L2, { legs: "run2", eyes: "side", hy: 1, fly: true }, hat),
+      wave0: heroFrame(L2, { arms: "right", eyes: "happy" }, hat),
+      wave1: heroFrame(L2, { eyes: "happy", hy: 1 }, hat)
     };
+  }
+  function buddyStage(stat) {
+    const b = stat ? stat.box | 0 : 0;
+    return b >= 3 ? 2 : b === 2 ? 1 : 0;
+  }
+  var BUDDY_STAGE = ["klein", "mit Fl\xFCgeln", "mit Fl\xFCgeln und Krone"];
+  function makeBuddy(letter, alt, stage) {
+    const c = cv(22, 22), x = c.getContext("2d"), cr = makeCreature(letter, alt);
+    x.imageSmoothingEnabled = false;
+    if (stage === 0) {
+      x.drawImage(cr, 5, 10, 12, 12);
+      return c;
+    }
+    for (const [wx, d] of [[2, -1], [19, 1]]) {
+      for (let k = 0; k < 3; k++) {
+        px(x, wx + d * 0, 12 + k, "#FFFFFF");
+        px(x, wx + d, 11 + k, "#FFFFFF");
+      }
+      px(x, wx + d * 2, 11, "#DDEBF7");
+      px(x, wx, 15, "#DDEBF7");
+    }
+    x.drawImage(cr, 3, 6);
+    if (stage === 2) {
+      for (let i = 8; i <= 13; i++) {
+        px(x, i, 5, C.YE);
+        px(x, i, 4, C.YE);
+      }
+      for (const i of [8, 10, 11, 13]) px(x, i, 3, C.YE);
+      px(x, 9, 5, "#EF5350");
+      px(x, 12, 5, "#2998E8");
+    }
+    return c;
   }
   var CREATURE_COL = [["#FFD966", "#D9A441"], ["#F07FA0", "#B84A72"], ["#B58BE8", "#7A52B8"], ["#4FD1C5", "#2C8F88"], ["#8CCB3F", "#4E8A2E"], ["#FF9D35", "#C46A14"], ["#5AAEF2", "#2A6DB8"]];
   function makeCreature(letter, alt = 0, locked = false) {
@@ -4109,8 +4154,8 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     c.setAttribute("aria-hidden", "true");
     return c;
   }
-  function heroCanvas(i, size = 72) {
-    const c = makeHero(i).idle0;
+  function heroCanvas(i, size = 72, hat = 0) {
+    const c = makeHero(i, hat).idle0;
     c.style.width = size + "px";
     c.style.height = size * 24 / 18 + "px";
     c.className = "pix";
@@ -4119,7 +4164,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   }
   function fill(root) {
     root.querySelectorAll("[data-cr]").forEach((e) => e.appendChild(crCanvas(e.dataset.cr, e.dataset.locked === "1", +e.dataset.size || 64)));
-    root.querySelectorAll("[data-hero]").forEach((e) => e.appendChild(heroCanvas(+e.dataset.hero, +e.dataset.size || 72)));
+    root.querySelectorAll("[data-hero]").forEach((e) => e.appendChild(heroCanvas(+e.dataset.hero, +e.dataset.size || 72, +e.dataset.hat || 0)));
   }
   function title(app) {
     app.backdrop("himmel");
@@ -4134,7 +4179,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   }
   function profiles(app) {
     app.backdrop("himmel");
-    app.screen(`<h2>Wer spielt?</h2><div class="plist">${app.state.profiles.map((p) => `<button class="pcard" data-act="pick" data-id="${p.id}"><span data-hero="${p.hero}"></span><b>${esc(p.name)}</b><small>${totalStars(p)} Sterne \xB7 ${p.creatures.length} Notenwesen</small></button>`).join("")}
+    app.screen(`<h2>Wer spielt?</h2><div class="plist">${app.state.profiles.map((p) => `<button class="pcard" data-act="pick" data-id="${p.id}"><span data-hero="${p.hero}" data-hat="${hatOf(p, totalStars(p))}"></span><b>${esc(p.name)}</b><small>${totalStars(p)} Sterne \xB7 ${p.creatures.length} Notenwesen</small></button>`).join("")}
     <button class="pcard new" data-act="new"><span class="plus">+</span><b>Neu</b><small>Neues Profil</small></button></div>
     <div class="row"><button class="btn" data-act="code">Spielstand-Code eingeben</button></div>`, {
       pick: (e) => {
@@ -4341,7 +4386,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   function story(app, pages, then, theme) {
     app.backdrop(theme || app.scene && app.scene.theme || "himmel");
     let i = 0;
-    const render = () => app.screen(`<div class="story"><span data-hero="${app.profile ? app.profile.hero : 0}" data-size="90"></span><p>${esc(pages[i])}</p></div>
+    const render = () => app.screen(`<div class="story"><span data-hero="${app.profile ? app.profile.hero : 0}" data-hat="${app.profile ? hatOf(app.profile, totalStars(app.profile)) : 0}" data-size="90"></span><p>${esc(pages[i])}</p></div>
     <div class="row"><button class="btn quiet" data-act="skip">Geschichte \xFCberspringen</button><button class="btn go" data-act="next">${i < pages.length - 1 ? "Weiter" : "Los!"}</button></div>`, {
       next: () => {
         app.audio.sfx("click");
@@ -4353,6 +4398,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     render();
   }
   function map(app, world) {
+    app.refreshLook();
     const p = app.profile;
     if (world == null) world = p.lastWorld || 0;
     if (!worldUnlocked(p, world)) world = 0;
@@ -4366,7 +4412,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       return story(app, WORLD_INTRO[world], () => map(app, world), W.theme);
     }
     const ls = levelsOf(world), goal = p.goal || 5, today = Math.floor((p.days[dayKey()] || 0) / 60);
-    app.screen(`<div class="maphead"><button class="chip" data-act="prof" aria-label="Profil wechseln"><span data-hero="${p.hero}" data-size="36"></span><b>${esc(p.name)}</b></button>
+    app.screen(`<div class="maphead"><button class="chip" data-act="prof" aria-label="Profil wechseln"><span data-hero="${p.hero}" data-hat="${hatOf(p, totalStars(p))}" data-size="36"></span><b>${esc(p.name)}</b></button>
     <div class="row tight"><span class="pill goal ${today >= goal ? "ok" : ""}" role="img" aria-label="Tagesziel: ${today} von ${goal} Minuten">Heute ge\xFCbt: ${Math.min(today, goal)} von ${goal} Minuten<i style="width:${Math.min(100, 100 * today / goal)}%"></i></span><span class="pill">${totalStars(p)} Sterne</span></div></div>
     <h3 class="mapq">W\xE4hle eine Welt und dann ein Level:</h3>
     <div class="tabs" role="tablist">${WORLDS.map((w, i) => {
@@ -4377,7 +4423,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       const open = levelUnlocked(p, l), rec = p.levels[l.id];
       return `<button class="node t-${l.type} ${rec ? "done" : ""}" ${open ? "" : "disabled"} data-act="lvl" data-id="${l.id}"><span class="num">${i + 1}</span><b>${esc(l.title)}</b><small>${TYPE_LABEL[l.type]}</small>${!open ? '<small class="lock">im Nebel</small>' : app.locked(l) ? '<small class="lock full">Vollversion</small>' : stars(rec ? rec.stars : 0)}</button>`;
     }).join("")}</div>
-    <nav class="mapnav" aria-label="Bereiche"><button class="btn" data-act="coll"><b>Sammlung</b><small>${p.creatures.length} von ${creatureTotal()} Notenwesen</small></button><button class="btn" data-act="pass"><b>\xDCbungspass</b><small>Was du ge\xFCbt hast</small></button><button class="btn" data-act="book"><b>Geschichte</b><small>Nachlesen</small></button><button class="btn" data-act="board"><b>Bestenliste</b><small>Auf diesem Ger\xE4t</small></button><button class="btn" data-act="set"><b>Einstellungen</b><small>Ton, Mikrofon, Code</small></button></nav>`, {
+    <nav class="mapnav" aria-label="Bereiche"><button class="btn" data-act="coll"><b>Sammlung</b><small>${p.creatures.length} von ${creatureTotal()} Wesen \xB7 H\xFCte</small></button><button class="btn" data-act="pass"><b>\xDCbungspass</b><small>Was du ge\xFCbt hast</small></button><button class="btn" data-act="book"><b>Geschichte</b><small>Nachlesen</small></button><button class="btn" data-act="board"><b>Bestenliste</b><small>Auf diesem Ger\xE4t</small></button><button class="btn" data-act="set"><b>Einstellungen</b><small>Ton, Mikrofon, Code</small></button></nav>`, {
       prof: () => profiles(app),
       coll: () => collection(app),
       pass: () => pass(app),
@@ -4513,24 +4559,34 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     return c;
   }
   function collection(app, sel) {
-    const p = app.profile;
+    const p = app.profile, stars2 = totalStars(p), worn = hatOf(p, stars2);
     let detail = "";
     if (sel) {
       const n = N(sel.key), st = p.notes[sel.key] || { box: 0, seen: 0, ok: 0 };
-      detail = `<div class="crdetail"><span data-cr="${sel.key}" data-size="128"></span><div><h3>${nameHtml(n)}</h3><button class="btn sm ${p.buddy === sel.key ? "" : "go"}" data-act="buddy" style="margin-bottom:8px">${p.buddy === sel.key ? "Begleiter ablegen" : "Als Begleiter mitnehmen"}</button><div id="staffHere"></div><p>${describePos(staffPos(n, sel.clef))}</p>
+      detail = `<div class="crdetail"><span data-cr="${sel.key}" data-size="128"></span><div><h3>${nameHtml(n)}</h3><button class="btn sm ${p.buddy === sel.key ? "" : "go"}" data-act="buddy" style="margin-bottom:8px">${p.buddy === sel.key ? "Begleiter ablegen" : "Als Begleiter mitnehmen"}</button><p class="muted" style="margin:0 0 8px;font-size:17px">Als Begleiter: <b>${BUDDY_STAGE[buddyStage(st)]}</b>.${buddyStage(st) < 2 ? " Er w\xE4chst, wenn du diese Note sicherer spielst." : ""}</p><div id="staffHere"></div><p>${describePos(staffPos(n, sel.clef))}</p>
       <p>Sicherheit <span class="bar"><i style="width:${st.box * 25}%"></i></span></p><p>${st.ok} von ${st.seen} Mal beim ersten Versuch</p><button class="btn sm" data-act="play">Anh\xF6ren</button></div></div>`;
     }
-    app.screen(`<div class="maphead"><h2>Deine Notenwesen</h2><button class="btn sm" data-act="back">Zur\xFCck</button></div><p class="muted" style="margin:0 0 8px">${p.buddy && p.creatures.includes(p.buddy) ? `Dein Begleiter: <b>${nameHtml(N(p.buddy))}</b>. Er fliegt dir im Spiel hinterher.` : "Tippe ein Notenwesen an und nimm es als Begleiter mit. Es fliegt dir dann im Spiel hinterher."}</p><div class="collwrap"><div class="coll">${WORLDS.map((w, wi) => `<h3>${esc(w.name)}</h3><div class="crgrid">${ALL_NOTES[wi].map((k) => {
+    app.screen(`<div class="maphead"><h2>Deine Sammlung</h2><button class="btn sm" data-act="back">Zur\xFCck</button></div><p class="muted" style="margin:0 0 8px">${p.buddy && p.creatures.includes(p.buddy) ? `Dein Begleiter: <b>${nameHtml(N(p.buddy))}</b>. Er fliegt dir im Spiel hinterher.` : "Tippe ein Notenwesen an und nimm es als Begleiter mit. Es fliegt dir dann im Spiel hinterher."}</p><div class="collwrap"><div class="coll"><h3>H\xFCte f\xFCr deine Figur <small class="muted">\xB7 du hast ${stars2} Sterne</small></h3><div class="crgrid">${HATS.map((h, i) => {
+      const open = stars2 >= h.stars;
+      return `<button class="crcard hat ${worn === i ? "bud" : ""}" ${open ? "" : "disabled"} data-act="hat" data-i="${i}"><span data-hero="${p.hero}" data-hat="${open ? i : 0}" data-size="42"></span><b>${esc(h.name)}</b>${open ? "" : `<small>ab ${h.stars} Sternen</small>`}</button>`;
+    }).join("")}</div>${WORLDS.map((w, wi) => `<h3>${esc(w.name)}</h3><div class="crgrid">${ALL_NOTES[wi].map((k) => {
       const has = p.creatures.includes(k);
       return `<button class="crcard ${sel && sel.key === k && sel.clef === w.clef ? "sel" : ""} ${p.buddy === k ? "bud" : ""}" ${has ? "" : "disabled"} data-act="cr" data-k="${k}" data-clef="${w.clef}"><span data-cr="${k}" data-locked="${has ? 0 : 1}" data-size="56"></span><b>${has ? nameHtml(N(k)) : "?"}</b>${has && isMastered(p.notes[k]) ? '<i class="tick" title="sicher"></i>' : ""}</button>`;
     }).join("")}</div>`).join("")}</div>${detail}</div>`, {
       back: () => map(app),
       cr: (e) => collection(app, { key: e.dataset.k, clef: e.dataset.clef }),
       play: () => app.audio.playNote(midiOf(N(sel.key))),
+      hat: (e) => {
+        p.hat = +e.dataset.i;
+        app.save();
+        app.refreshLook();
+        app.audio.sfx("ok");
+        collection(app, sel);
+      },
       buddy: () => {
         p.buddy = p.buddy === sel.key ? null : sel.key;
         app.save();
-        app.applyProfile();
+        app.refreshLook();
         app.audio.sfx("ok");
         collection(app, sel);
       }
@@ -4735,7 +4791,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     }, "wide");
     document.getElementById("qrHere").appendChild(qrCanvas(link));
   }
-  var VERSION = "1.9 \xB7 21.11.2026";
+  var VERSION = "2.0 \xB7 21.11.2026";
   function about(app, back) {
     app.screen(`<div class="maphead"><h2>Info und Datenschutz</h2><button class="btn sm" data-act="back">Zur\xFCck</button></div><div class="book">
     <h3>Die Notenbr\xFCcke</h3><p>Ein Lernspiel zum Notenlesen am Klavier. Version ${VERSION}${CONFIG.shop ? " \xB7 Kauf-Fassung" : " \xB7 Test-Fassung"}.</p>
@@ -4997,17 +5053,23 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         ctx.fillStyle = "#FFF1D6";
         ctx.fillRect(q(o.bx - 11 + Math.floor(t * 6) % 5), q(y + 4 - Math.floor(t * 4) % 7), 1, 1);
       }
-      ctx.drawImage(b, q(o.bx - 8), q(y - 8));
+      ctx.drawImage(b, q(o.bx - 11), q(y - 14));
+    }
+    /** Figur (mit Hut) und Begleiter (mit Stufe) neu zeichnen – nach Profilwechsel und immer, wenn die Karte erscheint. */
+    refreshLook() {
+      const p = this.profile;
+      this.heroFrames = makeHero(p ? p.hero : 0, p ? hatOf(p, totalStars(p)) : 0);
+      this.buddy = null;
+      this.buddySure = false;
+      if (p && p.buddy && p.creatures.includes(p.buddy)) {
+        const n = N(p.buddy), st = buddyStage(p.notes[p.buddy]);
+        this.buddy = makeBuddy((n.step % 7 + 7) % 7, n.alt, st);
+        this.buddySure = st === 2;
+      }
     }
     applyProfile() {
       const p = this.profile;
-      this.heroFrames = makeHero(p ? p.hero : 0);
-      this.buddy = null;
-      if (p && p.buddy && p.creatures.includes(p.buddy)) {
-        const n = N(p.buddy);
-        this.buddy = makeCreature((n.step % 7 + 7) % 7, n.alt);
-        this.buddySure = !!(p.notes[p.buddy] && p.notes[p.buddy].box >= 3);
-      }
+      this.refreshLook();
       this.audio.muted = !!this.state.muted;
       this.audio.song = this.state.song || "tanz";
       if (p) {

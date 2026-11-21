@@ -31,7 +31,18 @@ export const HEROES = [
   { name: 'Türkis', R: '#3FC9B8', r: '#1F7F78', O: '#FFF1D6', B: '#9B6BD6', b: '#4A2A70' },
 ];
 export const HERO_W = 18, HERO_H = 24;
-function heroFrame(look, o) {
+// ---------- Hüte: mit Sternen freigeschaltet. Die Zeilen liegen über dem Kopf (2 Zeilen darüber, 3 über dem Haar). ----------
+export const HATS = [
+  { name: 'Ohne Hut', stars: 0, rows: [] },
+  { name: 'Stirnband', stars: 5, rows: ['', '', '', '', '..KEEEEEEEEEEEKE'] },
+  { name: 'Mütze', stars: 15, rows: ['.......WW.......', '.....KKWWKK.....', '....KEEEEEEEK...', '...KEEEEEEEEEEK.', '..KWWWWWWWWWWWK.'] },
+  { name: 'Zauberhut', stars: 30, rows: ['.......KPK......', '......KPPPK.....', '.....KPPYPPK....', '....KPPPPPPPPK..', '.KKPPPPPPPPPPPKK'] },
+  { name: 'Krone', stars: 50, rows: ['...Y...YY...Y...', '...YY.YYYY.YY...', '...YYYYYYYYYY...', '..KYEYYBBYYEYK..', '..KKKKKKKKKKKK..'] },
+];
+const HAT_PAL = { K: C.K, W: '#FFFFFF', Y: C.YE, E: '#EF5350', P: '#9B6BD6', B: '#2998E8' };
+/** Der Hut, den das Profil wirklich tragen darf (0, wenn die Sterne nicht reichen). */
+export function hatOf(profile, stars) { const h = profile && profile.hat | 0; return HATS[h] && stars >= HATS[h].stars ? h : 0; }
+function heroFrame(look, o, hat = 0) {
   const c = cv(HERO_W, HERO_H), x = c.getContext('2d');
   const pal = { K: C.K, O: look.O, S: '#FFE1C4', s: '#F2B8A0', W: '#FFFFFF', R: look.R, r: look.r, B: look.B, b: look.b, Y: C.YE };
   const head = HEAD.map(r => r.split('')); const e = EYES[o.eyes || 'open'];
@@ -40,19 +51,31 @@ function heroFrame(look, o) {
   fromMap(LEGS[o.legs || 'stand'], pal, x, 1, by + 18);
   fromMap(o.fly ? BODY_FLY : BODY, pal, x, 1, by + 11);
   fromMap(head.map(r => r.join('')), pal, x, 1 + (o.hx || 0), by + (o.hy || 0));
+  if (hat) fromMap(HATS[hat].rows, HAT_PAL, x, 1 + (o.hx || 0), by + (o.hy || 0) - 2);
   const arm = (cOut, cIn) => { px(x, cIn, by + 5, C.K); px(x, cOut, by + 5, C.K); for (let y = by + 6; y <= by + 12; y++) { px(x, cIn, y, y < by + 8 ? pal.S : look.B); px(x, cOut, y, C.K); } };
   if (o.arms === 'both' || o.arms === 'right') arm(17, 16); if (o.arms === 'both') arm(0, 1);
   return c;
 }
-export function makeHero(i) {
+export function makeHero(i, hat = 0) {
   const L = HEROES[i % HEROES.length];
-  return { idle0: heroFrame(L, {}), idle1: heroFrame(L, { hy: 1 }), blink: heroFrame(L, { eyes: 'closed' }), lookUp: heroFrame(L, { eyes: 'up', hy: -1 }), lookDown: heroFrame(L, { eyes: 'down', hy: 1 }),
-    listen: heroFrame(L, { hx: 1, hy: 1, eyes: 'side', arms: 'right' }), jump: heroFrame(L, { legs: 'tuck', fly: true, hy: -1, eyes: 'happy', lift: -1, arms: 'both' }),
-    cheer0: heroFrame(L, { eyes: 'happy', arms: 'both' }), cheer1: heroFrame(L, { eyes: 'happy', hy: -1, fly: true, arms: 'both', lift: -1, legs: 'tuck' }), oops: heroFrame(L, { eyes: 'closed', hx: -1, hy: 1 }),
-    run0: heroFrame(L, { legs: 'run1', eyes: 'side' }), run1: heroFrame(L, { legs: 'run2', eyes: 'side', hy: 1, fly: true }), wave0: heroFrame(L, { arms: 'right', eyes: 'happy' }), wave1: heroFrame(L, { eyes: 'happy', hy: 1 }) };
+  return { idle0: heroFrame(L, {}, hat), idle1: heroFrame(L, { hy: 1 }, hat), blink: heroFrame(L, { eyes: 'closed' }, hat), lookUp: heroFrame(L, { eyes: 'up', hy: -1 }, hat), lookDown: heroFrame(L, { eyes: 'down', hy: 1 }, hat),
+    listen: heroFrame(L, { hx: 1, hy: 1, eyes: 'side', arms: 'right' }, hat), jump: heroFrame(L, { legs: 'tuck', fly: true, hy: -1, eyes: 'happy', lift: -1, arms: 'both' }, hat),
+    cheer0: heroFrame(L, { eyes: 'happy', arms: 'both' }, hat), cheer1: heroFrame(L, { eyes: 'happy', hy: -1, fly: true, arms: 'both', lift: -1, legs: 'tuck' }, hat), oops: heroFrame(L, { eyes: 'closed', hx: -1, hy: 1 }, hat),
+    run0: heroFrame(L, { legs: 'run1', eyes: 'side' }, hat), run1: heroFrame(L, { legs: 'run2', eyes: 'side', hy: 1, fly: true }, hat), wave0: heroFrame(L, { arms: 'right', eyes: 'happy' }, hat), wave1: heroFrame(L, { eyes: 'happy', hy: 1 }, hat) };
 }
 
 // ---------- Notenwesen ----------
+/** Begleiter in drei Stufen: 0 klein, 1 mit Flügeln, 2 mit Flügeln und Krone. Er wächst, je sicherer seine Note sitzt. */
+export function buddyStage(stat) { const b = stat ? stat.box | 0 : 0; return b >= 3 ? 2 : b === 2 ? 1 : 0; }
+export const BUDDY_STAGE = ['klein', 'mit Flügeln', 'mit Flügeln und Krone'];
+export function makeBuddy(letter, alt, stage) {
+  const c = cv(22, 22), x = c.getContext('2d'), cr = makeCreature(letter, alt); x.imageSmoothingEnabled = false;
+  if (stage === 0) { x.drawImage(cr, 5, 10, 12, 12); return c; }
+  for (const [wx, d] of [[2, -1], [19, 1]]) { for (let k = 0; k < 3; k++) { px(x, wx + d * 0, 12 + k, '#FFFFFF'); px(x, wx + d, 11 + k, '#FFFFFF'); } px(x, wx + d * 2, 11, '#DDEBF7'); px(x, wx, 15, '#DDEBF7'); }
+  x.drawImage(cr, 3, 6);
+  if (stage === 2) { for (let i = 8; i <= 13; i++) { px(x, i, 5, C.YE); px(x, i, 4, C.YE); } for (const i of [8, 10, 11, 13]) px(x, i, 3, C.YE); px(x, 9, 5, '#EF5350'); px(x, 12, 5, '#2998E8'); }
+  return c;
+}
 const CREATURE_COL = [['#FFD966', '#D9A441'], ['#F07FA0', '#B84A72'], ['#B58BE8', '#7A52B8'], ['#4FD1C5', '#2C8F88'], ['#8CCB3F', '#4E8A2E'], ['#FF9D35', '#C46A14'], ['#5AAEF2', '#2A6DB8']];
 export function makeCreature(letter, alt = 0, locked = false) {
   const W = 16, H = 16, g = Array.from({ length: H }, () => Array(W).fill(null));
