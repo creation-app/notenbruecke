@@ -581,7 +581,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     constructor(opt = {}) {
       this.holdMs = opt.holdMs || 200;
       this.minClarity = opt.minClarity || 0.86;
-      this.minRms = opt.minRms || 6e-3;
+      this.minRms = opt.minRms || 2e-3;
       this.a4 = opt.a4 || 440;
       this.reset();
     }
@@ -5129,7 +5129,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     }, "wide");
     document.getElementById("qrHere").appendChild(qrCanvas(link));
   }
-  var VERSION = "2.3 \xB7 21.11.2026";
+  var VERSION = "2.4 \xB7 21.11.2026";
   function about(app, back) {
     app.screen(`<div class="maphead"><h2>Info und Datenschutz</h2><button class="btn sm" data-act="back">Zur\xFCck</button></div><div class="book">
     <h3>Die Notenbr\xFCcke</h3><p>Ein Lernspiel zum Notenlesen am Klavier. Version ${VERSION}${CONFIG.shop ? " \xB7 Kauf-Fassung" : " \xB7 Test-Fassung"}.</p>

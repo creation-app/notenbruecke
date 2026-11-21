@@ -38,7 +38,7 @@ export function detectPitch(buf, sampleRate, opt = {}) {
  */
 export class NoteTracker {
   constructor(opt = {}) {
-    this.holdMs = opt.holdMs || 200; this.minClarity = opt.minClarity || 0.86; this.minRms = opt.minRms || 0.006;
+    this.holdMs = opt.holdMs || 200; this.minClarity = opt.minClarity || 0.86; this.minRms = opt.minRms || 0.002; // leiser erlaubt: viele Geräte nehmen das Klavier nur schwach auf
     this.a4 = opt.a4 || 440; this.reset();
   }
   reset() { this.cand = null; this.since = 0; this.cents = []; this.lastEmit = null; this.lowRms = Infinity; this.onset = true; this.current = null; this.emitRms = 0; }
