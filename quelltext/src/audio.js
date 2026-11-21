@@ -38,21 +38,32 @@ export class GameAudio {
   setA4(a4) { this.tracker.a4 = a4 || 440; }
   /** Muss aus einem Klick heraus aufgerufen werden. @returns {'on'|'denied'|'unsupported'} */
   async startMic() {
-    if (this.micState === 'on') return 'on';
+    if (this.micState === 'on') { if (this.micHealthy()) return 'on'; this.dropMic(); } // eingeschlafenes Mikrofon (Tablet war zu, Tab im Hintergrund) neu aufbauen
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !this.ensure()) return (this.micState = 'unsupported');
     try {
       this.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
       this.src = this.ctx.createMediaStreamSource(this.stream); this.analyser = this.ctx.createAnalyser(); this.analyser.fftSize = 4096; this.analyser.smoothingTimeConstant = 0;
       this.src.connect(this.analyser); this.sink = this.ctx.createGain(); this.sink.gain.value = 0; this.analyser.connect(this.sink); this.sink.connect(this.ctx.destination);
       this.buf = new Float32Array(4096); this.half = new Float32Array(2048); this.bytes = new Uint8Array(4096);
-      const tr = this.stream.getAudioTracks()[0]; if (tr) tr.addEventListener('ended', () => { this.micState = 'off'; }); this.tracker.reset(); return (this.micState = 'on');
+      const tr = this.stream.getAudioTracks()[0], st = this.stream;
+      if (tr) { tr.addEventListener('ended', () => { if (this.stream === st) this.micState = 'off'; }); tr.addEventListener('mute', () => { if (this.stream === st) this.dead = true; }); tr.addEventListener('unmute', () => { if (this.stream === st) { this.dead = false; this.zeroSince = 0; } }); }
+      this.dead = false; this.zeroSince = 0; this.stuckSince = 0; this.tracker.reset(); return (this.micState = 'on');
     } catch (e) { return (this.micState = 'denied'); }
   }
+  /** Lebt das Mikrofon noch? Nach Zuklappen oder Tab-Wechsel liefern manche Geräte (vor allem iPad und iPhone) nur noch Stille. */
+  micHealthy() { const tr = this.stream && this.stream.getAudioTracks()[0]; return !!tr && tr.readyState === 'live' && !tr.muted && tr.enabled && !this.dead && !!this.ctx && this.ctx.state === 'running'; }
+  dropMic() { try { if (this.stream) this.stream.getTracks().forEach(t => t.stop()); if (this.src) this.src.disconnect(); if (this.analyser) this.analyser.disconnect(); } catch (e) { /* egal */ } this.stream = this.src = this.analyser = null; this.micState = 'off'; this.dead = false; }
+  /** Mikrofon neu aufbauen, wenn es an sein sollte, aber nichts mehr liefert. Gibt true zurück, wenn es danach läuft. */
+  async reviveMic() { if (this.micState !== 'on' || this.reviving) return this.micState === 'on'; this.reviving = true; try { this.ensure(); if (this.ctx && this.ctx.state !== 'running') await this.ctx.resume().catch(() => {}); if (!this.micHealthy()) { this.dropMic(); await this.startMic(); } } finally { this.reviving = false; } return this.micState === 'on'; }
   /** Liefert ein Noten-Ereignis, sobald ein Ton stabil erkannt wurde. */
   poll(now) {
     if (this.micState !== 'on' || now - this.lastPoll < 45) return null;
-    this.lastPoll = now; if (this.ctx.state !== 'running') { this.ctx.resume().catch(() => {}); return null; }
+    this.lastPoll = now; if (!this.analyser) return null;
+    if (this.ctx.state !== 'running') { this.ctx.resume().catch(() => {}); if (!this.stuckSince) this.stuckSince = now; else if (now - this.stuckSince > 2000) this.dead = true; return null; } this.stuckSince = 0;
     if (this.analyser.getFloatTimeDomainData) this.analyser.getFloatTimeDomainData(this.buf); else { this.analyser.getByteTimeDomainData(this.bytes); for (let i = 0; i < 4096; i++) this.buf[i] = (this.bytes[i] - 128) / 128; }
+    // Völlige Stille (lauter Nullen) gibt es bei einem echten Mikrofon nie: Dann ist die Aufnahme stumm geschaltet oder eingeschlafen.
+    let zero = true; for (let i = 0; i < 4096; i += 16) if (this.buf[i] > 1e-7 || this.buf[i] < -1e-7) { zero = false; break; }
+    if (!zero) { this.zeroSince = 0; if (this.dead) this.dead = false; } else if (!this.zeroSince) this.zeroSince = now; else if (now - this.zeroSince > 2500) this.dead = true;
     if (now < this.gateUntil) { this.gated = true; this.level = 0; return null; }
     if (this.gated) { this.gated = false; this.tracker.resume(); }
     const d = this.half; for (let i = 0; i < 2048; i++) d[i] = (this.buf[2 * i] + this.buf[2 * i + 1]) * 0.5;
