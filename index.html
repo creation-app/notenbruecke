@@ -124,7 +124,7 @@ textarea{width:100%;font:16px/1.3 ui-monospace,monospace;border:4px solid var(--
 .stars.pop i.on{animation:pop .5s backwards}.stars.pop i:nth-child(2){animation-delay:.25s}.stars.pop i:nth-child(3){animation-delay:.5s}@keyframes pop{0%{transform:scale(0)}70%{transform:scale(1.25)}}
 .freed{background:#F3E3C3;padding:8px 12px;margin-top:8px}
 .crcard{position:relative;display:inline-flex;flex-direction:column;align-items:center;background:#fff;border:4px solid var(--k);padding:6px 8px;min-width:84px;min-height:96px;font-size:20px}
-.crcard:disabled{background:#C9CFD9;border-color:#6B7890}.crcard.sel{background:var(--ye)}
+.crcard:disabled{background:#C9CFD9;border-color:#6B7890}.crcard.sel{background:var(--ye)}.crcard.bud{box-shadow:0 0 0 4px var(--or)}.crcard.bud::after{content:"dabei";position:absolute;top:-10px;right:-6px;background:var(--or);border:2px solid var(--k);font-size:13px;font-weight:700;padding:0 4px}
 .tick{position:absolute;right:4px;top:4px;width:14px;height:14px;background:var(--g1);border:2px solid var(--k)}
 .collwrap{display:flex;gap:20px;align-items:flex-start}.coll{flex:1}.crgrid{display:flex;flex-wrap:wrap;gap:8px}
 .crdetail{width:300px;flex:none;background:#fff;border:4px solid var(--k);padding:14px;text-align:center;position:sticky;top:0}
@@ -1733,11 +1733,17 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   function newStat() {
     return { box: 0, seen: 0, ok: 0 };
   }
-  function update(stat, firstTry) {
+  var SLOW_PLAY_MS = 7e3;
+  var SLOW_WRITE_MS = 12e3;
+  function update(stat, firstTry, slow = false) {
     stat.seen++;
     if (firstTry) {
       stat.ok++;
-      stat.box = Math.min(4, stat.box + 1);
+      if (!slow) stat.box = Math.min(4, stat.box + 1);
+      else {
+        stat.slow = (stat.slow || 0) + 1;
+        if (stat.box < MASTERED_BOX - 1) stat.box++;
+      }
     } else stat.box = Math.max(0, stat.box - 2);
     return stat;
   }
@@ -1864,6 +1870,8 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       const { app } = this, tg = this.target;
       this.tries = 0;
       const isNew = !app.profile.notes[tg.key];
+      this.t0 = performance.now();
+      this.fresh = isNew;
       this.hint = isNew;
       app.panel.setHint(isNew ? midiOf(tg) : null);
       app.hud.progress(this.idx, this.targets.length);
@@ -1885,7 +1893,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       const cls = classify(tm, midi), heard = noteOfMidi(midi, tg.alt < 0);
       if (cls === "correct") {
         const first = this.tries === 0;
-        p.notes[tg.key] = update(p.notes[tg.key] || newStat(), first);
+        p.notes[tg.key] = update(p.notes[tg.key] || newStat(), first, !this.fresh && performance.now() - this.t0 > SLOW_PLAY_MS);
         if (first) {
           this.firstTry++;
           this.combo++;
@@ -2051,6 +2059,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       else f = Math.floor(this.t * 1.6) % 2 ? H.idle1 : H.idle0;
       const bob = this.phase === "done" ? Math.abs(Math.sin(this.doneT * 9)) * 5 : 0, shake = this.oopsT > 0 ? Math.round(Math.sin(this.oopsT * 50) * 1.5) : 0;
       const sq = this.landT > 0 && this.phase !== "done" ? this.landT / 0.28 : 0, w = q(18 * (1 + 0.22 * sq)), h = q(24 * (1 - 0.22 * sq));
+      this.app.drawBuddy(ctx, this, this.hero.x - cam - 20, this.hero.y - 34, this.t, this.phase === "done" ? Math.abs(Math.sin(this.doneT * 9 + 1)) * 7 : this.landT > 0 ? Math.sin(this.landT / 0.28 * Math.PI) * 6 : 0);
       ctx.drawImage(f, q(this.hero.x - cam - w / 2) + shake, q(this.hero.y - 4 - 23 - bob + (24 - h)), w, h);
       this.parts.draw(ctx, cam);
       for (const [pl, i, sx, style] of vis) {
@@ -2257,6 +2266,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       this.pos = Math.max(this.minPos, Math.min(this.maxPos, 4));
       this.alt = 0;
       this.tries = 0;
+      this.t0 = performance.now();
       this.taskClean = true;
       this.wrongT = 0;
       this.msg = null;
@@ -2286,7 +2296,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       app.audio.playNote(midiOf(cand));
       const ok = tk.word ? LETTERS[letterIdx(cand)] === tk.word[this.slot].toLowerCase() && !cand.alt : cand.step === tk.notes[0].step && cand.alt === tk.notes[0].alt;
       if (ok) {
-        p.notes[cand.key] = update(p.notes[cand.key] || newStat(), this.tries === 0);
+        p.notes[cand.key] = update(p.notes[cand.key] || newStat(), this.tries === 0, performance.now() - this.t0 > SLOW_WRITE_MS);
         if (this.app.levelNoteKeys(this.level).includes(cand.key) && !p.creatures.includes(cand.key)) {
           p.creatures.push(cand.key);
           this.freed.push(cand);
@@ -2295,6 +2305,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         this.parts.burst(this.xs[this.slot], yOfPos(this.pos), [C.YE, C.W, C.GL], 14);
         this.slot++;
         this.tries = 0;
+        this.t0 = performance.now();
         if (this.slot < this.n) app.bubble(`Schreibe das Wort <b>${tk.word}</b> \u2013 Note f\xFCr Note.`, 0);
         if (this.slot >= this.n) {
           if (this.taskClean) this.firstTry++;
@@ -4506,16 +4517,23 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     let detail = "";
     if (sel) {
       const n = N(sel.key), st = p.notes[sel.key] || { box: 0, seen: 0, ok: 0 };
-      detail = `<div class="crdetail"><span data-cr="${sel.key}" data-size="128"></span><div><h3>${nameHtml(n)}</h3><div id="staffHere"></div><p>${describePos(staffPos(n, sel.clef))}</p>
+      detail = `<div class="crdetail"><span data-cr="${sel.key}" data-size="128"></span><div><h3>${nameHtml(n)}</h3><button class="btn sm ${p.buddy === sel.key ? "" : "go"}" data-act="buddy" style="margin-bottom:8px">${p.buddy === sel.key ? "Begleiter ablegen" : "Als Begleiter mitnehmen"}</button><div id="staffHere"></div><p>${describePos(staffPos(n, sel.clef))}</p>
       <p>Sicherheit <span class="bar"><i style="width:${st.box * 25}%"></i></span></p><p>${st.ok} von ${st.seen} Mal beim ersten Versuch</p><button class="btn sm" data-act="play">Anh\xF6ren</button></div></div>`;
     }
-    app.screen(`<div class="maphead"><h2>Deine Notenwesen</h2><button class="btn sm" data-act="back">Zur\xFCck</button></div><div class="collwrap"><div class="coll">${WORLDS.map((w, wi) => `<h3>${esc(w.name)}</h3><div class="crgrid">${ALL_NOTES[wi].map((k) => {
+    app.screen(`<div class="maphead"><h2>Deine Notenwesen</h2><button class="btn sm" data-act="back">Zur\xFCck</button></div><p class="muted" style="margin:0 0 8px">${p.buddy && p.creatures.includes(p.buddy) ? `Dein Begleiter: <b>${nameHtml(N(p.buddy))}</b>. Er fliegt dir im Spiel hinterher.` : "Tippe ein Notenwesen an und nimm es als Begleiter mit. Es fliegt dir dann im Spiel hinterher."}</p><div class="collwrap"><div class="coll">${WORLDS.map((w, wi) => `<h3>${esc(w.name)}</h3><div class="crgrid">${ALL_NOTES[wi].map((k) => {
       const has = p.creatures.includes(k);
-      return `<button class="crcard ${sel && sel.key === k && sel.clef === w.clef ? "sel" : ""}" ${has ? "" : "disabled"} data-act="cr" data-k="${k}" data-clef="${w.clef}"><span data-cr="${k}" data-locked="${has ? 0 : 1}" data-size="56"></span><b>${has ? nameHtml(N(k)) : "?"}</b>${has && isMastered(p.notes[k]) ? '<i class="tick" title="sicher"></i>' : ""}</button>`;
+      return `<button class="crcard ${sel && sel.key === k && sel.clef === w.clef ? "sel" : ""} ${p.buddy === k ? "bud" : ""}" ${has ? "" : "disabled"} data-act="cr" data-k="${k}" data-clef="${w.clef}"><span data-cr="${k}" data-locked="${has ? 0 : 1}" data-size="56"></span><b>${has ? nameHtml(N(k)) : "?"}</b>${has && isMastered(p.notes[k]) ? '<i class="tick" title="sicher"></i>' : ""}</button>`;
     }).join("")}</div>`).join("")}</div>${detail}</div>`, {
       back: () => map(app),
       cr: (e) => collection(app, { key: e.dataset.k, clef: e.dataset.clef }),
-      play: () => app.audio.playNote(midiOf(N(sel.key)))
+      play: () => app.audio.playNote(midiOf(N(sel.key))),
+      buddy: () => {
+        p.buddy = p.buddy === sel.key ? null : sel.key;
+        app.save();
+        app.applyProfile();
+        app.audio.sfx("ok");
+        collection(app, sel);
+      }
     }, "wide");
     if (sel) {
       const h = document.getElementById("staffHere");
@@ -4541,7 +4559,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     app.screen(`<div class="maphead"><h2>\xDCbungspass von ${esc(p.name)}</h2><button class="btn sm" data-act="back">Zur\xFCck</button></div>
     <div class="passgrid"><div class="card"><h3>Ge\xFCbt</h3><p class="bigno">${streak(p)}<small> Tage in Folge</small></p><p>Diese Woche: <b>${Math.round(week / 60)} min</b> \xB7 Insgesamt: <b>${Math.round(total / 60)} min</b></p><div class="cal" role="img" aria-label="\xDCbungstage der letzten vier Wochen">${cells.join("")}</div><small class="muted">Die letzten 4 Wochen, heute unten rechts</small></div>
     <div class="card"><h3>Fortschritt</h3><p><b>${totalStars(p)}</b> Sterne \xB7 <b>${p.creatures.length}</b> von ${creatureTotal()} Notenwesen</p>${WORLDS.map((w, i) => `<p>${esc(w.short)}: ${doneCount(p, i)} von ${levelsOf(i).length} Leveln <span class="bar"><i style="width:${100 * doneCount(p, i) / levelsOf(i).length}%"></i></span></p>`).join("")}</div>
-    <div class="card"><h3>Diese Noten sitzen sicher</h3><div class="tags">${list(sure)}</div><h3>Diese Noten noch \xFCben</h3><div class="tags">${list(weak)}</div></div>
+    <div class="card"><h3>Diese Noten sitzen sicher <small>(richtig und z\xFCgig)</small></h3><div class="tags">${list(sure)}</div><h3>Diese Noten noch \xFCben</h3><div class="tags">${list(weak)}</div></div>
     <div class="card"><h3>H\xE4ufige Verwechslungen</h3>${conf.length ? conf.map((c) => `<p><b>${nameHtml(N(c.target))}</b> wird oft mit <b>${nameHtml(N(c.played))}</b> verwechselt <span class="muted">(${c.n}\xD7)</span></p>`).join("") : '<p class="muted">Bisher keine auff\xE4lligen Verwechslungen.</p>'}</div></div>`, { back: () => map(app) }, "wide");
   }
   function board(app) {
@@ -4717,7 +4735,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     }, "wide");
     document.getElementById("qrHere").appendChild(qrCanvas(link));
   }
-  var VERSION = "1.8 \xB7 21.11.2026";
+  var VERSION = "1.9 \xB7 21.11.2026";
   function about(app, back) {
     app.screen(`<div class="maphead"><h2>Info und Datenschutz</h2><button class="btn sm" data-act="back">Zur\xFCck</button></div><div class="book">
     <h3>Die Notenbr\xFCcke</h3><p>Ein Lernspiel zum Notenlesen am Klavier. Version ${VERSION}${CONFIG.shop ? " \xB7 Kauf-Fassung" : " \xB7 Test-Fassung"}.</p>
@@ -4746,6 +4764,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       if (!H) return;
       const cyc = this.t % 24, walking = cyc < 9 || cyc >= 12 && cyc < 21, back = cyc >= 12, x = cyc < 9 ? 30 + cyc * 22 : cyc < 12 ? 228 : cyc < 21 ? 228 - (cyc - 12) * 22 : 30;
       const f = walking ? Math.floor(this.t * 7) % 2 ? H.run1 : H.run0 : cyc < 12 ? Math.floor(this.t * 4) % 2 ? H.wave0 : H.wave1 : Math.floor(this.t * 1.6) % 2 ? H.idle1 : H.idle0;
+      this.app.drawBuddy(ctx, this, back && walking ? x + 30 : x - 12, 108, this.t, walking ? 0 : Math.abs(Math.sin(this.t * 4)) * 3);
       if (back && walking) {
         ctx.save();
         ctx.translate(q(x) + 18, 113);
@@ -4960,9 +4979,35 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     get listening() {
       return this.audio.micState === "on" && !this.keysOn;
     }
+    /** Begleiter: ein gesammeltes Notenwesen schwebt der Figur hinterher (weich nachgezogen, wippt, hüpft bei Erfolg). o merkt sich die Position. */
+    drawBuddy(ctx, o, tx, ty, t, hop = 0) {
+      const b = this.buddy;
+      if (!b) return;
+      if (o.bx === void 0 || Math.abs(o.bx - tx) > 140) {
+        o.bx = tx;
+        o.by = ty;
+        o.bt = t;
+      }
+      const dt = Math.min(0.1, Math.max(0, t - o.bt)), k = 1 - Math.exp(-dt * 5);
+      o.bt = t;
+      o.bx += (tx - o.bx) * k;
+      o.by += (ty - o.by) * k;
+      const y = o.by + Math.sin(t * 3) * 2 - hop;
+      if (this.buddySure && Math.floor(t * 6) % 3 === 0) {
+        ctx.fillStyle = "#FFF1D6";
+        ctx.fillRect(q(o.bx - 11 + Math.floor(t * 6) % 5), q(y + 4 - Math.floor(t * 4) % 7), 1, 1);
+      }
+      ctx.drawImage(b, q(o.bx - 8), q(y - 8));
+    }
     applyProfile() {
       const p = this.profile;
       this.heroFrames = makeHero(p ? p.hero : 0);
+      this.buddy = null;
+      if (p && p.buddy && p.creatures.includes(p.buddy)) {
+        const n = N(p.buddy);
+        this.buddy = makeCreature((n.step % 7 + 7) % 7, n.alt);
+        this.buddySure = !!(p.notes[p.buddy] && p.notes[p.buddy].box >= 3);
+      }
       this.audio.muted = !!this.state.muted;
       this.audio.song = this.state.song || "tanz";
       if (p) {

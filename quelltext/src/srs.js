@@ -2,8 +2,11 @@
 const WEIGHT = [9, 6, 3.5, 2, 1];
 export const MASTERED_BOX = 3;
 export function newStat() { return { box: 0, seen: 0, ok: 0 }; }
-export function update(stat, firstTry) {
-  stat.seen++; if (firstTry) { stat.ok++; stat.box = Math.min(4, stat.box + 1); } else stat.box = Math.max(0, stat.box - 2);
+/** Ab wann eine richtige Antwort als "noch nicht flüssig" gilt (Millisekunden): am Klavier spielen bzw. ins System schreiben. */
+export const SLOW_PLAY_MS = 7000, SLOW_WRITE_MS = 12000;
+/** slow: richtig, aber langsam. Das zählt als gekonnt, führt aber nicht über Kasten 2 hinaus – "sicher" ist eine Note erst, wenn sie auch zügig kommt. */
+export function update(stat, firstTry, slow = false) {
+  stat.seen++; if (firstTry) { stat.ok++; if (!slow) stat.box = Math.min(4, stat.box + 1); else { stat.slow = (stat.slow || 0) + 1; if (stat.box < MASTERED_BOX - 1) stat.box++; } } else stat.box = Math.max(0, stat.box - 2);
   return stat;
 }
 export function pickNext(keys, stats, rnd = Math.random, avoid = null) {

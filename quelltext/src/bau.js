@@ -1,6 +1,6 @@
 // Spielart "Brückenbauer": Noten selbst ins System schreiben (einzeln oder als Wort aus Notennamen).
 import { stemUp, N, note, midiOf, staffPos, nameHtml, nameStr, letterIdx, LETTERS, CLEFS, describePos, ledgerPositions } from './music.js';
-import { pickNext, update as srsUpdate, newStat } from './srs.js';
+import { pickNext, update as srsUpdate, newStat, SLOW_WRITE_MS } from './srs.js';
 import * as G from './gfx.js';
 import { label, noteLabel } from './text.js';
 
@@ -20,7 +20,7 @@ export class BauScene {
     return out;
   }
   startTask() {
-    const tk = this.tasks[this.ti], { app } = this; this.slot = 0; this.placed = []; this.pos = Math.max(this.minPos, Math.min(this.maxPos, 4)); this.alt = 0; this.tries = 0; this.taskClean = true; this.wrongT = 0; this.msg = null; app.panel.setAcc(0);
+    const tk = this.tasks[this.ti], { app } = this; this.slot = 0; this.placed = []; this.pos = Math.max(this.minPos, Math.min(this.maxPos, 4)); this.alt = 0; this.tries = 0; this.t0 = performance.now(); this.taskClean = true; this.wrongT = 0; this.msg = null; app.panel.setAcc(0);
     this.n = tk.word ? tk.word.length : 1; this.xs = Array.from({ length: this.n }, (_, i) => 176 + (i - (this.n - 1) / 2) * 40);
     app.hud.progress(this.ti, this.tasks.length);
     app.bubble(tk.word ? `Schreibe das Wort <b>${tk.word}</b> – Note für Note.` : `Setze die Note <b>${nameHtml(tk.notes[0])}</b> ins System.`, 0);
@@ -33,9 +33,9 @@ export class BauScene {
     const cand = note(this.pos + CLEFS[this.clef].bottom, this.alt); app.audio.playNote(midiOf(cand));
     const ok = tk.word ? (LETTERS[letterIdx(cand)] === tk.word[this.slot].toLowerCase() && !cand.alt) : (cand.step === tk.notes[0].step && cand.alt === tk.notes[0].alt);
     if (ok) {
-      p.notes[cand.key] = srsUpdate(p.notes[cand.key] || newStat(), this.tries === 0);
+      p.notes[cand.key] = srsUpdate(p.notes[cand.key] || newStat(), this.tries === 0, performance.now() - this.t0 > SLOW_WRITE_MS);
       if (this.app.levelNoteKeys(this.level).includes(cand.key) && !p.creatures.includes(cand.key)) { p.creatures.push(cand.key); this.freed.push(cand); }
-      this.placed.push(cand); this.parts.burst(this.xs[this.slot], G.yOfPos(this.pos), [G.C.YE, G.C.W, G.C.GL], 14); this.slot++; this.tries = 0; if (this.slot < this.n) app.bubble(`Schreibe das Wort <b>${tk.word}</b> – Note für Note.`, 0);
+      this.placed.push(cand); this.parts.burst(this.xs[this.slot], G.yOfPos(this.pos), [G.C.YE, G.C.W, G.C.GL], 14); this.slot++; this.tries = 0; this.t0 = performance.now(); if (this.slot < this.n) app.bubble(`Schreibe das Wort <b>${tk.word}</b> – Note für Note.`, 0);
       if (this.slot >= this.n) { if (this.taskClean) this.firstTry++; this.locked = true; app.bubble('Richtig!', 1);
         setTimeout(() => { this.locked = false; this.ti++; if (this.ti >= this.tasks.length) { app.audio.sfx('done'); app.finishLevel(this.level, { ratio: this.firstTry / this.tasks.length, freed: this.freed, line: `Beim ersten Versuch richtig: <b>${this.firstTry} von ${this.tasks.length}</b>` }); } else this.startTask(); }, 900); }
     } else {

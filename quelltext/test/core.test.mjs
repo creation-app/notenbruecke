@@ -132,3 +132,9 @@ test('Titelmusik: alle Stücke haben 8 Takte und gültige Töne', async () => {
     for (const pair of [...S.bass, ...S.pad]) { assert.equal(pair.length, 2, k); pair.forEach(n => assert.ok(pitch(n) > 40 && pitch(n) < 600, k + ' ' + n)); } }
   assert.ok(Math.abs(pitch('A4') - 440) < 1e-9); assert.ok(Math.abs(pitch('C4') - 261.626) < 0.01); assert.ok(Math.abs(pitch('A#4') - 466.16) < 0.01);
 });
+
+test('Wiederholung: langsam richtig reicht nicht für "sicher"', () => {
+  const a = S.newStat(); for (let i = 0; i < 6; i++) S.update(a, true, true); assert.equal(a.box, 2); assert.ok(!S.isMastered(a)); assert.equal(a.slow, 6); assert.equal(a.ok, 6);
+  S.update(a, true); assert.ok(S.isMastered(a)); S.update(a, true, true); assert.ok(S.isMastered(a), 'einmal langsam nimmt nichts weg');
+  S.update(a, false); assert.equal(a.box, 1);
+});

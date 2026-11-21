@@ -164,11 +164,11 @@ function staffCanvas(n, clef) { const c = cv(70, 80), x = c.getContext('2d'); x.
 export function collection(app, sel) {
   const p = app.profile; let detail = '';
   if (sel) { const n = N(sel.key), st = p.notes[sel.key] || { box: 0, seen: 0, ok: 0 };
-    detail = `<div class="crdetail"><span data-cr="${sel.key}" data-size="128"></span><div><h3>${nameHtml(n)}</h3><div id="staffHere"></div><p>${describePos(staffPos(n, sel.clef))}</p>
+    detail = `<div class="crdetail"><span data-cr="${sel.key}" data-size="128"></span><div><h3>${nameHtml(n)}</h3><button class="btn sm ${p.buddy === sel.key ? '' : 'go'}" data-act="buddy" style="margin-bottom:8px">${p.buddy === sel.key ? 'Begleiter ablegen' : 'Als Begleiter mitnehmen'}</button><div id="staffHere"></div><p>${describePos(staffPos(n, sel.clef))}</p>
       <p>Sicherheit <span class="bar"><i style="width:${st.box * 25}%"></i></span></p><p>${st.ok} von ${st.seen} Mal beim ersten Versuch</p><button class="btn sm" data-act="play">Anhören</button></div></div>`; }
-  app.screen(`<div class="maphead"><h2>Deine Notenwesen</h2><button class="btn sm" data-act="back">Zurück</button></div><div class="collwrap"><div class="coll">${WORLDS.map((w, wi) => `<h3>${esc(w.name)}</h3><div class="crgrid">${ALL_NOTES[wi].map(k => { const has = p.creatures.includes(k);
-      return `<button class="crcard ${sel && sel.key === k && sel.clef === w.clef ? 'sel' : ''}" ${has ? '' : 'disabled'} data-act="cr" data-k="${k}" data-clef="${w.clef}"><span data-cr="${k}" data-locked="${has ? 0 : 1}" data-size="56"></span><b>${has ? nameHtml(N(k)) : '?'}</b>${has && isMastered(p.notes[k]) ? '<i class="tick" title="sicher"></i>' : ''}</button>`; }).join('')}</div>`).join('')}</div>${detail}</div>`, {
-    back: () => map(app), cr: e => collection(app, { key: e.dataset.k, clef: e.dataset.clef }), play: () => app.audio.playNote(midiOf(N(sel.key))) }, 'wide');
+  app.screen(`<div class="maphead"><h2>Deine Notenwesen</h2><button class="btn sm" data-act="back">Zurück</button></div><p class="muted" style="margin:0 0 8px">${p.buddy && p.creatures.includes(p.buddy) ? `Dein Begleiter: <b>${nameHtml(N(p.buddy))}</b>. Er fliegt dir im Spiel hinterher.` : 'Tippe ein Notenwesen an und nimm es als Begleiter mit. Es fliegt dir dann im Spiel hinterher.'}</p><div class="collwrap"><div class="coll">${WORLDS.map((w, wi) => `<h3>${esc(w.name)}</h3><div class="crgrid">${ALL_NOTES[wi].map(k => { const has = p.creatures.includes(k);
+      return `<button class="crcard ${sel && sel.key === k && sel.clef === w.clef ? 'sel' : ''} ${p.buddy === k ? 'bud' : ''}" ${has ? '' : 'disabled'} data-act="cr" data-k="${k}" data-clef="${w.clef}"><span data-cr="${k}" data-locked="${has ? 0 : 1}" data-size="56"></span><b>${has ? nameHtml(N(k)) : '?'}</b>${has && isMastered(p.notes[k]) ? '<i class="tick" title="sicher"></i>' : ''}</button>`; }).join('')}</div>`).join('')}</div>${detail}</div>`, {
+    back: () => map(app), cr: e => collection(app, { key: e.dataset.k, clef: e.dataset.clef }), play: () => app.audio.playNote(midiOf(N(sel.key))), buddy: () => { p.buddy = p.buddy === sel.key ? null : sel.key; app.save(); app.applyProfile(); app.audio.sfx('ok'); collection(app, sel); } }, 'wide');
   if (sel) { const h = document.getElementById('staffHere'); if (h) h.appendChild(staffCanvas(N(sel.key), sel.clef)); }
 }
 
@@ -182,7 +182,7 @@ export function pass(app) {
   app.screen(`<div class="maphead"><h2>Übungspass von ${esc(p.name)}</h2><button class="btn sm" data-act="back">Zurück</button></div>
     <div class="passgrid"><div class="card"><h3>Geübt</h3><p class="bigno">${streak(p)}<small> Tage in Folge</small></p><p>Diese Woche: <b>${Math.round(week / 60)} min</b> · Insgesamt: <b>${Math.round(total / 60)} min</b></p><div class="cal" role="img" aria-label="Übungstage der letzten vier Wochen">${cells.join('')}</div><small class="muted">Die letzten 4 Wochen, heute unten rechts</small></div>
     <div class="card"><h3>Fortschritt</h3><p><b>${totalStars(p)}</b> Sterne · <b>${p.creatures.length}</b> von ${creatureTotal()} Notenwesen</p>${WORLDS.map((w, i) => `<p>${esc(w.short)}: ${doneCount(p, i)} von ${levelsOf(i).length} Leveln <span class="bar"><i style="width:${100 * doneCount(p, i) / levelsOf(i).length}%"></i></span></p>`).join('')}</div>
-    <div class="card"><h3>Diese Noten sitzen sicher</h3><div class="tags">${list(sure)}</div><h3>Diese Noten noch üben</h3><div class="tags">${list(weak)}</div></div>
+    <div class="card"><h3>Diese Noten sitzen sicher <small>(richtig und zügig)</small></h3><div class="tags">${list(sure)}</div><h3>Diese Noten noch üben</h3><div class="tags">${list(weak)}</div></div>
     <div class="card"><h3>Häufige Verwechslungen</h3>${conf.length ? conf.map(c => `<p><b>${nameHtml(N(c.target))}</b> wird oft mit <b>${nameHtml(N(c.played))}</b> verwechselt <span class="muted">(${c.n}×)</span></p>`).join('') : '<p class="muted">Bisher keine auffälligen Verwechslungen.</p>'}</div></div>`, { back: () => map(app) }, 'wide');
 }
 export function board(app) {
@@ -257,7 +257,7 @@ export async function shareSave(app) {
   document.getElementById('qrHere').appendChild(qrCanvas(link));
 }
 
-export const VERSION = '1.8 · 21.11.2026';
+export const VERSION = '1.9 · 21.11.2026';
 /** Info, Datenschutz und Quellen. */
 export function about(app, back) {
   app.screen(`<div class="maphead"><h2>Info und Datenschutz</h2><button class="btn sm" data-act="back">Zurück</button></div><div class="book">

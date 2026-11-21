@@ -19,6 +19,7 @@ class Backdrop {
   draw(ctx) { G.drawBackground(ctx, this.bg, this.t * 7, this.t); const H = this.app.heroFrames; if (!H) return;
     const cyc = this.t % 24, walking = cyc < 9 || (cyc >= 12 && cyc < 21), back = cyc >= 12, x = cyc < 9 ? 30 + cyc * 22 : cyc < 12 ? 228 : cyc < 21 ? 228 - (cyc - 12) * 22 : 30;
     const f = walking ? (Math.floor(this.t * 7) % 2 ? H.run1 : H.run0) : cyc < 12 ? (Math.floor(this.t * 4) % 2 ? H.wave0 : H.wave1) : (Math.floor(this.t * 1.6) % 2 ? H.idle1 : H.idle0);
+    this.app.drawBuddy(ctx, this, back && walking ? x + 30 : x - 12, 108, this.t, walking ? 0 : Math.abs(Math.sin(this.t * 4)) * 3);
     if (back && walking) { ctx.save(); ctx.translate(G.q(x) + 18, 113); ctx.scale(-1, 1); ctx.drawImage(f, 0, 0); ctx.restore(); } else ctx.drawImage(f, G.q(x), 113); }
 }
 class App {
@@ -64,7 +65,12 @@ class App {
   get profile() { return this.state.profiles.find(p => p.id === this.state.current) || null; }
   get keysOn() { const p = this.profile; return this.keysSession || !!(p && p.keys); }
   get listening() { return this.audio.micState === 'on' && !this.keysOn; }
-  applyProfile() { const p = this.profile; this.heroFrames = G.makeHero(p ? p.hero : 0); this.audio.muted = !!this.state.muted; this.audio.song = this.state.song || 'tanz'; if (p) { this.audio.setA4(p.a4); this.audio.musicOff = p.music === false; } if (this.audio.muted || this.audio.musicOff) this.audio.stopMusic(); if (this.paintSound) this.paintSound(); }
+  /** Begleiter: ein gesammeltes Notenwesen schwebt der Figur hinterher (weich nachgezogen, wippt, hüpft bei Erfolg). o merkt sich die Position. */
+  drawBuddy(ctx, o, tx, ty, t, hop = 0) { const b = this.buddy; if (!b) return; if (o.bx === undefined || Math.abs(o.bx - tx) > 140) { o.bx = tx; o.by = ty; o.bt = t; }
+    const dt = Math.min(0.1, Math.max(0, t - o.bt)), k = 1 - Math.exp(-dt * 5); o.bt = t; o.bx += (tx - o.bx) * k; o.by += (ty - o.by) * k;
+    const y = o.by + Math.sin(t * 3) * 2 - hop; if (this.buddySure && Math.floor(t * 6) % 3 === 0) { ctx.fillStyle = '#FFF1D6'; ctx.fillRect(G.q(o.bx - 11 + (Math.floor(t * 6) % 5)), G.q(y + 4 - (Math.floor(t * 4) % 7)), 1, 1); }
+    ctx.drawImage(b, G.q(o.bx - 8), G.q(y - 8)); }
+  applyProfile() { const p = this.profile; this.heroFrames = G.makeHero(p ? p.hero : 0); this.buddy = null; if (p && p.buddy && p.creatures.includes(p.buddy)) { const n = N(p.buddy); this.buddy = G.makeCreature(((n.step % 7) + 7) % 7, n.alt); this.buddySure = !!(p.notes[p.buddy] && p.notes[p.buddy].box >= 3); } this.audio.muted = !!this.state.muted; this.audio.song = this.state.song || 'tanz'; if (p) { this.audio.setA4(p.a4); this.audio.musicOff = p.music === false; } if (this.audio.muted || this.audio.musicOff) this.audio.stopMusic(); if (this.paintSound) this.paintSound(); }
   /** Ton für das ganze Gerät an oder aus (Musik, Spielklänge, Erfolgsmelodie). */
   setMuted(m) { this.state.muted = !!m; this.audio.muted = !!m; this.save(); if (m) { this.audio.stopMusic(); if (this.audio.bus) this.audio.bus.gain.value = 0; } else { this.audio.ensure(); if (this.musicReady && this.scene instanceof Backdrop && !this.calib) this.audio.startMusic(); } this.paintSound(); }
   save() { return persist(this.store, this.state); }

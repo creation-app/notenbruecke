@@ -1,6 +1,6 @@
 // Spielart "Springen": Das Notensystem ist das Level. Richtiger Ton auf dem Klavier = Sprung auf die nächste Plattform.
 import { stemUp, N, midiOf, staffPos, classify, noteOfMidi, nameHtml, letterName, describePos, ledgerPositions } from './music.js';
-import { pickNext, update as srsUpdate, newStat } from './srs.js';
+import { pickNext, update as srsUpdate, newStat, SLOW_PLAY_MS } from './srs.js';
 import * as G from './gfx.js';
 import { label, noteLabel } from './text.js';
 
@@ -27,7 +27,7 @@ export class JumpScene {
   }
   get target() { return this.targets[this.idx]; }
   prompt(first) {
-    const { app } = this, tg = this.target; this.tries = 0; const isNew = !app.profile.notes[tg.key];
+    const { app } = this, tg = this.target; this.tries = 0; const isNew = !app.profile.notes[tg.key]; this.t0 = performance.now(); this.fresh = isNew;
     this.hint = isNew; app.panel.setHint(isNew ? midiOf(tg) : null);
     app.hud.progress(this.idx, this.targets.length);
     app.hud.extra(app.profile.mode === 'profi' ? `<span id="jTime">0:00</span>${this.combo > 1 ? ` &middot; <b>${this.combo}×</b> Serie` : ''}` : '');
@@ -43,7 +43,7 @@ export class JumpScene {
     if (midi === this.accMidi && (now - this.accAt < 350 || (midi !== tm && now - this.accAt < 1200))) return; // ausklingender Ton
     this.started = true; const cls = classify(tm, midi), heard = noteOfMidi(midi, tg.alt < 0);
     if (cls === 'correct') {
-      const first = this.tries === 0; p.notes[tg.key] = srsUpdate(p.notes[tg.key] || newStat(), first);
+      const first = this.tries === 0; p.notes[tg.key] = srsUpdate(p.notes[tg.key] || newStat(), first, !this.fresh && performance.now() - this.t0 > SLOW_PLAY_MS);
       if (first) { this.firstTry++; this.combo++; } else this.combo = 0;
       app.panel.say('Ich höre …', `Perfekt! <b>${nameHtml(tg)}</b> erkannt!`, 'ok'); app.panel.flash(midi, 'good'); app.panel.setHint(null); app.bubble(null);
       if (!p.creatures.includes(tg.key)) { p.creatures.push(tg.key); this.freed.push(tg); this.freeAt = tg; }
@@ -106,6 +106,7 @@ export class JumpScene {
     else if (this.app.audio.heard) f = H.listen; else if (this.t % 3.4 > 3.25) f = H.blink; else if (nxt && this.t % 4.5 < 1.3) f = above ? H.lookUp : H.lookDown; else f = Math.floor(this.t * 1.6) % 2 ? H.idle1 : H.idle0;
     const bob = this.phase === 'done' ? Math.abs(Math.sin(this.doneT * 9)) * 5 : 0, shake = this.oopsT > 0 ? Math.round(Math.sin(this.oopsT * 50) * 1.5) : 0;
     const sq = this.landT > 0 && this.phase !== 'done' ? this.landT / 0.28 : 0, w = G.q(18 * (1 + 0.22 * sq)), h = G.q(24 * (1 - 0.22 * sq)); // Landung: kurz zusammenstauchen
+    this.app.drawBuddy(ctx, this, this.hero.x - cam - 20, this.hero.y - 34, this.t, this.phase === 'done' ? Math.abs(Math.sin(this.doneT * 9 + 1)) * 7 : this.landT > 0 ? Math.sin(this.landT / 0.28 * Math.PI) * 6 : 0);
     ctx.drawImage(f, G.q(this.hero.x - cam - w / 2) + shake, G.q(this.hero.y - 4 - 23 - bob + (24 - h)), w, h);
     this.parts.draw(ctx, cam);
     // Beschriftung
