@@ -21,7 +21,7 @@ export class BauScene {
   }
   startTask() {
     const tk = this.tasks[this.ti], { app } = this; this.slot = 0; this.placed = []; this.pos = Math.max(this.minPos, Math.min(this.maxPos, 4)); this.alt = 0; this.tries = 0; this.t0 = performance.now(); this.taskClean = true; this.wrongT = 0; this.msg = null; app.panel.setAcc(0);
-    this.n = tk.word ? tk.word.length : 1; this.xs = Array.from({ length: this.n }, (_, i) => 176 + (i - (this.n - 1) / 2) * 40);
+    this.n = tk.word ? tk.word.length : 1; this.xs = Array.from({ length: this.n }, (_, i) => G.VIEW_W / 2 + 16 + (i - (this.n - 1) / 2) * 40);
     app.hud.progress(this.ti, this.tasks.length);
     app.bubble(tk.word ? `Schreibe das Wort <b>${tk.word}</b> – Note für Note.` : `Setze die Note <b>${nameHtml(tk.notes[0])}</b> ins System.`, 0);
   }

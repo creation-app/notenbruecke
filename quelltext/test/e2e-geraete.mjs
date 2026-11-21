@@ -25,8 +25,8 @@ for (const name of list) {
   // Brückenbauer: Fingertipp auf die Notenlinien muss an der richtigen Stelle ankommen (auch gedreht)
   await tap('map'); await wait(150); await page.tap('[data-id="h5"]'); await tap('go'); await wait(500);
   const probe = await page.evaluate(() => { const s = __nb.scene; const got = []; const orig = s.pointer.bind(s); s.pointer = (x, y) => { got.push([x, y]); orig(x, y); }; window.__got = got; const b = __nb.world.getBoundingClientRect(); const fx = 0.5, fy = 0.3; return __nb.rot ? { x: b.left + (1 - fy) * b.width, y: b.top + fx * b.height } : { x: b.left + fx * b.width, y: b.top + fy * b.height }; });
-  await page.touchscreen.tap(probe.x, probe.y); await wait(100); const got = await page.evaluate(() => window.__got[0]);
-  if (!got || Math.abs(got[0] - 160) > 3 || Math.abs(got[1] - 60) > 3) err('Fingertipp landet falsch: ' + JSON.stringify(got));
+  await page.touchscreen.tap(probe.x, probe.y); await wait(100); const got = await page.evaluate(() => window.__got[0]); const want = await page.evaluate(() => [__nb.W / 4 * 0.5, __nb.H / 4 * 0.3]);
+  if (!got || Math.abs(got[0] - want[0]) > 3 || Math.abs(got[1] - want[1]) > 3) err('Fingertipp landet falsch: ' + JSON.stringify(got));
   if (name === 'iPhone 15') await page.screenshot({ path: 'shots/g-iPhone15-bau.png' });
   await ctx.close();
 }

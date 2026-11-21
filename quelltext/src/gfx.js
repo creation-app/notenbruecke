@@ -4,7 +4,10 @@ import { staffLines } from './music.js';
 
 export const C = { K: '#26364B', SKY: '#75CCF5', B1: '#2998E8', B2: '#174B83', G1: '#78B833', G2: '#467C35', GL: '#A5D84F',
   OR: '#FF9D35', YE: '#FFD966', CREAM: '#FFF1D6', RED: '#EF5350', W: '#FFFFFF' };
-export const VIEW_W = 320, VIEW_H = 150, STAFF_BOTTOM = 100, STEP_PX = 5;
+/** Sichtbreite der Welt in Weltpixeln: 320 bei 16:10, breiter auf breiten Bildschirmen (Handy quer), damit nie schwarze Ränder bleiben. */
+export let VIEW_W = 320;
+export function setViewW(w) { VIEW_W = w; }
+export const VIEW_H = 150, STAFF_BOTTOM = 100, STEP_PX = 5;
 /** Auf Viertel-Weltpixel runden = ganze Bildschirmpixel: flüssige Bewegung ohne unscharfe Kanten. */
 export const q = v => Math.round(v * 4) / 4;
 export function yOfPos(pos) { return STAFF_BOTTOM - pos * STEP_PX; }

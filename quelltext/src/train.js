@@ -5,7 +5,7 @@ import { pool, sameSound, TRAIN_SECS, TRAIN_COUNT, SLOW_MS } from './training.js
 import * as G from './gfx.js';
 import { label } from './text.js';
 
-const NOTE_X = 150, NEXT_X = 218, COUNTDOWN = 3;
+const COUNTDOWN = 3; let NOTE_X = 150, NEXT_X = 218; const place = () => { NOTE_X = Math.round(G.VIEW_W * 0.47); NEXT_X = NOTE_X + 68; };
 const ORDER = ['c', 'cis', 'des', 'd', 'dis', 'es', 'e', 'f', 'fis', 'ges', 'g', 'gis', 'as', 'a', 'ais', 'b', 'h'];
 export class TrainScene {
   constructor(app, level) { this.app = app; this.level = level; this.cfg = level.cfg; this.isLevel = true; }
@@ -57,13 +57,14 @@ export class TrainScene {
   answer(l, btn) { if (this.cfg.input !== 'name' || !this.live) return; if (letterName(this.cur.n) === l) return this.hit(null); this.miss(l); btn.classList.add('shake'); setTimeout(() => btn.classList.remove('shake'), 350); }
   finish() { this.done = true; this.app.audio.sfx('done'); this.app.finishTraining(this.level, { correct: this.correct, first: this.first, tried: this.tried, ms: this.cfg.len === 'time' ? TRAIN_SECS * 1000 : this.elapsed * 1000, times: this.times, freed: this.freed }); }
   update(dt) {
-    this.t += dt; this.parts.update(dt); if (this.slide < 1) this.slide = Math.min(1, this.slide + dt / 0.14); if (this.hop > 0) this.hop = Math.max(0, this.hop - dt * 3.5); if (this.shake > 0) this.shake -= dt;
+    place(); this.t += dt; this.parts.update(dt); if (this.slide < 1) this.slide = Math.min(1, this.slide + dt / 0.14); if (this.hop > 0) this.hop = Math.max(0, this.hop - dt * 3.5); if (this.shake > 0) this.shake -= dt;
     if (this.done) return;
     if (this.count > 0) { this.count -= dt; if (this.count <= 0) { this.noteStart = 0; if (this.cfg.input === 'play') this.app.panel.say(this.app.listening ? 'Ich höre …' : 'Tippe die Taste', 'Los!'); } return; }
     this.elapsed += dt; const el = document.getElementById('tTime');
     if (this.cfg.len === 'time') { if (el) el.textContent = Math.max(0, Math.ceil(TRAIN_SECS - this.elapsed)); if (this.elapsed >= TRAIN_SECS) this.finish(); } else if (el) el.textContent = Math.floor(this.elapsed);
   }
   draw(ctx, tx) {
+    place();
     const line = this.line, c = this.cur; G.drawBackground(ctx, this.bg, this.t * 4, this.t); G.drawStaff(ctx, line, 4, G.VIEW_W - 4, c.clef); G.drawClef(ctx, c.clef, 6, line);
     this.app.drawBuddy(ctx, this, 72, 46, this.t, Math.sin(this.hop * Math.PI) * 7);
     if (this.count > 0) { const n = Math.ceil(this.count); label(tx, String(n), NOTE_X + 10, G.yOfPos(4), { size: 150 + 40 * (this.count - Math.floor(this.count)), color: '#FFFFFF', stroke: G.C.K }); return; }

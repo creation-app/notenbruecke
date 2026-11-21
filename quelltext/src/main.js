@@ -41,7 +41,7 @@ class App {
     const quiet = () => { this.audio.stopMusic(); try { if (this.audio.bus) this.audio.bus.gain.value = 0; if (this.audio.ctx && this.audio.ctx.state === 'running') this.audio.ctx.suspend(); } catch (e) { /* egal */ } };
     window.addEventListener('pagehide', quiet); window.addEventListener('freeze', quiet); this.quiet = quiet;
     $('pauseBtn').addEventListener('click', () => { if (this.scene && this.scene.isLevel) S.pause(this); });
-    const pt = e => { if (!this.scene || !this.scene.pointer || this.paused) return; const r = this.world.getBoundingClientRect(); const u = (e.clientX - r.left) / r.width, v = (e.clientY - r.top) / r.height; if (this.rot) this.scene.pointer(v * 320, (1 - u) * 200); else this.scene.pointer(u * 320, v * 200); };
+    const pt = e => { if (!this.scene || !this.scene.pointer || this.paused) return; const r = this.world.getBoundingClientRect(); const u = (e.clientX - r.left) / r.width, v = (e.clientY - r.top) / r.height; if (this.rot) this.scene.pointer(v * G.VIEW_W, (1 - u) * this.H / 4); else this.scene.pointer(u * G.VIEW_W, v * this.H / 4); };
     $('stage').addEventListener('pointerdown', e => { if (e.target.closest('#panel,#screen,#hud')) return; pt(e); }); $('stage').addEventListener('pointermove', e => { if (e.buttons && !e.target.closest('#panel,#screen,#hud')) pt(e); });
     document.addEventListener('keydown', e => { const sc = this.scene; if (!sc || !sc.isLevel || this.paused || !$('screen').hidden) return;
       if (e.key === 'Escape') S.pause(this); else if (sc.move && e.key === 'ArrowUp') { sc.move(1); e.preventDefault(); } else if (sc.move && e.key === 'ArrowDown') { sc.move(-1); e.preventDefault(); } else if (sc.place && e.key === 'Enter') sc.place(); });
@@ -49,7 +49,10 @@ class App {
       if (document.hidden && this.scene && this.scene.isLevel && !this.paused && $('screen').hidden) S.pause(this); });
     window.addEventListener('error', () => { if (!this._err) { this._err = true; this.toast('Etwas ist schiefgegangen. Bitte lade die Seite neu – dein Spielstand bleibt erhalten.'); } });
     // Hochkant (z. B. Handy mit Drehsperre): Das Spiel wird um 90° gedreht und füllt den Bildschirm, statt den Weg zu versperren.
-    const fit = () => { const w = window.innerWidth, h = window.innerHeight, rot = w < h, s = rot ? Math.min(h / 1280, w / 800) : Math.min(w / 1280, h / 800); const was = this.rot; this.rot = rot; $('stage').classList.toggle('phone', s < 0.62);
+    // Bühne passt sich dem Seitenverhältnis an: breite Bildschirme bekommen mehr Welt, hohe (iPad) ein höheres Bedienfeld – der Bildschirm ist immer ganz gefüllt.
+    const fit = () => { const w = window.innerWidth, h = window.innerHeight, rot = w < h, lw = rot ? h : w, lh = rot ? w : h, a = lw / lh;
+      const W = a >= 1.6 ? Math.round(Math.min(1920, Math.max(1280, 800 * a)) / 4) * 4 : 1280, H = a >= 1.6 ? 800 : Math.min(1000, Math.round(1280 / a)); if (W !== this.W || H !== this.H) this.resizeStage(W, H);
+      const s = Math.min(lw / W, lh / H); const was = this.rot; this.rot = rot; $('stage').classList.toggle('phone', s < 0.62);
       $('stage').style.transform = `translate(-50%,-50%) ${rot ? 'rotate(90deg) ' : ''}scale(${s})`; const el = $('rotate'); if (rot && !was) { el.hidden = false; clearTimeout(this._rotT); this._rotT = setTimeout(() => { el.hidden = true; }, 6000); } else if (!rot) el.hidden = true; };
     window.addEventListener('orientationchange', () => setTimeout(fit, 250)); window.addEventListener('resize', fit); fit();
     this.applyProfile(); this.hud.hide(); S.title(this); this.last = performance.now(); requestAnimationFrame(t => this.loop(t)); track('start'); this.ready = this.boot();
@@ -76,6 +79,9 @@ class App {
   /** Figur (mit Hut) und Begleiter (mit Stufe) neu zeichnen – nach Profilwechsel und immer, wenn die Karte erscheint. */
   refreshLook() { const p = this.profile; this.heroFrames = G.makeHero(p ? p.hero : 0, p ? G.hatOf(p, totalStars(p)) : 0); this.buddy = null; this.buddySure = false;
     if (p && p.buddy && p.creatures.includes(p.buddy)) { const n = N(p.buddy), st = G.buddyStage(p.notes[p.buddy]); this.buddy = G.makeBuddy(((n.step % 7) + 7) % 7, n.alt, st); this.buddySure = st === 2; } }
+  resizeStage(W, H) { this.W = W; this.H = H; const st = this.$('stage'); st.style.width = W + 'px'; st.style.height = H + 'px';
+    for (const c of [this.world, this.$('text')]) { c.width = W; c.height = H; c.style.width = W + 'px'; c.style.height = H + 'px'; }
+    this.ctx.setTransform(4, 0, 0, 4, 0, 0); this.ctx.imageSmoothingEnabled = false; G.setViewW(W / 4); this.$('panel').style.height = (H - 600) + 'px'; st.classList.toggle('tall', H - 600 >= 300); }
   applyProfile() { const p = this.profile; this.refreshLook(); this.audio.muted = !!this.state.muted; this.audio.song = this.state.song || 'tanz'; if (p) { this.audio.setA4(p.a4); this.audio.musicOff = p.music === false; } if (this.audio.muted || this.audio.musicOff) this.audio.stopMusic(); if (this.paintSound) this.paintSound(); }
   /** Ton für das ganze Gerät an oder aus (Musik, Spielklänge, Erfolgsmelodie). */
   setMuted(m) { this.state.muted = !!m; this.audio.muted = !!m; this.save(); if (m) { this.audio.stopMusic(); if (this.audio.bus) this.audio.bus.gain.value = 0; } else { this.audio.ensure(); if (this.musicReady && this.scene instanceof Backdrop && !this.calib) this.audio.startMusic(); } this.paintSound(); }
@@ -128,7 +134,7 @@ class App {
       else if (sc && sc.isLevel && sc.onNote) { const h = this.listening ? this.audio.heard : null; this.panel.setLevel(this.listening ? this.audio.level : 0); this.panel.setHeard(h ? h.midi : null); }
       if (sc) { sc.update(dt); if (sc.isLevel) { this.sec += dt; if (this.sec > 20) this.flush(); } }
     }
-    if (sc) { this.ctx.fillStyle = (G.THEMES[sc.theme] || G.THEMES.himmel).hill[4]; this.ctx.fillRect(0, 0, 320, 200); this.tx.clearRect(0, 0, 1280, 800); sc.draw(this.ctx, this.tx); }
+    if (sc) { this.ctx.fillStyle = (G.THEMES[sc.theme] || G.THEMES.himmel).hill[4]; this.ctx.fillRect(0, 0, G.VIEW_W, this.H / 4); this.tx.clearRect(0, 0, this.W, this.H); sc.draw(this.ctx, this.tx); }
     requestAnimationFrame(t => this.loop(t));
   }
 }
