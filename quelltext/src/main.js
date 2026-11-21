@@ -62,7 +62,7 @@ class App {
   get profile() { return this.state.profiles.find(p => p.id === this.state.current) || null; }
   get keysOn() { const p = this.profile; return this.keysSession || !!(p && p.keys); }
   get listening() { return this.audio.micState === 'on' && !this.keysOn; }
-  applyProfile() { const p = this.profile; this.heroFrames = G.makeHero(p ? p.hero : 0); this.audio.muted = !!this.state.muted; if (p) { this.audio.setA4(p.a4); this.audio.musicOff = p.music === false; } if (this.audio.muted || this.audio.musicOff) this.audio.stopMusic(); if (this.paintSound) this.paintSound(); }
+  applyProfile() { const p = this.profile; this.heroFrames = G.makeHero(p ? p.hero : 0); this.audio.muted = !!this.state.muted; this.audio.song = this.state.song || 'original'; if (p) { this.audio.setA4(p.a4); this.audio.musicOff = p.music === false; } if (this.audio.muted || this.audio.musicOff) this.audio.stopMusic(); if (this.paintSound) this.paintSound(); }
   /** Ton für das ganze Gerät an oder aus (Musik, Spielklänge, Erfolgsmelodie). */
   setMuted(m) { this.state.muted = !!m; this.audio.muted = !!m; this.save(); if (m) { this.audio.stopMusic(); if (this.audio.bus) this.audio.bus.gain.value = 0; } else { this.audio.ensure(); if (this.musicReady && this.scene instanceof Backdrop && !this.calib) this.audio.startMusic(); } this.paintSound(); }
   save() { return persist(this.store, this.state); }

@@ -10,12 +10,19 @@ const SFX = {
 // ---- Musik: eigener Titelsong und Erfolgsmelodie, komplett im Browser erzeugt (kein Mitschnitt, keine fremden Stücke).
 const SEMI = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 export function pitch(name) { const m = /^([A-G])(#?)(\d)$/.exec(name); return 440 * Math.pow(2, (12 * (+m[3] + 1) + SEMI[m[1]] + (m[2] ? 1 : 0) - 69) / 12); }
-// Achtel-Raster, 8 Takte. "-" hält den Ton, "." ist Pause. Das Motiv c–e–g ist die "Brücke".
-export const SONG = { bpm: 126,
-  lead: ('E5 G5 C6 G5 E5 G5 A5 G5 ' + 'F5 A5 C6 A5 G5 - E5 - ' + 'D5 F5 A5 F5 D5 F5 G5 F5 ' + 'E5 - G5 - C5 - - . ' +
-         'E5 G5 C6 G5 E5 G5 A5 G5 ' + 'F5 A5 C6 D6 E6 - C6 - ' + 'D6 C6 A5 F5 G5 A5 B5 D6 ' + 'C6 - - - G5 C6 - .').split(' '),
-  bass: [['C2', 'G2'], ['F2', 'C3'], ['D2', 'A2'], ['C2', 'G2'], ['C2', 'G2'], ['F2', 'C3'], ['G2', 'D3'], ['C2', 'G2']],
-  pad: [['E4', 'G4'], ['F4', 'A4'], ['F4', 'A4'], ['E4', 'G4'], ['E4', 'G4'], ['F4', 'A4'], ['D4', 'G4'], ['E4', 'G4']] };
+// Achtel-Raster, 8 Takte. "-" hält den Ton, "." ist Pause. Alle Stücke sind eigens für das Spiel geschrieben.
+const song = (name, bpm, lead, bass, pad) => ({ name, bpm, lead: lead.join(' ').split(' '), bass: bass.split(' ').map(x => x.split('/')), pad: pad.split(' ').map(x => x.split('/')) });
+export const SONGS = {
+  original: song('Brückenlied', 126, ['E5 G5 C6 G5 E5 G5 A5 G5', 'F5 A5 C6 A5 G5 - E5 -', 'D5 F5 A5 F5 D5 F5 G5 F5', 'E5 - G5 - C5 - - .', 'E5 G5 C6 G5 E5 G5 A5 G5', 'F5 A5 C6 D6 E6 - C6 -', 'D6 C6 A5 F5 G5 A5 B5 D6', 'C6 - - - G5 C6 - .'],
+    'C2/G2 F2/C3 D2/A2 C2/G2 C2/G2 F2/C3 G2/D3 C2/G2', 'E4/G4 F4/A4 F4/A4 E4/G4 E4/G4 F4/A4 D4/G4 E4/G4'),
+  tanz: song('Brückentanz', 144, ['A4 C5 E5 C5 A4 C5 E5 A5', 'G5 - E5 - F5 E5 D5 -', 'D5 F5 A5 F5 D5 F5 A5 D6', 'C6 - B5 - A5 - - .', 'A4 C5 E5 C5 A4 C5 E5 A5', 'G5 - E5 - F5 G5 A5 -', 'B5 A5 G#5 E5 G#5 B5 D6 B5', 'A5 - E5 - A4 - - .'],
+    'A2/E3 C3/G3 D3/A3 A2/E3 A2/E3 F2/C3 E2/B2 A2/E3', 'C4/E4 E4/G4 D4/F4 C4/E4 C4/E4 F4/A4 E4/G#4 C4/E4'),
+  feder: song('Sprungfeder', 132, ['G5 . B5 D6 . B5 G5 .', 'A5 . C6 E6 . C6 A5 .', 'B5 D6 G6 D6 B5 D6 A5 D6', 'G5 - - . D5 G5 B5 .', 'G5 . B5 D6 . B5 G5 .', 'C6 . E6 G6 . E6 C6 .', 'D6 C6 B5 A5 F#5 A5 D6 F#6', 'G6 - - . G5 - - .'],
+    'G2/D3 A2/E3 G2/D3 G2/D3 G2/D3 C3/G3 D3/A3 G2/D3', 'G4/B4 A4/C5 G4/B4 G4/B4 G4/B4 E4/G4 F#4/A4 G4/B4'),
+  jagd: song('Nebeljagd', 150, ['D5 F5 A5 D6 A5 F5 D5 F5', 'C5 E5 G5 C6 G5 E5 C5 E5', 'A#4 D5 F5 A#5 F5 D5 A#4 D5', 'A4 C#5 E5 A5 - G5 E5 C#5', 'D5 F5 A5 D6 F6 D6 A5 F5', 'G5 A#5 D6 G6 D6 A#5 G5 A#5', 'A5 C#6 E6 A5 G5 E5 C#5 E5', 'D5 - A5 - D6 - - .'],
+    'D2/A2 C2/G2 A#1/F2 A1/E2 D2/A2 G2/D3 A2/E3 D2/A2', 'F4/A4 E4/G4 D4/F4 C#4/E4 F4/A4 G4/A#4 C#4/E4 F4/A4'),
+};
+export const SONG = SONGS.original;
 export class GameAudio {
   constructor() { this.ctx = null; this.micState = 'off'; this.gateUntil = 0; this.gated = false; this.level = 0; this.tracker = new NoteTracker(); this.lastPoll = 0; this.muted = false; }
   ensure() {
@@ -77,7 +84,7 @@ export class GameAudio {
   }
   /** Titelsong in Schleife. Nur in den Menüs: Im Level muss das Mikrofon das Klavier hören. */
   startMusic() {
-    if (this.muted || this.musicOff || this.musicTimer || !this.ensureBus()) return; const c = this.ctx, step = 60 / SONG.bpm / 2; let i = 0, next = c.currentTime + 0.08;
+    if (this.muted || this.musicOff || this.musicTimer || !this.ensureBus()) return; const SONG = SONGS[this.song] || SONGS.original, c = this.ctx, step = 60 / SONG.bpm / 2; let i = 0, next = c.currentTime + 0.08;
     this.bus.gain.cancelScheduledValues(c.currentTime); this.bus.gain.setValueAtTime(this.bus.gain.value, c.currentTime); this.bus.gain.linearRampToValueAtTime(1, c.currentTime + 0.4);
     const tick = () => { if (typeof document !== 'undefined' && document.hidden) { next = c.currentTime + 0.1; return; } if (next < c.currentTime - 0.5) next = c.currentTime + 0.05;
       while (next < c.currentTime + 0.3) { const tok = SONG.lead[i], bar = i >> 3, k = i & 7;

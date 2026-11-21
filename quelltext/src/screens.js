@@ -5,6 +5,7 @@ import { letterName } from './music.js';
 import { HEROES, makeHero, makeCreature, cv, drawStaff, drawClef, drawNote, drawLedgers, yOfPos, C } from './gfx.js';
 import { newProfile, importCode, exportShort, importShort, exportPayload, importPayload, streak, dayKey } from './save.js';
 import { CONFIG } from './config.js';
+import { SONGS } from './audio.js';
 import { track } from './stats.js';
 import { classify } from './music.js';
 import { prevWorld } from './levels.js';
@@ -66,7 +67,7 @@ function askLevel(app) {
 export async function startPlacement(app, then) { app.audio.ensure(); const r = await app.audio.startMic(); if (r === 'on' && !app.profile.calibrated) calibrate(app, () => placement(app, then)); else placement(app, then); }
 /** Einstufung: je Stufe erst Noten benennen, dann (mit Mikrofon) Noten am Klavier spielen. Bei der ersten nicht bestandenen Stufe ist Schluss. */
 export function placement(app, then) {
-  app.audio.stopMusic(); const p = app.profile, mic = app.audio.micState === 'on'; let si = 0, qi = 0, right = 0, cur = null, last = null, reached = null, fb = '', mode = 'read', busy = false;
+  app.audio.stopMusic(); const p = app.profile, mic = app.audio.micState === 'on'; let si = 0, qi = 0, right = 0, cur = null, last = null, reached = null, fb = '', mode = 'read', busy = false, asking = false;
   const order = ['c', 'cis', 'des', 'd', 'es', 'e', 'f', 'fis', 'g', 'gis', 'as', 'a', 'b', 'h'], PLAY_Q = 3, PLAY_PASS = 2;
   const pick = () => { const st = PLACEMENT[si]; let k; do { k = st.notes[Math.floor(Math.random() * st.notes.length)]; } while (k === last && st.notes.length > 1); last = k; cur = N(k); };
   const finish = () => { app.calib = null; const done = reached; if (done) { p.skip = done.skip.map((v, i) => Math.max(v, (p.skip || [])[i] || 0)); p.seenWorld = p.seenWorld || {}; } app.save(); track('einstufung-' + (done ? PLACEMENT.indexOf(done) + 1 : 0));
@@ -78,9 +79,12 @@ export function placement(app, then) {
     if (qi >= total) { if (right < need) return finish(); if (mode === 'read' && mic) { mode = 'play'; qi = 0; right = 0; fb = 'Gut gelesen! Jetzt am Klavier.'; } else return passed(); }
     pick(); render(); };
   const render = () => { const st = PLACEMENT[si], names = [...new Set((si === 5 ? [...st.notes, 'f1', 'h1', 'c2', 'e2', 'g1', 'a1', 'd2'] : ['c1', 'd1', 'e1', 'f1', 'g1', 'a1', 'h1']).map(k => letterName(N(k))))].sort((a, b) => order.indexOf(a) - order.indexOf(b)), play = mode === 'play';
-    app.screen(`<small class="kicker">Einstufung · Stufe ${si + 1} von ${PLACEMENT.length} · ${esc(st.name)}</small><h2>${play ? 'Spiele diese Note auf dem Klavier' : 'Wie heißt diese Note?'}</h2><div class="place"><div id="plStaff"></div><div><p>${play ? 'Klavier' : 'Lesen'}: Frage ${qi + 1} von ${play ? PLAY_Q : PLACEMENT_Q}</p><p class="note ${/^(Richtig|Gut|Stufe)/.test(fb) ? 'ok' : 'warn'}" role="status">${fb}</p>${play ? '<p class="muted">Die richtige Oktave zählt. Du hast einen Versuch pro Note.</p>' : ''}</div></div>
-      ${play ? '' : `<div class="answers small">${names.map(n => `<button class="btn ans" data-act="a" data-n="${n}">${n}</button>`).join('')}</div>`}<div class="row"><button class="btn sm" data-act="stop">Test beenden</button></div>`, {
-      stop: () => finish(), a: e => { const ok = letterName(cur) === e.dataset.n; fb = ok ? 'Richtig!' : `Das war ${nameStr(cur)}.`; app.audio.sfx(ok ? 'ok' : 'miss'); judge(ok); } }, 'wide');
+    const total = play ? PLAY_Q : PLACEMENT_Q, dots = Array.from({ length: total }, (_, k) => `<i class="${k < qi ? 'on' : k === qi ? 'now' : ''}"></i>`).join('');
+    app.screen(`<div class="maphead"><small class="kicker">Einstufung · Stufe ${si + 1} von ${PLACEMENT.length} · ${esc(st.name)}</small>${asking ? `<span class="row tight"><b>Test wirklich abbrechen?</b><button class="btn sm" data-act="no">Nein, weiter</button><button class="btn sm danger" data-act="yes">Ja, abbrechen</button></span>` : '<button class="btn quiet" data-act="stop">✕ Test abbrechen</button>'}</div>
+      <h2>${play ? 'Spiele diese Note auf dem Klavier' : 'Wie heißt diese Note?'}</h2><div class="place"><div id="plStaff"></div><div><div class="dots small" role="img" aria-label="Frage ${qi + 1} von ${total}">${dots}</div><p class="note ${/^(Richtig|Gut|Stufe)/.test(fb) ? 'ok' : 'warn'}" role="status">${fb}</p>
+      <p class="muted">${play ? 'Spiele die Note einmal. Die richtige Oktave zählt. Danach kommt von selbst die nächste.' : 'Tippe unten den Namen an. Danach kommt von selbst die nächste Note.'}</p></div></div>
+      ${play ? '' : `<div class="answers small">${names.map(n => `<button class="btn ans" data-act="a" data-n="${n}">${n}</button>`).join('')}</div>`}`, {
+      stop: () => { asking = true; render(); }, no: () => { asking = false; render(); }, yes: () => finish(), a: e => { const ok = letterName(cur) === e.dataset.n; fb = ok ? 'Richtig!' : `Das war ${nameStr(cur)}.`; app.audio.sfx(ok ? 'ok' : 'miss'); judge(ok); } }, 'wide');
     document.getElementById('plStaff').appendChild(staffCanvas(cur, st.clef));
     app.calib = play ? { level() {}, onNote(midi) { if (busy) return; const c = classify(midiOf(cur), midi), ok = c === 'correct'; fb = ok ? 'Richtig gespielt!' : c === 'wrong' ? `Das war ${nameStr(noteOfMidi(midi, cur.alt < 0))}, gesucht war ${nameStr(cur)}.` : `Das war ein ${letterName(cur)}, aber in einer anderen Oktave.`;
       app.audio.sfx(ok ? 'ok' : 'miss'); busy = true; setTimeout(() => { busy = false; judge(ok); }, 700); } } : null; };
@@ -91,7 +95,7 @@ export function placement(app, then) {
 export function story(app, pages, then, theme) {
   app.backdrop(theme || (app.scene && app.scene.theme) || 'himmel'); let i = 0;
   const render = () => app.screen(`<div class="story"><span data-hero="${app.profile ? app.profile.hero : 0}" data-size="90"></span><p>${esc(pages[i])}</p></div>
-    <div class="row"><button class="btn" data-act="skip">Überspringen</button><button class="btn go" data-act="next">${i < pages.length - 1 ? 'Weiter' : 'Los!'}</button></div>`, {
+    <div class="row"><button class="btn quiet" data-act="skip">Geschichte überspringen</button><button class="btn go" data-act="next">${i < pages.length - 1 ? 'Weiter' : 'Los!'}</button></div>`, {
     next: () => { app.audio.sfx('click'); if (++i >= pages.length) then(); else render(); }, skip: () => then() }, 'low');
   render();
 }
@@ -102,9 +106,11 @@ export function map(app, world) {
   if (!p.seenWorld[world]) { p.seenWorld[world] = 1; app.save(); return story(app, WORLD_INTRO[world], () => map(app, world), W.theme); }
   const ls = levelsOf(world), goal = p.goal || 5, today = Math.floor((p.days[dayKey()] || 0) / 60);
   app.screen(`<div class="maphead"><button class="chip" data-act="prof" aria-label="Profil wechseln"><span data-hero="${p.hero}" data-size="36"></span><b>${esc(p.name)}</b></button>
-    <div class="row tight"><span class="pill goal ${today >= goal ? 'ok' : ''}" role="img" aria-label="Tagesziel: ${today} von ${goal} Minuten">Heute ${Math.min(today, goal)}/${goal} min<i style="width:${Math.min(100, 100 * today / goal)}%"></i></span><span class="pill">${totalStars(p)} Sterne</span><button class="btn sm" data-act="coll">Sammlung ${p.creatures.length}/${creatureTotal()}</button><button class="btn sm" data-act="pass">Übungspass</button><button class="btn sm" data-act="book">Geschichte</button><button class="btn sm" data-act="board">Bestenliste</button><button class="btn sm" data-act="set">Einstellungen</button></div></div>
+    <div class="row tight"><span class="pill goal ${today >= goal ? 'ok' : ''}" role="img" aria-label="Tagesziel: ${today} von ${goal} Minuten">Heute geübt: ${Math.min(today, goal)} von ${goal} Minuten<i style="width:${Math.min(100, 100 * today / goal)}%"></i></span><span class="pill">${totalStars(p)} Sterne</span></div></div>
+    <h3 class="mapq">Wähle eine Welt und dann ein Level:</h3>
     <div class="tabs" role="tablist">${WORLDS.map((w, i) => { const open = worldUnlocked(p, i); return `<button role="tab" aria-selected="${i === world}" class="tab ${i === world ? 'sel' : ''}" ${open ? '' : 'disabled'} data-act="world" data-w="${i}">${open ? esc(w.name) : `Noch im Nebel: ${WORLDS[i].need} Level in „${WORLDS[prevWorld(i)].short}“ schaffen`}</button>`; }).join('')}</div>
-    <div class="nodes">${ls.map((l, i) => { const open = levelUnlocked(p, l), rec = p.levels[l.id]; return `<button class="node t-${l.type} ${rec ? 'done' : ''}" ${open ? '' : 'disabled'} data-act="lvl" data-id="${l.id}"><span class="num">${i + 1}</span><b>${esc(l.title)}</b><small>${TYPE_LABEL[l.type]}</small>${!open ? '<small class="lock">im Nebel</small>' : app.locked(l) ? '<small class="lock full">Vollversion</small>' : stars(rec ? rec.stars : 0)}</button>`; }).join('')}</div>`, {
+    <div class="nodes">${ls.map((l, i) => { const open = levelUnlocked(p, l), rec = p.levels[l.id]; return `<button class="node t-${l.type} ${rec ? 'done' : ''}" ${open ? '' : 'disabled'} data-act="lvl" data-id="${l.id}"><span class="num">${i + 1}</span><b>${esc(l.title)}</b><small>${TYPE_LABEL[l.type]}</small>${!open ? '<small class="lock">im Nebel</small>' : app.locked(l) ? '<small class="lock full">Vollversion</small>' : stars(rec ? rec.stars : 0)}</button>`; }).join('')}</div>
+    <nav class="mapnav" aria-label="Bereiche"><button class="btn" data-act="coll"><b>Sammlung</b><small>${p.creatures.length} von ${creatureTotal()} Notenwesen</small></button><button class="btn" data-act="pass"><b>Übungspass</b><small>Was du geübt hast</small></button><button class="btn" data-act="book"><b>Geschichte</b><small>Nachlesen</small></button><button class="btn" data-act="board"><b>Bestenliste</b><small>Auf diesem Gerät</small></button><button class="btn" data-act="set"><b>Einstellungen</b><small>Ton, Mikrofon, Code</small></button></nav>`, {
     prof: () => profiles(app), coll: () => collection(app), pass: () => pass(app), board: () => board(app), set: () => settings(app), book: () => storyBook(app, null, () => map(app, world)),
     world: e => map(app, +e.dataset.w), lvl: e => levelCard(app, LEVELS.find(l => l.id === e.dataset.id)) }, 'wide');
 }
@@ -128,7 +134,7 @@ export function calibrate(app, then) {
   const finish = (skip) => { app.calib = null; if (!skip) { p.a4 = a4FromCents(cents); } p.calibrated = true; app.audio.setA4(p.a4); app.save(); then(); };
   const render = () => app.screen(`<h2>Klavier einstimmen</h2><p>Spiele dreimal nacheinander das <b>c<sup>1</sup></b> – das mittlere c. So stellt sich das Spiel auf dein Klavier ein.</p>
     <div class="calib"><div class="dots">${[0, 1, 2].map(i => `<i class="${i < cents.length ? 'on' : ''}"></i>`).join('')}</div><p id="calMsg" role="status">${last}</p><div class="meter big" id="calMeter" aria-hidden="true">${'<i></i>'.repeat(12)}</div></div>
-    <div class="row"><button class="btn" data-act="skip">Überspringen</button></div>`, { skip: () => finish(true) });
+    <div class="row"><button class="btn quiet" data-act="skip">Ohne Einstimmen weiter</button></div>`, { skip: () => finish(true) });
   app.calib = { onNote(midi, ev) { const dev = (midi - 60) * 100 + (ev ? ev.cents : 0);
       if (Math.abs(dev) <= 80) { cents.push(dev); last = `Gut! Noch ${3 - cents.length}×`; app.audio.sfx('ok'); if (cents.length >= 3) { const c = Math.round(cents.slice().sort((a, b) => a - b)[1]);
         last = Math.abs(c) < 8 ? 'Dein Klavier ist gut gestimmt.' : `Dein Klavier klingt ${Math.abs(c)} Cent ${c > 0 ? 'höher' : 'tiefer'}. Das ist gespeichert.`; render(); app.calib = null; setTimeout(() => finish(false), 1600); return; } }
@@ -189,12 +195,13 @@ export function settings(app, msg = '') {
   const p = app.profile, mic = { on: 'an', off: 'noch nicht eingeschaltet', denied: 'nicht erlaubt', unsupported: 'hier nicht verfügbar' }[app.audio.micState];
   const tg = (act, on, label, hint) => `<button class="toggle ${on ? 'on' : ''}" role="switch" aria-checked="${on}" data-act="${act}"><i></i><span><b>${label}</b><small>${hint}</small></span></button>`;
   app.screen(`<div class="maphead"><h2>Einstellungen</h2><button class="btn sm" data-act="back">Zurück</button></div><div class="setgrid">
-    <div class="card"><h3>Spielen</h3>${tg('mode', p.mode === 'profi', 'Profi-Spielart', 'Stoppuhr, Serien und weniger Tipps')}${tg('keys', p.keys, 'Bildschirm-Tasten', 'Ohne Klavier spielen: Tasten antippen')}${tg('mute', !app.audio.muted, 'Ton', 'Alles an oder aus: Musik, Spielklänge, Erfolgsmelodie')}${tg('music', p.music !== false, 'Titelmusik', 'Läuft nur in den Menüs, nie im Level')}<button class="btn sm" data-act="goal">Tagesziel: ${p.goal || 5} Minuten (ändern)</button></div>
+    <div class="card"><h3>Spielen</h3>${tg('mode', p.mode === 'profi', 'Profi-Spielart', 'Stoppuhr, Serien und weniger Tipps')}${tg('keys', p.keys, 'Bildschirm-Tasten', 'Ohne Klavier spielen: Tasten antippen')}${tg('mute', !app.audio.muted, 'Ton', 'Alles an oder aus: Musik, Spielklänge, Erfolgsmelodie')}${tg('music', p.music !== false, 'Titelmusik', 'Läuft nur in den Menüs, nie im Level')}<button class="btn sm" data-act="song">Titelmusik: ${(SONGS[app.state.song] || SONGS.original).name} (wechseln)</button> <button class="btn sm" data-act="goal">Tagesziel: ${p.goal || 5} Minuten (ändern)</button></div>
     <div class="card"><h3>Mikrofon</h3><p>Mikrofon: <b>${mic}</b></p><p>Kammerton: <b>${Math.round(p.a4 * 10) / 10} Hz</b></p><button class="btn sm" data-act="cal">Mikrofon testen und Klavier einstimmen</button><h3>Einstieg</h3><button class="btn sm" data-act="place">Einstufung machen</button> <button class="btn sm" data-act="info">Info und Datenschutz</button></div>
     <div class="card"><h3>Spielstand mitnehmen</h3><p>Dein Kurzcode zum Aufschreiben:</p><p class="shortcode" aria-label="Kurzcode">${exportShort(p, worldIds())}</p><p class="muted">Der Kurzcode merkt sich, wie weit du bist. Alles (Name, Sterne, Übungspass) steckt im QR-Code.</p><button class="btn sm" data-act="exp">QR-Code und Link</button> <button class="btn sm" data-act="imp">Code eingeben</button></div>
     <div class="card"><h3>Für Lehrkräfte</h3>${tg('unlock', p.unlockAll, 'Alle Level freischalten', 'Zum gezielten Üben einzelner Noten')}<button class="btn sm ${app._del ? 'danger' : ''}" data-act="del">${app._del ? 'Wirklich löschen? Nochmal tippen' : 'Dieses Profil löschen'}</button>${CONFIG.shop ? `<h3>Vollversion</h3><p>${app.licensed ? (app.license.until ? `Abo aktiv bis ${app.license.until.toLocaleDateString('de-DE')}` : 'Freigeschaltet (Einmalkauf)') : 'Noch nicht freigeschaltet'}</p>${app.licensed ? '' : '<button class="btn sm" data-act="buy">Vollversion ansehen</button>'}` : ''}</div></div><p class="note" role="status">${msg}</p>`, {
     back: () => { app._del = false; map(app); }, mode: () => { p.mode = p.mode === 'profi' ? 'abenteuer' : 'profi'; app.save(); settings(app); }, keys: () => { p.keys = !p.keys; app.save(); settings(app); },
     mute: () => { app.setMuted(!app.audio.muted); settings(app); },
+    song: () => { const ks = Object.keys(SONGS); app.state.song = ks[(ks.indexOf(app.state.song || 'original') + 1) % ks.length]; app.save(); app.audio.stopMusic(); app.applyProfile(); setTimeout(() => app.audio.startMusic(), 320); settings(app); },
     music: () => { p.music = p.music === false; app.save(); app.applyProfile(); if (p.music) app.audio.startMusic(); settings(app); }, info: () => about(app, () => settings(app)), unlock: () => { p.unlockAll = !p.unlockAll; app.save(); settings(app); },
     cal: async () => { app.audio.ensure(); const r = await app.audio.startMic(); if (r !== 'on') return settings(app, r === 'denied' ? 'Das Mikrofon wurde nicht erlaubt. Erlaube es in den Einstellungen deines Browsers.' : 'Auf dieser Seite gibt es kein Mikrofon.'); calibrate(app, () => settings(app, 'Gespeichert.')); },
     exp: () => shareSave(app),
@@ -250,7 +257,7 @@ export async function shareSave(app) {
   document.getElementById('qrHere').appendChild(qrCanvas(link));
 }
 
-export const VERSION = '1.5 · 20.11.2026';
+export const VERSION = '1.6 · 21.11.2026';
 /** Info, Datenschutz und Quellen. */
 export function about(app, back) {
   app.screen(`<div class="maphead"><h2>Info und Datenschutz</h2><button class="btn sm" data-act="back">Zurück</button></div><div class="book">

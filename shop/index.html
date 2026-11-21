@@ -36,6 +36,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:4px soli
 .btn.sm{min-height:48px;font-size:20px;padding:6px 14px}
 .btn.danger{background:var(--red);color:#fff}
 .btn.sel{background:var(--ye)}
+.btn.quiet{min-height:44px;font-size:17px;font-weight:400;padding:4px 12px;background:#E8DCC4;border-width:2px;box-shadow:none;color:#3F4C63}
 .btn.opt{display:flex;flex-direction:column;align-items:flex-start;text-align:left;flex:1}
 .btn.opt small,.toggle small{font-weight:400;font-size:18px}
 .row{display:flex;gap:16px;justify-content:center;align-items:center;margin-top:18px;flex-wrap:wrap}
@@ -103,12 +104,15 @@ textarea{width:100%;font:16px/1.3 ui-monospace,monospace;border:4px solid var(--
 .plist{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
 .pcard{display:flex;flex-direction:column;align-items:center;gap:4px;background:#fff;border:4px solid var(--k);box-shadow:4px 4px 0 var(--k);padding:14px;width:200px;min-height:200px;font-size:22px}
 .pcard small{font-size:17px}.pcard .plus{font-size:80px;line-height:96px;font-weight:700}.hide{display:none}
-.maphead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.maphead .row{flex-wrap:nowrap;gap:8px}.maphead .row .btn.sm{font-size:17px;padding:6px 9px;white-space:nowrap}.maphead .pill{font-size:17px;white-space:nowrap;padding:8px 9px}.maphead h2{margin:0}
+.maphead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.maphead .row{flex-wrap:nowrap;gap:8px}.maphead .pill{font-size:18px;white-space:nowrap;padding:8px 12px}.maphead h2{margin:0}
 .chip{display:flex;align-items:center;gap:10px;background:#fff;border:4px solid var(--k);padding:4px 14px 4px 8px;min-height:56px;font-size:22px}
 .pill{background:var(--k);color:var(--ye);padding:8px 12px;font-weight:700}
 .tabs{display:flex;gap:8px;margin-bottom:14px}.tab{flex:1;min-height:52px;background:#E8D7B5;border:4px solid var(--k);font-weight:700;font-size:20px}.tab.sel{background:var(--k);color:var(--cream)}.tab:disabled{opacity:.6;font-size:16px;font-weight:400}
+.mapq{margin:2px 0 8px;font-size:21px}
+.mapnav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:16px;padding-top:14px;border-top:4px solid var(--k)}.mapnav .btn{display:flex;flex-direction:column;align-items:flex-start;text-align:left;min-height:64px;padding:8px 14px;font-size:21px;background:#DDEBF7}.mapnav small{font-weight:400;font-size:16px}
+.dots.small{justify-content:flex-start;gap:8px;margin-bottom:8px}.dots.small i{width:22px;height:22px;border-width:3px}.dots i.now{background:var(--ye)}
 .nodes{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
-.node{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;background:#fff;border:4px solid var(--k);box-shadow:4px 4px 0 var(--k);padding:10px 10px 10px 14px;min-height:118px;font-size:19px;line-height:1.15;border-left-width:14px}
+.node{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;background:#fff;border:4px solid var(--k);box-shadow:4px 4px 0 var(--k);padding:8px 10px 8px 14px;min-height:104px;font-size:19px;line-height:1.15;border-left-width:14px}
 .node small{font-size:16px;font-weight:400}.node b{padding-right:26px}.node .num{position:absolute;right:8px;top:6px;font-family:"Press Start 2P",monospace;font-size:12px;color:#5A6478}
 .node.t-jump{border-left-color:var(--g1)}.node.t-regen{border-left-color:var(--b1)}.node.t-bau{border-left-color:var(--or)}.node.t-boss{border-left-color:var(--red);background:#FFE9E7}
 .node:disabled{background:#C9CFD9;border-color:#6B7890;box-shadow:none;color:#3F4C63}.node .stars{margin-top:auto}.node .lock{margin-top:auto}
@@ -656,12 +660,38 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     const m = /^([A-G])(#?)(\d)$/.exec(name);
     return 440 * Math.pow(2, (12 * (+m[3] + 1) + SEMI2[m[1]] + (m[2] ? 1 : 0) - 69) / 12);
   }
-  var SONG = {
-    bpm: 126,
-    lead: "E5 G5 C6 G5 E5 G5 A5 G5 F5 A5 C6 A5 G5 - E5 - D5 F5 A5 F5 D5 F5 G5 F5 E5 - G5 - C5 - - . E5 G5 C6 G5 E5 G5 A5 G5 F5 A5 C6 D6 E6 - C6 - D6 C6 A5 F5 G5 A5 B5 D6 C6 - - - G5 C6 - .".split(" "),
-    bass: [["C2", "G2"], ["F2", "C3"], ["D2", "A2"], ["C2", "G2"], ["C2", "G2"], ["F2", "C3"], ["G2", "D3"], ["C2", "G2"]],
-    pad: [["E4", "G4"], ["F4", "A4"], ["F4", "A4"], ["E4", "G4"], ["E4", "G4"], ["F4", "A4"], ["D4", "G4"], ["E4", "G4"]]
+  var song = (name, bpm, lead, bass, pad) => ({ name, bpm, lead: lead.join(" ").split(" "), bass: bass.split(" ").map((x) => x.split("/")), pad: pad.split(" ").map((x) => x.split("/")) });
+  var SONGS = {
+    original: song(
+      "Br\xFCckenlied",
+      126,
+      ["E5 G5 C6 G5 E5 G5 A5 G5", "F5 A5 C6 A5 G5 - E5 -", "D5 F5 A5 F5 D5 F5 G5 F5", "E5 - G5 - C5 - - .", "E5 G5 C6 G5 E5 G5 A5 G5", "F5 A5 C6 D6 E6 - C6 -", "D6 C6 A5 F5 G5 A5 B5 D6", "C6 - - - G5 C6 - ."],
+      "C2/G2 F2/C3 D2/A2 C2/G2 C2/G2 F2/C3 G2/D3 C2/G2",
+      "E4/G4 F4/A4 F4/A4 E4/G4 E4/G4 F4/A4 D4/G4 E4/G4"
+    ),
+    tanz: song(
+      "Br\xFCckentanz",
+      144,
+      ["A4 C5 E5 C5 A4 C5 E5 A5", "G5 - E5 - F5 E5 D5 -", "D5 F5 A5 F5 D5 F5 A5 D6", "C6 - B5 - A5 - - .", "A4 C5 E5 C5 A4 C5 E5 A5", "G5 - E5 - F5 G5 A5 -", "B5 A5 G#5 E5 G#5 B5 D6 B5", "A5 - E5 - A4 - - ."],
+      "A2/E3 C3/G3 D3/A3 A2/E3 A2/E3 F2/C3 E2/B2 A2/E3",
+      "C4/E4 E4/G4 D4/F4 C4/E4 C4/E4 F4/A4 E4/G#4 C4/E4"
+    ),
+    feder: song(
+      "Sprungfeder",
+      132,
+      ["G5 . B5 D6 . B5 G5 .", "A5 . C6 E6 . C6 A5 .", "B5 D6 G6 D6 B5 D6 A5 D6", "G5 - - . D5 G5 B5 .", "G5 . B5 D6 . B5 G5 .", "C6 . E6 G6 . E6 C6 .", "D6 C6 B5 A5 F#5 A5 D6 F#6", "G6 - - . G5 - - ."],
+      "G2/D3 A2/E3 G2/D3 G2/D3 G2/D3 C3/G3 D3/A3 G2/D3",
+      "G4/B4 A4/C5 G4/B4 G4/B4 G4/B4 E4/G4 F#4/A4 G4/B4"
+    ),
+    jagd: song(
+      "Nebeljagd",
+      150,
+      ["D5 F5 A5 D6 A5 F5 D5 F5", "C5 E5 G5 C6 G5 E5 C5 E5", "A#4 D5 F5 A#5 F5 D5 A#4 D5", "A4 C#5 E5 A5 - G5 E5 C#5", "D5 F5 A5 D6 F6 D6 A5 F5", "G5 A#5 D6 G6 D6 A#5 G5 A#5", "A5 C#6 E6 A5 G5 E5 C#5 E5", "D5 - A5 - D6 - - ."],
+      "D2/A2 C2/G2 A#1/F2 A1/E2 D2/A2 G2/D3 A2/E3 D2/A2",
+      "F4/A4 E4/G4 D4/F4 C#4/E4 F4/A4 G4/A#4 C#4/E4 F4/A4"
+    )
   };
+  var SONG = SONGS.original;
   var GameAudio = class {
     constructor() {
       this.ctx = null;
@@ -843,7 +873,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     /** Titelsong in Schleife. Nur in den Menüs: Im Level muss das Mikrofon das Klavier hören. */
     startMusic() {
       if (this.muted || this.musicOff || this.musicTimer || !this.ensureBus()) return;
-      const c = this.ctx, step = 60 / SONG.bpm / 2;
+      const SONG2 = SONGS[this.song] || SONGS.original, c = this.ctx, step = 60 / SONG2.bpm / 2;
       let i = 0, next = c.currentTime + 0.08;
       this.bus.gain.cancelScheduledValues(c.currentTime);
       this.bus.gain.setValueAtTime(this.bus.gain.value, c.currentTime);
@@ -855,18 +885,18 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         }
         if (next < c.currentTime - 0.5) next = c.currentTime + 0.05;
         while (next < c.currentTime + 0.3) {
-          const tok = SONG.lead[i], bar = i >> 3, k = i & 7;
+          const tok = SONG2.lead[i], bar = i >> 3, k = i & 7;
           try {
             if (tok !== "-" && tok !== ".") {
               let n = 1;
-              while (SONG.lead[(i + n) % 64] === "-" && n < 8) n++;
+              while (SONG2.lead[(i + n) % 64] === "-" && n < 8) n++;
               const f = pitch(tok);
               this.voice(f, next, step * n * 0.94, "square", 0.045);
               this.voice(f / 2, next, step * n * 0.9, "triangle", 0.05);
             }
-            const b = SONG.bass[bar];
+            const b = SONG2.bass[bar];
             if (k % 2 === 0) this.voice(pitch(k === 4 ? b[1] : b[0]) * (k === 2 || k === 6 ? 2 : 1), next, step * 1.7, "triangle", 0.11);
-            if (k === 2 || k === 6) for (const p of SONG.pad[bar]) this.voice(pitch(p), next, step * 1.2, "sine", 0.035);
+            if (k === 2 || k === 6) for (const p of SONG2.pad[bar]) this.voice(pitch(p), next, step * 1.2, "sine", 0.035);
             if (k === 0 || k === 4) this.voice(150, next, 0.11, "sine", 0.16, 45);
             this.hat(next, k % 2 ? 0.018 : 0.035);
           } catch (e) {
@@ -4198,7 +4228,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   function placement(app, then) {
     app.audio.stopMusic();
     const p = app.profile, mic = app.audio.micState === "on";
-    let si = 0, qi = 0, right = 0, cur = null, last = null, reached = null, fb = "", mode = "read", busy = false;
+    let si = 0, qi = 0, right = 0, cur = null, last = null, reached = null, fb = "", mode = "read", busy = false, asking = false;
     const order = ["c", "cis", "des", "d", "es", "e", "f", "fis", "g", "gis", "as", "a", "b", "h"], PLAY_Q = 3, PLAY_PASS = 2;
     const pick = () => {
       const st = PLACEMENT[si];
@@ -4254,9 +4284,20 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     };
     const render = () => {
       const st = PLACEMENT[si], names = [...new Set((si === 5 ? [...st.notes, "f1", "h1", "c2", "e2", "g1", "a1", "d2"] : ["c1", "d1", "e1", "f1", "g1", "a1", "h1"]).map((k) => letterName(N(k))))].sort((a, b) => order.indexOf(a) - order.indexOf(b)), play = mode === "play";
-      app.screen(`<small class="kicker">Einstufung \xB7 Stufe ${si + 1} von ${PLACEMENT.length} \xB7 ${esc(st.name)}</small><h2>${play ? "Spiele diese Note auf dem Klavier" : "Wie hei\xDFt diese Note?"}</h2><div class="place"><div id="plStaff"></div><div><p>${play ? "Klavier" : "Lesen"}: Frage ${qi + 1} von ${play ? PLAY_Q : PLACEMENT_Q}</p><p class="note ${/^(Richtig|Gut|Stufe)/.test(fb) ? "ok" : "warn"}" role="status">${fb}</p>${play ? '<p class="muted">Die richtige Oktave z\xE4hlt. Du hast einen Versuch pro Note.</p>' : ""}</div></div>
-      ${play ? "" : `<div class="answers small">${names.map((n) => `<button class="btn ans" data-act="a" data-n="${n}">${n}</button>`).join("")}</div>`}<div class="row"><button class="btn sm" data-act="stop">Test beenden</button></div>`, {
-        stop: () => finish(),
+      const total = play ? PLAY_Q : PLACEMENT_Q, dots = Array.from({ length: total }, (_, k) => `<i class="${k < qi ? "on" : k === qi ? "now" : ""}"></i>`).join("");
+      app.screen(`<div class="maphead"><small class="kicker">Einstufung \xB7 Stufe ${si + 1} von ${PLACEMENT.length} \xB7 ${esc(st.name)}</small>${asking ? `<span class="row tight"><b>Test wirklich abbrechen?</b><button class="btn sm" data-act="no">Nein, weiter</button><button class="btn sm danger" data-act="yes">Ja, abbrechen</button></span>` : '<button class="btn quiet" data-act="stop">\u2715 Test abbrechen</button>'}</div>
+      <h2>${play ? "Spiele diese Note auf dem Klavier" : "Wie hei\xDFt diese Note?"}</h2><div class="place"><div id="plStaff"></div><div><div class="dots small" role="img" aria-label="Frage ${qi + 1} von ${total}">${dots}</div><p class="note ${/^(Richtig|Gut|Stufe)/.test(fb) ? "ok" : "warn"}" role="status">${fb}</p>
+      <p class="muted">${play ? "Spiele die Note einmal. Die richtige Oktave z\xE4hlt. Danach kommt von selbst die n\xE4chste." : "Tippe unten den Namen an. Danach kommt von selbst die n\xE4chste Note."}</p></div></div>
+      ${play ? "" : `<div class="answers small">${names.map((n) => `<button class="btn ans" data-act="a" data-n="${n}">${n}</button>`).join("")}</div>`}`, {
+        stop: () => {
+          asking = true;
+          render();
+        },
+        no: () => {
+          asking = false;
+          render();
+        },
+        yes: () => finish(),
         a: (e) => {
           const ok = letterName(cur) === e.dataset.n;
           fb = ok ? "Richtig!" : `Das war ${nameStr(cur)}.`;
@@ -4285,7 +4326,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     app.backdrop(theme || app.scene && app.scene.theme || "himmel");
     let i = 0;
     const render = () => app.screen(`<div class="story"><span data-hero="${app.profile ? app.profile.hero : 0}" data-size="90"></span><p>${esc(pages[i])}</p></div>
-    <div class="row"><button class="btn" data-act="skip">\xDCberspringen</button><button class="btn go" data-act="next">${i < pages.length - 1 ? "Weiter" : "Los!"}</button></div>`, {
+    <div class="row"><button class="btn quiet" data-act="skip">Geschichte \xFCberspringen</button><button class="btn go" data-act="next">${i < pages.length - 1 ? "Weiter" : "Los!"}</button></div>`, {
       next: () => {
         app.audio.sfx("click");
         if (++i >= pages.length) then();
@@ -4310,7 +4351,8 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     }
     const ls = levelsOf(world), goal = p.goal || 5, today = Math.floor((p.days[dayKey()] || 0) / 60);
     app.screen(`<div class="maphead"><button class="chip" data-act="prof" aria-label="Profil wechseln"><span data-hero="${p.hero}" data-size="36"></span><b>${esc(p.name)}</b></button>
-    <div class="row tight"><span class="pill goal ${today >= goal ? "ok" : ""}" role="img" aria-label="Tagesziel: ${today} von ${goal} Minuten">Heute ${Math.min(today, goal)}/${goal} min<i style="width:${Math.min(100, 100 * today / goal)}%"></i></span><span class="pill">${totalStars(p)} Sterne</span><button class="btn sm" data-act="coll">Sammlung ${p.creatures.length}/${creatureTotal()}</button><button class="btn sm" data-act="pass">\xDCbungspass</button><button class="btn sm" data-act="book">Geschichte</button><button class="btn sm" data-act="board">Bestenliste</button><button class="btn sm" data-act="set">Einstellungen</button></div></div>
+    <div class="row tight"><span class="pill goal ${today >= goal ? "ok" : ""}" role="img" aria-label="Tagesziel: ${today} von ${goal} Minuten">Heute ge\xFCbt: ${Math.min(today, goal)} von ${goal} Minuten<i style="width:${Math.min(100, 100 * today / goal)}%"></i></span><span class="pill">${totalStars(p)} Sterne</span></div></div>
+    <h3 class="mapq">W\xE4hle eine Welt und dann ein Level:</h3>
     <div class="tabs" role="tablist">${WORLDS.map((w, i) => {
       const open = worldUnlocked(p, i);
       return `<button role="tab" aria-selected="${i === world}" class="tab ${i === world ? "sel" : ""}" ${open ? "" : "disabled"} data-act="world" data-w="${i}">${open ? esc(w.name) : `Noch im Nebel: ${WORLDS[i].need} Level in \u201E${WORLDS[prevWorld(i)].short}\u201C schaffen`}</button>`;
@@ -4318,7 +4360,8 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     <div class="nodes">${ls.map((l, i) => {
       const open = levelUnlocked(p, l), rec = p.levels[l.id];
       return `<button class="node t-${l.type} ${rec ? "done" : ""}" ${open ? "" : "disabled"} data-act="lvl" data-id="${l.id}"><span class="num">${i + 1}</span><b>${esc(l.title)}</b><small>${TYPE_LABEL[l.type]}</small>${!open ? '<small class="lock">im Nebel</small>' : app.locked(l) ? '<small class="lock full">Vollversion</small>' : stars(rec ? rec.stars : 0)}</button>`;
-    }).join("")}</div>`, {
+    }).join("")}</div>
+    <nav class="mapnav" aria-label="Bereiche"><button class="btn" data-act="coll"><b>Sammlung</b><small>${p.creatures.length} von ${creatureTotal()} Notenwesen</small></button><button class="btn" data-act="pass"><b>\xDCbungspass</b><small>Was du ge\xFCbt hast</small></button><button class="btn" data-act="book"><b>Geschichte</b><small>Nachlesen</small></button><button class="btn" data-act="board"><b>Bestenliste</b><small>Auf diesem Ger\xE4t</small></button><button class="btn" data-act="set"><b>Einstellungen</b><small>Ton, Mikrofon, Code</small></button></nav>`, {
       prof: () => profiles(app),
       coll: () => collection(app),
       pass: () => pass(app),
@@ -4373,7 +4416,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     };
     const render = () => app.screen(`<h2>Klavier einstimmen</h2><p>Spiele dreimal nacheinander das <b>c<sup>1</sup></b> \u2013 das mittlere c. So stellt sich das Spiel auf dein Klavier ein.</p>
     <div class="calib"><div class="dots">${[0, 1, 2].map((i) => `<i class="${i < cents.length ? "on" : ""}"></i>`).join("")}</div><p id="calMsg" role="status">${last}</p><div class="meter big" id="calMeter" aria-hidden="true">${"<i></i>".repeat(12)}</div></div>
-    <div class="row"><button class="btn" data-act="skip">\xDCberspringen</button></div>`, { skip: () => finish(true) });
+    <div class="row"><button class="btn quiet" data-act="skip">Ohne Einstimmen weiter</button></div>`, { skip: () => finish(true) });
     app.calib = {
       onNote(midi, ev) {
         const dev = (midi - 60) * 100 + (ev ? ev.cents : 0);
@@ -4506,7 +4549,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     const p = app.profile, mic = { on: "an", off: "noch nicht eingeschaltet", denied: "nicht erlaubt", unsupported: "hier nicht verf\xFCgbar" }[app.audio.micState];
     const tg = (act, on, label2, hint) => `<button class="toggle ${on ? "on" : ""}" role="switch" aria-checked="${on}" data-act="${act}"><i></i><span><b>${label2}</b><small>${hint}</small></span></button>`;
     app.screen(`<div class="maphead"><h2>Einstellungen</h2><button class="btn sm" data-act="back">Zur\xFCck</button></div><div class="setgrid">
-    <div class="card"><h3>Spielen</h3>${tg("mode", p.mode === "profi", "Profi-Spielart", "Stoppuhr, Serien und weniger Tipps")}${tg("keys", p.keys, "Bildschirm-Tasten", "Ohne Klavier spielen: Tasten antippen")}${tg("mute", !app.audio.muted, "Ton", "Alles an oder aus: Musik, Spielkl\xE4nge, Erfolgsmelodie")}${tg("music", p.music !== false, "Titelmusik", "L\xE4uft nur in den Men\xFCs, nie im Level")}<button class="btn sm" data-act="goal">Tagesziel: ${p.goal || 5} Minuten (\xE4ndern)</button></div>
+    <div class="card"><h3>Spielen</h3>${tg("mode", p.mode === "profi", "Profi-Spielart", "Stoppuhr, Serien und weniger Tipps")}${tg("keys", p.keys, "Bildschirm-Tasten", "Ohne Klavier spielen: Tasten antippen")}${tg("mute", !app.audio.muted, "Ton", "Alles an oder aus: Musik, Spielkl\xE4nge, Erfolgsmelodie")}${tg("music", p.music !== false, "Titelmusik", "L\xE4uft nur in den Men\xFCs, nie im Level")}<button class="btn sm" data-act="song">Titelmusik: ${(SONGS[app.state.song] || SONGS.original).name} (wechseln)</button> <button class="btn sm" data-act="goal">Tagesziel: ${p.goal || 5} Minuten (\xE4ndern)</button></div>
     <div class="card"><h3>Mikrofon</h3><p>Mikrofon: <b>${mic}</b></p><p>Kammerton: <b>${Math.round(p.a4 * 10) / 10} Hz</b></p><button class="btn sm" data-act="cal">Mikrofon testen und Klavier einstimmen</button><h3>Einstieg</h3><button class="btn sm" data-act="place">Einstufung machen</button> <button class="btn sm" data-act="info">Info und Datenschutz</button></div>
     <div class="card"><h3>Spielstand mitnehmen</h3><p>Dein Kurzcode zum Aufschreiben:</p><p class="shortcode" aria-label="Kurzcode">${exportShort(p, worldIds())}</p><p class="muted">Der Kurzcode merkt sich, wie weit du bist. Alles (Name, Sterne, \xDCbungspass) steckt im QR-Code.</p><button class="btn sm" data-act="exp">QR-Code und Link</button> <button class="btn sm" data-act="imp">Code eingeben</button></div>
     <div class="card"><h3>F\xFCr Lehrkr\xE4fte</h3>${tg("unlock", p.unlockAll, "Alle Level freischalten", "Zum gezielten \xDCben einzelner Noten")}<button class="btn sm ${app._del ? "danger" : ""}" data-act="del">${app._del ? "Wirklich l\xF6schen? Nochmal tippen" : "Dieses Profil l\xF6schen"}</button>${CONFIG.shop ? `<h3>Vollversion</h3><p>${app.licensed ? app.license.until ? `Abo aktiv bis ${app.license.until.toLocaleDateString("de-DE")}` : "Freigeschaltet (Einmalkauf)" : "Noch nicht freigeschaltet"}</p>${app.licensed ? "" : '<button class="btn sm" data-act="buy">Vollversion ansehen</button>'}` : ""}</div></div><p class="note" role="status">${msg}</p>`, {
@@ -4526,6 +4569,15 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       },
       mute: () => {
         app.setMuted(!app.audio.muted);
+        settings(app);
+      },
+      song: () => {
+        const ks = Object.keys(SONGS);
+        app.state.song = ks[(ks.indexOf(app.state.song || "original") + 1) % ks.length];
+        app.save();
+        app.audio.stopMusic();
+        app.applyProfile();
+        setTimeout(() => app.audio.startMusic(), 320);
         settings(app);
       },
       music: () => {
@@ -4660,7 +4712,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     }, "wide");
     document.getElementById("qrHere").appendChild(qrCanvas(link));
   }
-  var VERSION = "1.5 \xB7 20.11.2026";
+  var VERSION = "1.6 \xB7 21.11.2026";
   function about(app, back) {
     app.screen(`<div class="maphead"><h2>Info und Datenschutz</h2><button class="btn sm" data-act="back">Zur\xFCck</button></div><div class="book">
     <h3>Die Notenbr\xFCcke</h3><p>Ein Lernspiel zum Notenlesen am Klavier. Version ${VERSION}${CONFIG.shop ? " \xB7 Kauf-Fassung" : " \xB7 Test-Fassung"}.</p>
@@ -4895,6 +4947,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       const p = this.profile;
       this.heroFrames = makeHero(p ? p.hero : 0);
       this.audio.muted = !!this.state.muted;
+      this.audio.song = this.state.song || "original";
       if (p) {
         this.audio.setA4(p.a4);
         this.audio.musicOff = p.music === false;

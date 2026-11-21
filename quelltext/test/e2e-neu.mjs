@@ -24,7 +24,7 @@ for (let i = 0; i < 3; i++) { const r = await readRight(); await page.evaluate(m
 await wait(200); let p = await page.evaluate(() => __nb.profile); ok(JSON.stringify(p.skip) === '[6,0,0,0]', 'nur Stufe 1 zählt, weil Stufe 2 am Klavier nicht klappte: ' + JSON.stringify(p.skip));
 ok(!(await page.evaluate(() => __nb.calib)), 'Test beendet'); await page.screenshot({ path: 'shots/n2-einstufung-ergebnis.png' }); await act('ok'); await wait(150); if (await page.$('.story')) { await act('next'); await act('next'); } await wait(150);
 await page.evaluate(() => { __nb.audio.micState = 'off'; __nb.profile.keys = true; __nb.profile.unlockAll = true; __nb.profile.seenWorld = { 0: 1, 1: 1, 2: 1, 3: 1 }; __nb.profile.goal = 5; const d = new Date(), k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; __nb.profile.days[k] = 295; __screens.map(__nb, 3); });
-await wait(200); await page.screenshot({ path: 'shots/n3-karte-bruecke.png' }); ok((await page.textContent('.pill.goal')).includes('4/5'), 'Tagesziel-Anzeige: ' + await page.textContent('.pill.goal'));
+await wait(200); await page.screenshot({ path: 'shots/n3-karte-bruecke.png' }); ok((await page.textContent('.pill.goal')).includes('4 von 5'), 'Tagesziel-Anzeige: ' + await page.textContent('.pill.goal'));
 // --- Große Brücke: Springen (zwei Hände) + Tagesziel
 await page.click('[data-id="b1"]'); await act('go'); await wait(900); await page.screenshot({ path: 'shots/n4-zwei-haende.png' });
 for (let i = 0; i < 4; i++) { await page.evaluate(`__nb.keyTap(${midiJs})`); await wait(650); } await page.screenshot({ path: 'shots/n5-zwei-haende-2.png' });
