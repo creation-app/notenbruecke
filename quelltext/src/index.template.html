@@ -20,7 +20,7 @@ canvas.pix,#world{image-rendering:pixelated;image-rendering:crisp-edges}
 #world{position:absolute;left:0;top:0;width:1280px;height:800px}
 #text{position:absolute;left:0;top:0;width:1280px;height:800px;pointer-events:none}
 [hidden]{display:none!important}
-#rotate{position:fixed;inset:0;z-index:9;background:var(--k);color:var(--cream);display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;font-size:28px;font-weight:700}
+#rotate{position:fixed;left:8px;right:8px;bottom:8px;z-index:9;background:var(--k);color:var(--cream);border:3px solid var(--ye);text-align:center;padding:10px 12px;font-size:17px;font-weight:700;pointer-events:none}#rotate p{margin:0}#rotate[hidden]{display:none}
 h2{font-family:"Press Start 2P",monospace;font-size:24px;line-height:1.5;margin:0 0 14px}
 h3{font-size:24px;margin:10px 0 6px}
 p{margin:6px 0}
@@ -148,7 +148,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 </style>
 </head>
 <body>
-<div id="rotate" hidden><p>Bitte dreh dein Gerät ins Querformat.</p></div>
+<div id="rotate" hidden><p>Halte dein Gerät quer – das Spiel ist schon gedreht.</p></div>
 <div id="stage">
   <canvas id="world" width="1280" height="800" aria-label="Spielwelt"></canvas>
   <canvas id="text" width="1280" height="800" aria-hidden="true"></canvas>

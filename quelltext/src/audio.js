@@ -84,7 +84,7 @@ export class GameAudio {
   }
   /** Titelsong in Schleife. Nur in den Menüs: Im Level muss das Mikrofon das Klavier hören. */
   startMusic() {
-    if (this.muted || this.musicOff || this.musicTimer || !this.ensureBus()) return; const SONG = SONGS[this.song] || SONGS.original, c = this.ctx, step = 60 / SONG.bpm / 2; let i = 0, next = c.currentTime + 0.08;
+    if (this.muted || this.musicOff || this.musicTimer || !this.ensureBus()) return; const SONG = SONGS[this.song] || SONGS.tanz, c = this.ctx, step = 60 / SONG.bpm / 2; let i = 0, next = c.currentTime + 0.08;
     this.bus.gain.cancelScheduledValues(c.currentTime); this.bus.gain.setValueAtTime(this.bus.gain.value, c.currentTime); this.bus.gain.linearRampToValueAtTime(1, c.currentTime + 0.4);
     const tick = () => { if (typeof document !== 'undefined' && document.hidden) { next = c.currentTime + 0.1; return; } if (next < c.currentTime - 0.5) next = c.currentTime + 0.05;
       while (next < c.currentTime + 0.3) { const tok = SONG.lead[i], bar = i >> 3, k = i & 7;

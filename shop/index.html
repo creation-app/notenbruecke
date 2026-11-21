@@ -22,7 +22,7 @@ canvas.pix,#world{image-rendering:pixelated;image-rendering:crisp-edges}
 #world{position:absolute;left:0;top:0;width:1280px;height:800px}
 #text{position:absolute;left:0;top:0;width:1280px;height:800px;pointer-events:none}
 [hidden]{display:none!important}
-#rotate{position:fixed;inset:0;z-index:9;background:var(--k);color:var(--cream);display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;font-size:28px;font-weight:700}
+#rotate{position:fixed;left:8px;right:8px;bottom:8px;z-index:9;background:var(--k);color:var(--cream);border:3px solid var(--ye);text-align:center;padding:10px 12px;font-size:17px;font-weight:700;pointer-events:none}#rotate p{margin:0}#rotate[hidden]{display:none}
 h2{font-family:"Press Start 2P",monospace;font-size:24px;line-height:1.5;margin:0 0 14px}
 h3{font-size:24px;margin:10px 0 6px}
 p{margin:6px 0}
@@ -150,7 +150,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 </style>
 </head>
 <body>
-<div id="rotate" hidden><p>Bitte dreh dein Gerät ins Querformat.</p></div>
+<div id="rotate" hidden><p>Halte dein Gerät quer – das Spiel ist schon gedreht.</p></div>
 <div id="stage">
   <canvas id="world" width="1280" height="800" aria-label="Spielwelt"></canvas>
   <canvas id="text" width="1280" height="800" aria-hidden="true"></canvas>
@@ -873,7 +873,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     /** Titelsong in Schleife. Nur in den Menüs: Im Level muss das Mikrofon das Klavier hören. */
     startMusic() {
       if (this.muted || this.musicOff || this.musicTimer || !this.ensureBus()) return;
-      const SONG2 = SONGS[this.song] || SONGS.original, c = this.ctx, step = 60 / SONG2.bpm / 2;
+      const SONG2 = SONGS[this.song] || SONGS.tanz, c = this.ctx, step = 60 / SONG2.bpm / 2;
       let i = 0, next = c.currentTime + 0.08;
       this.bus.gain.cancelScheduledValues(c.currentTime);
       this.bus.gain.setValueAtTime(this.bus.gain.value, c.currentTime);
@@ -4228,8 +4228,8 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   function placement(app, then) {
     app.audio.stopMusic();
     const p = app.profile, mic = app.audio.micState === "on";
-    let si = 0, qi = 0, right = 0, cur = null, last = null, reached = null, fb = "", mode = "read", busy = false, asking = false;
-    const order = ["c", "cis", "des", "d", "es", "e", "f", "fis", "g", "gis", "as", "a", "b", "h"], PLAY_Q = 3, PLAY_PASS = 2;
+    let si = 0, qi = 0, right = 0, cur = null, last = null, reached = null, fb = "", mode = "read", busy = false, asking = false, t0 = 0;
+    const order = ["c", "cis", "des", "d", "es", "e", "f", "fis", "g", "gis", "as", "a", "b", "h"], PLAY_Q = 3, PLAY_PASS = 2, READ_MS = 6e3, PLAY_MS = 9e3;
     const pick = () => {
       const st = PLACEMENT[si];
       let k;
@@ -4238,6 +4238,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       } while (k === last && st.notes.length > 1);
       last = k;
       cur = N(k);
+      t0 = performance.now();
     };
     const finish = () => {
       app.calib = null;
@@ -4267,7 +4268,9 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       render();
     };
     const judge = (ok) => {
-      if (ok) right++;
+      const slow = performance.now() - t0 > (mode === "read" ? READ_MS : PLAY_MS);
+      if (ok && !slow) right++;
+      else if (ok) fb = "Richtig \u2013 aber noch nicht fl\xFCssig. Das \xFCben wir.";
       qi++;
       const st = PLACEMENT[si], total = mode === "read" ? PLACEMENT_Q : PLAY_Q, need = mode === "read" ? PLACEMENT_PASS : PLAY_PASS;
       if (qi >= total) {
@@ -4287,7 +4290,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       const total = play ? PLAY_Q : PLACEMENT_Q, dots = Array.from({ length: total }, (_, k) => `<i class="${k < qi ? "on" : k === qi ? "now" : ""}"></i>`).join("");
       app.screen(`<div class="maphead"><small class="kicker">Einstufung \xB7 Stufe ${si + 1} von ${PLACEMENT.length} \xB7 ${esc(st.name)}</small>${asking ? `<span class="row tight"><b>Test wirklich abbrechen?</b><button class="btn sm" data-act="no">Nein, weiter</button><button class="btn sm danger" data-act="yes">Ja, abbrechen</button></span>` : '<button class="btn quiet" data-act="stop">\u2715 Test abbrechen</button>'}</div>
       <h2>${play ? "Spiele diese Note auf dem Klavier" : "Wie hei\xDFt diese Note?"}</h2><div class="place"><div id="plStaff"></div><div><div class="dots small" role="img" aria-label="Frage ${qi + 1} von ${total}">${dots}</div><p class="note ${/^(Richtig|Gut|Stufe)/.test(fb) ? "ok" : "warn"}" role="status">${fb}</p>
-      <p class="muted">${play ? "Spiele die Note einmal. Die richtige Oktave z\xE4hlt. Danach kommt von selbst die n\xE4chste." : "Tippe unten den Namen an. Danach kommt von selbst die n\xE4chste Note."}</p></div></div>
+      <p class="muted">${play ? "Spiele die Note einmal, z\xFCgig, aber ohne Hektik. Die richtige Oktave z\xE4hlt. Danach kommt von selbst die n\xE4chste." : "Tippe unten den Namen an, z\xFCgig, aber ohne Hektik. Danach kommt von selbst die n\xE4chste Note."}</p></div></div>
       ${play ? "" : `<div class="answers small">${names.map((n) => `<button class="btn ans" data-act="a" data-n="${n}">${n}</button>`).join("")}</div>`}`, {
         stop: () => {
           asking = true;
@@ -4549,7 +4552,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     const p = app.profile, mic = { on: "an", off: "noch nicht eingeschaltet", denied: "nicht erlaubt", unsupported: "hier nicht verf\xFCgbar" }[app.audio.micState];
     const tg = (act, on, label2, hint) => `<button class="toggle ${on ? "on" : ""}" role="switch" aria-checked="${on}" data-act="${act}"><i></i><span><b>${label2}</b><small>${hint}</small></span></button>`;
     app.screen(`<div class="maphead"><h2>Einstellungen</h2><button class="btn sm" data-act="back">Zur\xFCck</button></div><div class="setgrid">
-    <div class="card"><h3>Spielen</h3>${tg("mode", p.mode === "profi", "Profi-Spielart", "Stoppuhr, Serien und weniger Tipps")}${tg("keys", p.keys, "Bildschirm-Tasten", "Ohne Klavier spielen: Tasten antippen")}${tg("mute", !app.audio.muted, "Ton", "Alles an oder aus: Musik, Spielkl\xE4nge, Erfolgsmelodie")}${tg("music", p.music !== false, "Titelmusik", "L\xE4uft nur in den Men\xFCs, nie im Level")}<button class="btn sm" data-act="song">Titelmusik: ${(SONGS[app.state.song] || SONGS.original).name} (wechseln)</button> <button class="btn sm" data-act="goal">Tagesziel: ${p.goal || 5} Minuten (\xE4ndern)</button></div>
+    <div class="card"><h3>Spielen</h3>${tg("mode", p.mode === "profi", "Profi-Spielart", "Stoppuhr, Serien und weniger Tipps")}${tg("keys", p.keys, "Bildschirm-Tasten", "Ohne Klavier spielen: Tasten antippen")}${tg("mute", !app.audio.muted, "Ton", "Alles an oder aus: Musik, Spielkl\xE4nge, Erfolgsmelodie")}${tg("music", p.music !== false, "Titelmusik", "L\xE4uft nur in den Men\xFCs, nie im Level")}<button class="btn sm" data-act="song">Titelmusik: ${(SONGS[app.state.song] || SONGS.tanz).name} (wechseln)</button> <button class="btn sm" data-act="goal">Tagesziel: ${p.goal || 5} Minuten (\xE4ndern)</button></div>
     <div class="card"><h3>Mikrofon</h3><p>Mikrofon: <b>${mic}</b></p><p>Kammerton: <b>${Math.round(p.a4 * 10) / 10} Hz</b></p><button class="btn sm" data-act="cal">Mikrofon testen und Klavier einstimmen</button><h3>Einstieg</h3><button class="btn sm" data-act="place">Einstufung machen</button> <button class="btn sm" data-act="info">Info und Datenschutz</button></div>
     <div class="card"><h3>Spielstand mitnehmen</h3><p>Dein Kurzcode zum Aufschreiben:</p><p class="shortcode" aria-label="Kurzcode">${exportShort(p, worldIds())}</p><p class="muted">Der Kurzcode merkt sich, wie weit du bist. Alles (Name, Sterne, \xDCbungspass) steckt im QR-Code.</p><button class="btn sm" data-act="exp">QR-Code und Link</button> <button class="btn sm" data-act="imp">Code eingeben</button></div>
     <div class="card"><h3>F\xFCr Lehrkr\xE4fte</h3>${tg("unlock", p.unlockAll, "Alle Level freischalten", "Zum gezielten \xDCben einzelner Noten")}<button class="btn sm ${app._del ? "danger" : ""}" data-act="del">${app._del ? "Wirklich l\xF6schen? Nochmal tippen" : "Dieses Profil l\xF6schen"}</button>${CONFIG.shop ? `<h3>Vollversion</h3><p>${app.licensed ? app.license.until ? `Abo aktiv bis ${app.license.until.toLocaleDateString("de-DE")}` : "Freigeschaltet (Einmalkauf)" : "Noch nicht freigeschaltet"}</p>${app.licensed ? "" : '<button class="btn sm" data-act="buy">Vollversion ansehen</button>'}` : ""}</div></div><p class="note" role="status">${msg}</p>`, {
@@ -4573,7 +4576,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       },
       song: () => {
         const ks = Object.keys(SONGS);
-        app.state.song = ks[(ks.indexOf(app.state.song || "original") + 1) % ks.length];
+        app.state.song = ks[(ks.indexOf(app.state.song || "tanz") + 1) % ks.length];
         app.save();
         app.audio.stopMusic();
         app.applyProfile();
@@ -4712,7 +4715,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     }, "wide");
     document.getElementById("qrHere").appendChild(qrCanvas(link));
   }
-  var VERSION = "1.6 \xB7 21.11.2026";
+  var VERSION = "1.7 \xB7 21.11.2026";
   function about(app, back) {
     app.screen(`<div class="maphead"><h2>Info und Datenschutz</h2><button class="btn sm" data-act="back">Zur\xFCck</button></div><div class="book">
     <h3>Die Notenbr\xFCcke</h3><p>Ein Lernspiel zum Notenlesen am Klavier. Version ${VERSION}${CONFIG.shop ? " \xB7 Kauf-Fassung" : " \xB7 Test-Fassung"}.</p>
@@ -4831,7 +4834,9 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       const pt = (e) => {
         if (!this.scene || !this.scene.pointer || this.paused) return;
         const r = this.world.getBoundingClientRect();
-        this.scene.pointer((e.clientX - r.left) / r.width * 320, (e.clientY - r.top) / r.height * 200);
+        const u = (e.clientX - r.left) / r.width, v = (e.clientY - r.top) / r.height;
+        if (this.rot) this.scene.pointer(v * 320, (1 - u) * 200);
+        else this.scene.pointer(u * 320, v * 200);
       };
       $("stage").addEventListener("pointerdown", (e) => {
         if (e.target.closest("#panel,#screen,#hud")) return;
@@ -4868,9 +4873,18 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         }
       });
       const fit = () => {
-        const s = Math.min(window.innerWidth / 1280, window.innerHeight / 800);
-        $("stage").style.transform = `translate(-50%,-50%) scale(${s})`;
-        $("rotate").hidden = window.innerWidth >= window.innerHeight;
+        const w = window.innerWidth, h = window.innerHeight, rot = w < h, s = rot ? Math.min(h / 1280, w / 800) : Math.min(w / 1280, h / 800);
+        const was = this.rot;
+        this.rot = rot;
+        $("stage").style.transform = `translate(-50%,-50%) ${rot ? "rotate(90deg) " : ""}scale(${s})`;
+        const el = $("rotate");
+        if (rot && !was) {
+          el.hidden = false;
+          clearTimeout(this._rotT);
+          this._rotT = setTimeout(() => {
+            el.hidden = true;
+          }, 6e3);
+        } else if (!rot) el.hidden = true;
       };
       window.addEventListener("orientationchange", () => setTimeout(fit, 250));
       window.addEventListener("resize", fit);
@@ -4947,7 +4961,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       const p = this.profile;
       this.heroFrames = makeHero(p ? p.hero : 0);
       this.audio.muted = !!this.state.muted;
-      this.audio.song = this.state.song || "original";
+      this.audio.song = this.state.song || "tanz";
       if (p) {
         this.audio.setA4(p.a4);
         this.audio.musicOff = p.music === false;
