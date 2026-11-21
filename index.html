@@ -112,7 +112,11 @@ textarea{width:100%;font:16px/1.3 ui-monospace,monospace;border:4px solid var(--
 .pill{background:var(--k);color:var(--ye);padding:8px 12px;font-weight:700}
 .tabs{display:flex;gap:8px;margin-bottom:14px}.tab{flex:1;min-height:52px;background:#E8D7B5;border:4px solid var(--k);font-weight:700;font-size:20px}.tab.sel{background:var(--k);color:var(--cream)}.tab:disabled{opacity:.6;font-size:16px;font-weight:400}
 .mapq{margin:2px 0 8px;font-size:21px}
-.mapnav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:16px;padding-top:14px;border-top:4px solid var(--k)}.mapnav .btn{display:flex;flex-direction:column;align-items:flex-start;text-align:left;min-height:64px;padding:8px 14px;font-size:21px;background:#DDEBF7}.mapnav small{font-weight:400;font-size:16px}
+.mapnav{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-top:16px;padding-top:14px;border-top:4px solid var(--k)}.mapnav .btn{display:flex;flex-direction:column;align-items:flex-start;text-align:left;min-height:64px;padding:8px 10px;font-size:20px;background:#DDEBF7;min-width:0}.mapnav small{font-weight:400;font-size:15px}.mapnav .btn.tr{background:var(--ye)}
+.row.stick{position:sticky;bottom:-28px;background:var(--cream);padding:10px 10px 14px;margin:18px -10px -14px;z-index:2}#stage.phone .row.stick{bottom:-16px}
+.segq{margin:12px 0 6px;font-size:21px}.segrow{display:grid;gap:10px}.segrow.c2{grid-template-columns:1fr 1fr}.segrow.c4{grid-template-columns:repeat(4,minmax(0,1fr))}.btn.seg{min-height:66px;padding:8px 14px;font-size:22px;min-width:0;background:#fff}.btn.seg small{font-size:16px}.btn.seg.sel{background:var(--ye);box-shadow:4px 4px 0 var(--k),inset 0 0 0 3px var(--k)}
+.trnums{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:10px 0;text-align:center}.trnums>div{background:#fff;border:4px solid var(--k);padding:10px}.trnums .bigno{font-size:54px;margin:6px 0}.trstars{display:flex;align-items:center;gap:14px;margin:8px 0}
+.card.span2{grid-column:1/-1}.trow{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:8px 0;border-top:2px solid #E8DCC4}.spark{flex:none;background:#F7F1E3;border:2px solid var(--k)}.card .maphead{margin-bottom:4px}
 .dots.small{justify-content:flex-start;gap:8px;margin-bottom:8px}.dots.small i{width:22px;height:22px;border-width:3px}.dots i.now{background:var(--ye)}
 .nodes{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
 .node{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;background:#fff;border:4px solid var(--k);box-shadow:4px 4px 0 var(--k);padding:8px 10px 8px 14px;min-height:104px;font-size:19px;line-height:1.15;border-left-width:14px}
@@ -1372,7 +1376,10 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       if (o.up !== false) ctx.fillRect(x + 5, y - 28, 1, 27);
       else ctx.fillRect(x - 5, y + 2, 1, 27);
     }
-    if (o.alt) drawAccidental(ctx, x - 13, y, o.alt, line);
+    if (o.alt) {
+      if (o.halo) for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [1, -1], [-1, 1], [1, 1]]) drawAccidental(ctx, x - 13 + dx, y + dy, o.alt, o.halo);
+      drawAccidental(ctx, x - 13, y, o.alt, line);
+    }
   }
   var SHARP2 = ["..X..X.", "..X..XX", "..XXXX.", "XXX..X.", "..X..X.", "..X..XX", "..XXXX.", "XXX..X.", "..X..X."];
   var FLAT2 = ["X....", "X....", "X....", "X....", "X.XX.", "XX..X", "X...X", "X..X.", "XXX.."];
@@ -1759,7 +1766,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     return ratio >= 0.85 ? 3 : ratio >= 0.65 ? 2 : 1;
   }
   function totalStars(profile) {
-    return Object.values(profile.levels).reduce((a, l) => a + (l.stars || 0), 0);
+    return Object.values(profile.levels).reduce((a, l) => a + (l.stars || 0), 0) + Object.values(profile.train || {}).reduce((a, t) => a + (t.stars || 0), 0);
   }
   var PLACEMENT = [
     { name: "Violinschl\xFCssel: c\xB9 bis g\xB9", clef: "treble", notes: T1, skip: [6, 0, 0, 0] },
@@ -1793,14 +1800,14 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     return stat;
   }
   function pickNext(keys, stats, rnd = Math.random, avoid = null) {
-    const pool = keys.length > 1 ? keys.filter((k) => k !== avoid) : keys;
-    const w = pool.map((k) => WEIGHT[(stats[k] || { box: 0 }).box]);
+    const pool2 = keys.length > 1 ? keys.filter((k) => k !== avoid) : keys;
+    const w = pool2.map((k) => WEIGHT[(stats[k] || { box: 0 }).box]);
     let r = rnd() * w.reduce((a, b) => a + b, 0);
-    for (let i = 0; i < pool.length; i++) {
+    for (let i = 0; i < pool2.length; i++) {
       r -= w[i];
-      if (r <= 0) return pool[i];
+      if (r <= 0) return pool2[i];
     }
-    return pool[pool.length - 1];
+    return pool2[pool2.length - 1];
   }
   function isMastered(stat) {
     return !!stat && stat.box >= MASTERED_BOX;
@@ -2073,7 +2080,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         drawLedgers(ctx, nx - 9, 19, ledgerPositions(pl.pos, this.clef), line);
         if (k === 1) {
           if (this.phase === "listen") drawGlow(ctx, nx, ny, 0.65 + 0.3 * Math.sin(this.t * 5));
-          drawNote(ctx, nx, ny, { style: "gold", up: stemUp(pl.pos, this.clef), alt: pl.note.alt, line: C.K });
+          drawNote(ctx, nx, ny, { style: "gold", halo: "#FFF1D6", up: stemUp(pl.pos, this.clef), alt: pl.note.alt, line: C.K });
         } else {
           ctx.globalAlpha = 0.4;
           drawNote(ctx, nx, ny, { style: "ink", up: stemUp(pl.pos, this.clef), alt: pl.note.alt, line });
@@ -2255,7 +2262,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         drawLedgers(ctx, q(n.x) - 9, 19, ledgerPositions(n.pos, this.clef), line);
         if (i === 0) {
           drawGlow(ctx, q(n.x), y, 0.6 + 0.3 * Math.sin(this.t * 6));
-          drawNote(ctx, q(n.x), y, { style: n.missed ? "ghost" : "gold", up: stemUp(n.pos, this.clef), alt: n.n.alt, line: n.missed ? C.RED : C.K });
+          drawNote(ctx, q(n.x), y, { halo: "#FFF1D6", style: n.missed ? "ghost" : "gold", up: stemUp(n.pos, this.clef), alt: n.n.alt, line: n.missed ? C.RED : C.K });
         } else drawNote(ctx, q(n.x), y, { style: "ink", up: stemUp(n.pos, this.clef), alt: n.n.alt, line });
       });
       drawClef(ctx, this.clef, 6, line);
@@ -2399,7 +2406,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
           const sx = x + (this.wrongT > 0 ? Math.round(Math.sin(this.wrongT * 50) * 2) : 0), y = yOfPos(this.pos);
           drawLedgers(ctx, x - 9, 19, ledgerPositions(this.pos, this.clef), line);
           drawGlow(ctx, sx, y, 0.55 + 0.25 * Math.sin(this.t * 5));
-          drawNote(ctx, sx, y, { style: "gold", up: stemUp(this.pos, this.clef), alt: this.alt, line: C.K });
+          drawNote(ctx, sx, y, { style: "gold", halo: "#FFF1D6", up: stemUp(this.pos, this.clef), alt: this.alt, line: C.K });
           if (this.tries >= 2 && !tk.word) {
             const tp = staffPos(tk.notes[0], this.clef);
             ctx.globalAlpha = 0.45;
@@ -2413,6 +2420,315 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     }
   };
 
+  // src/training.js
+  var TRAIN_SECS = 60;
+  var TRAIN_COUNT = 20;
+  var RECORD_MIN_ACC = 70;
+  var RECORD_MIN_NOTES = 5;
+  var STAR_MIN_ACC = 80;
+  var WEAK_MIN = 3;
+  var STAR_AT = { play: [15, 25, 40], name: [25, 40, 55] };
+  var SLOW_MS = { play: 7e3, name: 5e3 };
+  var safe = (k) => {
+    try {
+      return N(k);
+    } catch (e) {
+      return null;
+    }
+  };
+  var TREBLE = ALL_NOTES[0].filter((k) => N(k).alt === 0);
+  var BASS = ALL_NOTES[1].filter((k) => N(k).alt === 0);
+  var ACC = ALL_NOTES[2].filter((k) => N(k).alt !== 0);
+  function normalize(c = {}) {
+    const cfg = { input: c.input === "name" ? "name" : "play", range: ["treble", "bass", "both"].includes(c.range) ? c.range : "treble", acc: !!c.acc, len: c.len === "count" ? "count" : "time", weak: !!c.weak };
+    if (cfg.range === "bass" || cfg.weak) cfg.acc = false;
+    return cfg;
+  }
+  function weakNotes(profile) {
+    return Object.keys(profile.notes || {}).filter((k) => safe(k) && profile.notes[k].seen >= 2 && !isMastered(profile.notes[k])).map((k) => ({ key: k, clef: TREBLE.includes(k) || ACC.includes(k) ? "treble" : BASS.includes(k) ? "bass" : N(k).step < 0 ? "bass" : "treble" }));
+  }
+  function pool(cfg, profile) {
+    if (cfg.weak) return weakNotes(profile);
+    const out = [];
+    if (cfg.range !== "bass") {
+      TREBLE.forEach((k) => out.push({ key: k, clef: "treble" }));
+      if (cfg.acc) ACC.forEach((k) => out.push({ key: k, clef: "treble" }));
+    }
+    if (cfg.range !== "treble") BASS.forEach((k) => out.push({ key: k, clef: "bass" }));
+    return out;
+  }
+  function disc(cfg) {
+    return cfg.weak ? null : `${cfg.input}-${cfg.range}${cfg.acc ? "+v" : ""}-${cfg.len}`;
+  }
+  function discLabel(cfg) {
+    const r = cfg.weak ? "Meine Wackelnoten" : { treble: "Violinschl\xFCssel", bass: "Bassschl\xFCssel", both: "Beide Schl\xFCssel" }[cfg.range] + (cfg.acc ? " mit Vorzeichen" : "");
+    return `${r} \xB7 ${cfg.input === "play" ? "am Klavier" : "Namen antippen"} \xB7 ${cfg.len === "time" ? "60 Sekunden" : "20 Noten"}`;
+  }
+  var BOARD_DISC = "play-treble-time";
+  function metrics(raw) {
+    const ms = Math.max(1e3, raw.ms || 0);
+    return { npm: Math.round(raw.correct * 6e4 / ms), acc: raw.tried ? Math.round(100 * raw.first / raw.tried) : 0 };
+  }
+  function starsFor2(input, npm, acc) {
+    if (acc < STAR_MIN_ACC) return 0;
+    const t = STAR_AT[input] || STAR_AT.play;
+    return npm >= t[2] ? 3 : npm >= t[1] ? 2 : npm >= t[0] ? 1 : 0;
+  }
+  function record(profile, cfg, raw, day = dayKey()) {
+    const m = metrics(raw), d = disc(cfg), out = { ...m, disc: d, counted: false, newBest: false, prevBest: 0, best: 0, stars: 0, starsGained: 0, nextStar: null, why: "" };
+    if (!d) {
+      out.why = "weak";
+      return out;
+    }
+    profile.train = profile.train || {};
+    const t = profile.train[d] || (profile.train[d] = { cfg: { input: cfg.input, range: cfg.range, acc: cfg.acc, len: cfg.len }, best: 0, bestAcc: 0, stars: 0, runs: [] });
+    t.runs.push({ d: day, n: m.npm, a: m.acc });
+    if (t.runs.length > 30) t.runs.splice(0, t.runs.length - 30);
+    out.prevBest = t.best;
+    out.counted = m.acc >= RECORD_MIN_ACC && raw.correct >= RECORD_MIN_NOTES;
+    if (!out.counted) out.why = raw.correct < RECORD_MIN_NOTES ? "few" : "acc";
+    if (out.counted && m.npm > t.best) {
+      t.best = m.npm;
+      t.bestAcc = m.acc;
+      out.newBest = true;
+    }
+    if (cfg.len === "time") {
+      const s = out.counted ? starsFor2(cfg.input, m.npm, m.acc) : 0;
+      out.starsGained = Math.max(0, s - t.stars);
+      t.stars = Math.max(t.stars, s);
+      const th = STAR_AT[cfg.input];
+      out.nextStar = t.stars < 3 ? th[t.stars] : null;
+    }
+    out.best = t.best;
+    out.stars = t.stars;
+    return out;
+  }
+  function slowest(times, max = 3) {
+    const by = /* @__PURE__ */ new Map();
+    for (const t of times) {
+      const k = t.clef + ":" + t.key, e = by.get(k) || { key: t.key, clef: t.clef, sum: 0, n: 0 };
+      e.sum += t.ms;
+      e.n++;
+      by.set(k, e);
+    }
+    const all = [...by.values()].map((e) => ({ key: e.key, clef: e.clef, ms: e.sum / e.n }));
+    if (all.length < 4) return [];
+    const mean = all.reduce((a, e) => a + e.ms, 0) / all.length;
+    return all.filter((e) => e.ms > mean * 1.25 && e.ms > 1200).sort((a, b) => b.ms - a.ms).slice(0, max);
+  }
+  function sameSound(a, b) {
+    return !!a && !!b && midiOf(N(a.key)) === midiOf(N(b.key));
+  }
+
+  // src/train.js
+  var NOTE_X = 150;
+  var NEXT_X = 218;
+  var COUNTDOWN = 3;
+  var ORDER = ["c", "cis", "des", "d", "dis", "es", "e", "f", "fis", "ges", "g", "gis", "as", "a", "ais", "b", "h"];
+  var TrainScene = class {
+    constructor(app, level) {
+      this.app = app;
+      this.level = level;
+      this.cfg = level.cfg;
+      this.isLevel = true;
+    }
+    enter() {
+      const { app, cfg, level } = this;
+      this.pool = pool(cfg, app.profile);
+      this.theme = level.theme;
+      this.bg = app.background(level.theme);
+      this.line = THEMES[level.theme].line;
+      this.t = 0;
+      this.count = COUNTDOWN;
+      this.elapsed = 0;
+      this.done = false;
+      this.correct = 0;
+      this.first = 0;
+      this.tried = 0;
+      this.times = [];
+      this.freed = [];
+      this.parts = new Particles();
+      this.slide = 1;
+      this.hop = 0;
+      this.shake = 0;
+      this.accMidi = null;
+      this.accAt = -1e9;
+      this.cur = null;
+      this.next = this.pick(null);
+      this.kbClef = null;
+      if (cfg.input === "play") app.panel.showMic(true);
+      else {
+        app.panel.showMic(false);
+        const names = [...new Set(this.pool.map((e) => letterName(N(e.key))))].sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
+        app.panel.answers(names, (l, btn) => this.answer(l, btn));
+      }
+      app.hud.show(level.title, true);
+      app.hud.progress(0, cfg.len === "count" ? TRAIN_COUNT : 0);
+      this.advance();
+      this.hudUpdate();
+      if (cfg.input === "play") app.panel.say(app.listening ? "Ich h\xF6re \u2026" : "Tippe die Taste", "Gleich geht es los.");
+      app.bubble(cfg.input === "play" ? "Spiele jede Note einmal \u2013 so viele wie m\xF6glich!" : "Tippe den Namen jeder Note \u2013 so viele wie m\xF6glich!", COUNTDOWN);
+    }
+    /** Nächste Note: unsichere kommen öfter; nie dieselbe (oder gleich klingende) zweimal hintereinander. */
+    pick(prev) {
+      const keys = [...new Set(this.pool.map((e2) => e2.key))], stats = this.app.profile.notes;
+      let e = null;
+      for (let i = 0; i < 12; i++) {
+        const k = pickNext(keys, stats, Math.random, prev ? prev.key : null), opts = this.pool.filter((x) => x.key === k);
+        e = opts[Math.floor(Math.random() * opts.length)];
+        if (!sameSound(prev, e)) break;
+      }
+      const n = N(e.key);
+      return { n, key: e.key, clef: e.clef, pos: staffPos(n, e.clef) };
+    }
+    advance() {
+      this.cur = this.next;
+      this.next = this.pick(this.cur);
+      this.curTried = false;
+      this.noteStart = this.elapsed;
+      this.slide = 0;
+      if (this.cfg.input === "play" && this.kbClef !== this.cur.clef) {
+        this.kbClef = this.cur.clef;
+        this.app.panel.keyboard(this.cur.clef);
+      }
+    }
+    hudUpdate() {
+      const { app, cfg } = this;
+      if (cfg.len === "count") {
+        app.hud.progress(this.correct, TRAIN_COUNT);
+        app.hud.extra(`<span id="tTime">${Math.floor(this.elapsed)}</span> s`);
+      } else app.hud.extra(`<b>${this.correct}</b> Noten &middot; <span id="tTime">${Math.max(0, Math.ceil(TRAIN_SECS - this.elapsed))}</span> s`);
+    }
+    get live() {
+      return !this.done && this.count <= 0;
+    }
+    hit(midi) {
+      const { app, cfg } = this, p = app.profile, c = this.cur, ms = (this.elapsed - this.noteStart) * 1e3;
+      this.correct++;
+      if (!this.curTried) {
+        this.first++;
+        this.tried++;
+      }
+      p.notes[c.key] = update(p.notes[c.key] || newStat(), !this.curTried, ms > SLOW_MS[cfg.input]);
+      this.times.push({ key: c.key, clef: c.clef, ms });
+      if (cfg.input === "play" && !p.creatures.includes(c.key)) {
+        p.creatures.push(c.key);
+        this.freed.push(c.n);
+      }
+      app.audio.sfx("ok");
+      this.parts.burst(NOTE_X, yOfPos(c.pos), [C.YE, C.W, C.OR], 12);
+      this.hop = 1;
+      if (cfg.input === "play") {
+        app.panel.flash(midi, "good");
+        app.panel.say(app.listening ? "Ich h\xF6re \u2026" : "Tippe die Taste", `<b>${nameHtml(c.n)}</b> \u2013 richtig!`, "ok");
+      }
+      if (cfg.len === "count" && this.correct >= TRAIN_COUNT) {
+        this.hudUpdate();
+        return this.finish();
+      }
+      this.advance();
+      this.hudUpdate();
+    }
+    miss(heardKey) {
+      const p = this.app.profile, c = this.cur;
+      if (!this.curTried) {
+        this.curTried = true;
+        this.tried++;
+        const ck = `${c.key}>${heardKey}`;
+        p.conf[ck] = (p.conf[ck] || 0) + 1;
+      }
+      this.shake = 0.35;
+      this.app.audio.sfx("oops");
+    }
+    /** Ton vom Klavier (Mikrofon) oder von den Bildschirm-Tasten. */
+    onNote(midi) {
+      if (this.cfg.input !== "play" || !this.live) return;
+      const { app } = this, c = this.cur, tm = midiOf(c.n), now = performance.now();
+      if (midi === this.accMidi && (now - this.accAt < 350 || midi !== tm && now - this.accAt < 1200)) return;
+      const cls = classify(tm, midi);
+      if (cls === "correct") {
+        this.accMidi = midi;
+        this.accAt = now;
+        return this.hit(midi);
+      }
+      const heard = noteOfMidi(midi, c.n.alt < 0);
+      this.miss(heard.key);
+      app.panel.flash(midi, "bad");
+      app.panel.say(app.listening ? "Ich h\xF6re \u2026" : "Tippe die Taste", cls === "wrong" ? `Das war <b>${nameHtml(heard)}</b>.` : `Eine Oktave zu ${cls === "octave-high" ? "hoch" : "tief"}.`, "warn");
+    }
+    /** Antwortknopf (Namen antippen). */
+    answer(l, btn) {
+      if (this.cfg.input !== "name" || !this.live) return;
+      if (letterName(this.cur.n) === l) return this.hit(null);
+      this.miss(l);
+      btn.classList.add("shake");
+      setTimeout(() => btn.classList.remove("shake"), 350);
+    }
+    finish() {
+      this.done = true;
+      this.app.audio.sfx("done");
+      this.app.finishTraining(this.level, { correct: this.correct, first: this.first, tried: this.tried, ms: this.cfg.len === "time" ? TRAIN_SECS * 1e3 : this.elapsed * 1e3, times: this.times, freed: this.freed });
+    }
+    update(dt) {
+      this.t += dt;
+      this.parts.update(dt);
+      if (this.slide < 1) this.slide = Math.min(1, this.slide + dt / 0.14);
+      if (this.hop > 0) this.hop = Math.max(0, this.hop - dt * 3.5);
+      if (this.shake > 0) this.shake -= dt;
+      if (this.done) return;
+      if (this.count > 0) {
+        this.count -= dt;
+        if (this.count <= 0) {
+          this.noteStart = 0;
+          if (this.cfg.input === "play") this.app.panel.say(this.app.listening ? "Ich h\xF6re \u2026" : "Tippe die Taste", "Los!");
+        }
+        return;
+      }
+      this.elapsed += dt;
+      const el = document.getElementById("tTime");
+      if (this.cfg.len === "time") {
+        if (el) el.textContent = Math.max(0, Math.ceil(TRAIN_SECS - this.elapsed));
+        if (this.elapsed >= TRAIN_SECS) this.finish();
+      } else if (el) el.textContent = Math.floor(this.elapsed);
+    }
+    draw(ctx, tx) {
+      const line = this.line, c = this.cur;
+      drawBackground(ctx, this.bg, this.t * 4, this.t);
+      drawStaff(ctx, line, 4, VIEW_W - 4, c.clef);
+      drawClef(ctx, c.clef, 6, line);
+      this.app.drawBuddy(ctx, this, 72, 46, this.t, Math.sin(this.hop * Math.PI) * 7);
+      if (this.count > 0) {
+        const n = Math.ceil(this.count);
+        label(tx, String(n), NOTE_X + 10, yOfPos(4), { size: 150 + 40 * (this.count - Math.floor(this.count)), color: "#FFFFFF", stroke: C.K });
+        return;
+      }
+      const off = (1 - this.slide) * (1 - this.slide) * (NEXT_X - NOTE_X), sh = this.shake > 0 ? Math.round(Math.sin(this.shake * 60) * 1.5) : 0, x = q(NOTE_X + off) + sh, y = yOfPos(c.pos);
+      if (!this.done) {
+        const nx = this.next;
+        if (nx.clef === c.clef) {
+          ctx.globalAlpha = 0.38;
+          const x2 = q(NEXT_X + off), y2 = yOfPos(nx.pos);
+          drawLedgers(ctx, x2 - 9, 19, ledgerPositions(nx.pos, nx.clef), line);
+          drawNote(ctx, x2, y2, { style: "ink", up: stemUp(nx.pos, nx.clef), alt: nx.n.alt, line });
+          ctx.globalAlpha = 1;
+        }
+        drawLedgers(ctx, x - 9, 19, ledgerPositions(c.pos, c.clef), line);
+        drawGlow(ctx, x, y, 0.6 + 0.3 * Math.sin(this.t * 6));
+        drawNote(ctx, x, y, { halo: "#FFF1D6", style: this.shake > 0 ? "ghost" : "gold", up: stemUp(c.pos, c.clef), alt: c.n.alt, line: this.shake > 0 ? C.RED : C.K });
+      }
+      this.parts.draw(ctx);
+    }
+  };
+
+  // src/trainui.js
+  var trainui_exports = {};
+  __export(trainui_exports, {
+    trainCard: () => trainCard,
+    trainLevel: () => trainLevel,
+    trainResult: () => trainResult,
+    trainSetup: () => trainSetup
+  });
+
   // src/screens.js
   var screens_exports = {};
   __export(screens_exports, {
@@ -2422,6 +2738,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     calibrate: () => calibrate,
     collection: () => collection,
     confirmImport: () => confirmImport,
+    esc: () => esc,
     fill: () => fill,
     levelCard: () => levelCard,
     map: () => map,
@@ -2434,6 +2751,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     result: () => result,
     settings: () => settings,
     shareSave: () => shareSave,
+    stars: () => stars,
     startPlacement: () => startPlacement,
     story: () => story,
     storyBook: () => storyBook,
@@ -4170,23 +4488,37 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     app.backdrop("himmel");
     const has = app.state.profiles.length > 0;
     app.screen(`<div class="title"><div class="logo">DIE<br>NOTENBR\xDCCKE</div><p class="sub">Ein Abenteuer auf f\xFCnf Linien</p>
-    <button class="btn big" data-act="go">${has ? "Spielen" : "Neues Spiel"}</button><p><button class="btn sm" data-act="info">Info und Datenschutz</button></p></div>`, { go: () => {
-      app.audio.ensure();
-      app.musicReady = true;
-      app.audio.startMusic();
-      has ? profiles(app) : newProf(app);
-    }, info: () => about(app, () => title(app)) }, "clear");
+    <button class="btn big" data-act="go">${has ? "Weiterspielen" : "Neues Spiel"}</button>${has ? '<p><button class="btn" data-act="quick">Schnelles Training</button></p>' : ""}<p><button class="btn sm" data-act="info">Info und Datenschutz</button></p></div>`, {
+      go: () => {
+        app.audio.ensure();
+        app.musicReady = true;
+        app.audio.startMusic();
+        has ? profiles(app) : newProf(app);
+      },
+      quick: () => {
+        app.audio.ensure();
+        app.musicReady = true;
+        app.audio.startMusic();
+        if (app.state.profiles.length === 1) {
+          app.state.current = app.state.profiles[0].id;
+          app.save();
+          app.applyProfile();
+          trainSetup(app);
+        } else profiles(app, "train");
+      },
+      info: () => about(app, () => title(app))
+    }, "clear");
   }
-  function profiles(app) {
+  function profiles(app, to) {
     app.backdrop("himmel");
-    app.screen(`<h2>Wer spielt?</h2><div class="plist">${app.state.profiles.map((p) => `<button class="pcard" data-act="pick" data-id="${p.id}"><span data-hero="${p.hero}" data-hat="${hatOf(p, totalStars(p))}"></span><b>${esc(p.name)}</b><small>${totalStars(p)} Sterne \xB7 ${p.creatures.length} Notenwesen</small></button>`).join("")}
+    app.screen(`<h2>${to === "train" ? "Wer trainiert?" : "Wer spielt?"}</h2><div class="plist">${app.state.profiles.map((p) => `<button class="pcard" data-act="pick" data-id="${p.id}"><span data-hero="${p.hero}" data-hat="${hatOf(p, totalStars(p))}"></span><b>${esc(p.name)}</b><small>${totalStars(p)} Sterne \xB7 ${p.creatures.length} Notenwesen</small></button>`).join("")}
     <button class="pcard new" data-act="new"><span class="plus">+</span><b>Neu</b><small>Neues Profil</small></button></div>
     <div class="row"><button class="btn" data-act="code">Spielstand-Code eingeben</button></div>`, {
       pick: (e) => {
         app.state.current = e.dataset.id;
         app.save();
         app.applyProfile();
-        map(app);
+        to === "train" ? trainSetup(app) : map(app);
       },
       new: () => newProf(app),
       code: () => importScreen(app)
@@ -4309,9 +4641,13 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       track("einstufung-" + (done ? PLACEMENT.indexOf(done) + 1 : 0));
       const w = done ? done.skip[2] ? 2 : done.skip[1] ? 1 : 0 : 0, start2 = done ? levelsOf(w)[Math.min(done.skip[w], levelsOf(w).length) - 1] : null;
       app.screen(`<h2>${done ? "Dein Einstieg steht fest" : "Du startest am Anfang"}</h2><p class="lead">${done ? `Sicher gelesen${mic ? " und gespielt" : ""}: <b>${esc(done.name)}</b>.` : "Das macht nichts: Im ersten Level lernst du die Noten Schritt f\xFCr Schritt."}</p>
-      ${start2 ? `<p>Du kannst jetzt direkt bei <b>${esc(start2.title)}</b> in \u201E${esc(WORLDS[w].name)}\u201C einsteigen. Alle Level davor sind offen, falls du sie trotzdem spielen m\xF6chtest.</p>` : ""}${mic ? "" : '<p class="note warn">Ohne Mikrofon wurde nur das Lesen getestet, nicht das Spielen am Klavier.</p>'}<div class="row"><button class="btn go" data-act="ok">Zur Karte</button></div>`, { ok: () => {
+      ${start2 ? `<p>Du kannst jetzt direkt bei <b>${esc(start2.title)}</b> in \u201E${esc(WORLDS[w].name)}\u201C einsteigen. Alle Level davor sind offen, falls du sie trotzdem spielen m\xF6chtest.</p>` : ""}${mic ? "" : '<p class="note warn">Ohne Mikrofon wurde nur das Lesen getestet, nicht das Spielen am Klavier.</p>'}<div class="row">${done && PLACEMENT.indexOf(done) >= 2 ? '<button class="btn" data-act="train">Direkt ins Training</button>' : ""}<button class="btn go" data-act="ok">Zur Karte</button></div>${done && PLACEMENT.indexOf(done) >= 2 ? '<p class="muted">Im Training \xFCbst du Tempo und Treffsicherheit, ohne Level und Geschichte.</p>' : ""}`, { ok: () => {
         if (done) p.lastWorld = w;
         then();
+      }, train: () => {
+        p.lastWorld = w;
+        app.save();
+        trainSetup(app);
       } });
     };
     const passed = () => {
@@ -4423,8 +4759,9 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       const open = levelUnlocked(p, l), rec = p.levels[l.id];
       return `<button class="node t-${l.type} ${rec ? "done" : ""}" ${open ? "" : "disabled"} data-act="lvl" data-id="${l.id}"><span class="num">${i + 1}</span><b>${esc(l.title)}</b><small>${TYPE_LABEL[l.type]}</small>${!open ? '<small class="lock">im Nebel</small>' : app.locked(l) ? '<small class="lock full">Vollversion</small>' : stars(rec ? rec.stars : 0)}</button>`;
     }).join("")}</div>
-    <nav class="mapnav" aria-label="Bereiche"><button class="btn" data-act="coll"><b>Sammlung</b><small>${p.creatures.length} von ${creatureTotal()} Wesen \xB7 H\xFCte</small></button><button class="btn" data-act="pass"><b>\xDCbungspass</b><small>Was du ge\xFCbt hast</small></button><button class="btn" data-act="book"><b>Geschichte</b><small>Nachlesen</small></button><button class="btn" data-act="board"><b>Bestenliste</b><small>Auf diesem Ger\xE4t</small></button><button class="btn" data-act="set"><b>Einstellungen</b><small>Ton, Mikrofon, Code</small></button></nav>`, {
+    <nav class="mapnav" aria-label="Bereiche"><button class="btn tr" data-act="train"><b>Training</b><small>Tempo und Treffer</small></button><button class="btn" data-act="coll"><b>Sammlung</b><small>${p.creatures.length} von ${creatureTotal()} Wesen \xB7 H\xFCte</small></button><button class="btn" data-act="pass"><b>\xDCbungspass</b><small>Dein Fortschritt</small></button><button class="btn" data-act="book"><b>Geschichte</b><small>Nachlesen</small></button><button class="btn" data-act="board"><b>Bestenliste</b><small>Auf diesem Ger\xE4t</small></button><button class="btn" data-act="set"><b>Einstellungen</b><small>Ton, Mikro, Code</small></button></nav>`, {
       prof: () => profiles(app),
+      train: () => trainSetup(app),
       coll: () => collection(app),
       pass: () => pass(app),
       board: () => board(app),
@@ -4525,7 +4862,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   }
   function pause(app) {
     app.paused = true;
-    app.screen(`<h2>Pause</h2><div class="col"><button class="btn go" data-act="go">Weiterspielen</button><button class="btn" data-act="snd">${app.audio.muted ? "Ton einschalten" : "Ton ausschalten"}</button><button class="btn" data-act="again">Level neu starten</button><button class="btn" data-act="map">Zur Karte</button></div>`, {
+    app.screen(`<h2>Pause</h2><div class="col"><button class="btn go" data-act="go">Weiterspielen</button><button class="btn" data-act="snd">${app.audio.muted ? "Ton einschalten" : "Ton ausschalten"}</button><button class="btn" data-act="again">${app.scene.level && app.scene.level.type === "train" ? "Runde neu starten" : "Level neu starten"}</button><button class="btn" data-act="map">Zur Karte</button></div>`, {
       go: () => {
         app.paused = false;
         app.closeScreen();
@@ -4615,14 +4952,15 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     app.screen(`<div class="maphead"><h2>\xDCbungspass von ${esc(p.name)}</h2><button class="btn sm" data-act="back">Zur\xFCck</button></div>
     <div class="passgrid"><div class="card"><h3>Ge\xFCbt</h3><p class="bigno">${streak(p)}<small> Tage in Folge</small></p><p>Diese Woche: <b>${Math.round(week / 60)} min</b> \xB7 Insgesamt: <b>${Math.round(total / 60)} min</b></p><div class="cal" role="img" aria-label="\xDCbungstage der letzten vier Wochen">${cells.join("")}</div><small class="muted">Die letzten 4 Wochen, heute unten rechts</small></div>
     <div class="card"><h3>Fortschritt</h3><p><b>${totalStars(p)}</b> Sterne \xB7 <b>${p.creatures.length}</b> von ${creatureTotal()} Notenwesen</p>${WORLDS.map((w, i) => `<p>${esc(w.short)}: ${doneCount(p, i)} von ${levelsOf(i).length} Leveln <span class="bar"><i style="width:${100 * doneCount(p, i) / levelsOf(i).length}%"></i></span></p>`).join("")}</div>
-    <div class="card"><h3>Diese Noten sitzen sicher <small>(richtig und z\xFCgig)</small></h3><div class="tags">${list(sure)}</div><h3>Diese Noten noch \xFCben</h3><div class="tags">${list(weak)}</div></div>
-    <div class="card"><h3>H\xE4ufige Verwechslungen</h3>${conf.length ? conf.map((c) => `<p><b>${nameHtml(N(c.target))}</b> wird oft mit <b>${nameHtml(N(c.played))}</b> verwechselt <span class="muted">(${c.n}\xD7)</span></p>`).join("") : '<p class="muted">Bisher keine auff\xE4lligen Verwechslungen.</p>'}</div></div>`, { back: () => map(app) }, "wide");
+    <div class="card"><h3>Diese Noten sitzen sicher <small>(richtig und z\xFCgig)</small></h3><div class="tags">${list(sure)}</div><h3>Diese Noten noch \xFCben</h3><div class="tags">${list(weak)}</div>${weakNotes(p).length >= WEAK_MIN ? '<p><button class="btn sm go" data-act="weak">Diese Noten trainieren</button></p>' : ""}</div>
+    <div class="card"><h3>H\xE4ufige Verwechslungen</h3>${conf.length ? conf.map((c) => `<p><b>${nameHtml(N(c.target))}</b> wird oft mit <b>${nameHtml(N(c.played))}</b> verwechselt <span class="muted">(${c.n}\xD7)</span></p>`).join("") : '<p class="muted">Bisher keine auff\xE4lligen Verwechslungen.</p>'}</div>
+    <div class="card span2"><div class="maphead"><h3>Training <small>(Tempo und Treffsicherheit)</small></h3><button class="btn sm" data-act="train">Training starten</button></div>${trainCard(p)}</div></div>`, { back: () => map(app), train: () => trainSetup(app, null, () => pass(app)), weak: () => trainSetup(app, { weak: true }, () => pass(app)) }, "wide");
   }
   function board(app) {
     const rows = app.state.profiles.map((p) => ({ p, s: totalStars(p) })).sort((a, b) => b.s - a.s || b.p.regenBest - a.p.regenBest);
     app.screen(`<div class="maphead"><h2>Bestenliste auf diesem Ger\xE4t</h2><button class="btn sm" data-act="back">Zur\xFCck</button></div>
-    <table class="board"><thead><tr><th>Platz</th><th>Name</th><th>Sterne</th><th>Notenwesen</th><th>Notenregen-Rekord</th><th>Tage in Folge</th></tr></thead><tbody>${rows.map((r, i) => `<tr class="${r.p.id === app.profile.id ? "me" : ""}"><td>${i + 1}.</td><td>${esc(r.p.name)}</td><td>${r.s}</td><td>${r.p.creatures.length}</td><td>${r.p.regenBest || "\u2013"}</td><td>${streak(r.p)}</td></tr>`).join("")}</tbody></table>
-    <p class="muted">Die Liste zeigt alle Profile, die auf diesem Ger\xE4t spielen.</p>`, { back: () => map(app) }, "wide");
+    <table class="board"><thead><tr><th>Platz</th><th>Name</th><th>Sterne</th><th>Notenwesen</th><th>Notenregen-Rekord</th><th>Training (Noten pro Minute)</th><th>Tage in Folge</th></tr></thead><tbody>${rows.map((r, i) => `<tr class="${r.p.id === app.profile.id ? "me" : ""}"><td>${i + 1}.</td><td>${esc(r.p.name)}</td><td>${r.s}</td><td>${r.p.creatures.length}</td><td>${r.p.regenBest || "\u2013"}</td><td>${r.p.train && r.p.train[BOARD_DISC] && r.p.train[BOARD_DISC].best || "\u2013"}</td><td>${streak(r.p)}</td></tr>`).join("")}</tbody></table>
+    <p class="muted">Die Liste zeigt alle Profile, die auf diesem Ger\xE4t spielen. Training: Violinschl\xFCssel am Klavier, 60 Sekunden.</p>`, { back: () => map(app) }, "wide");
   }
   function settings(app, msg = "") {
     const p = app.profile, mic = { on: "an", off: "noch nicht eingeschaltet", denied: "nicht erlaubt", unsupported: "hier nicht verf\xFCgbar" }[app.audio.micState];
@@ -4791,7 +5129,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     }, "wide");
     document.getElementById("qrHere").appendChild(qrCanvas(link));
   }
-  var VERSION = "2.0 \xB7 21.11.2026";
+  var VERSION = "2.1 \xB7 21.11.2026";
   function about(app, back) {
     app.screen(`<div class="maphead"><h2>Info und Datenschutz</h2><button class="btn sm" data-act="back">Zur\xFCck</button></div><div class="book">
     <h3>Die Notenbr\xFCcke</h3><p>Ein Lernspiel zum Notenlesen am Klavier. Version ${VERSION}${CONFIG.shop ? " \xB7 Kauf-Fassung" : " \xB7 Test-Fassung"}.</p>
@@ -4801,6 +5139,122 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     <p><b>Bereitstellung:</b> Die Seite wird \xFCber GitHub Pages ausgeliefert. Dabei verarbeitet GitHub technisch notwendige Verbindungsdaten wie die IP-Adresse.</p>
     <h3>Verantwortlich</h3><p>Die Angaben zum Anbieter werden vor der allgemeinen Ver\xF6ffentlichung erg\xE4nzt. Fragen bitte an die Lehrkraft, von der du den Link bekommen hast.</p>
     <h3>Quellen</h3><p>Schriften: Atkinson Hyperlegible und Press Start 2P (SIL Open Font License). Notenschl\xFCssel aus Noto Music (SIL Open Font License). QR-Code: qrcode-generator (MIT-Lizenz). Musik und Grafik entstanden eigens f\xFCr dieses Spiel. Die Melodien in den Leveln sind \xFCberlieferte Lieder sowie Werke von Beethoven.</p></div>`, { back }, "wide");
+  }
+
+  // src/trainui.js
+  var THEME = { treble: "himmel", bass: "tiefe", both: "abend" };
+  function trainLevel(cfg) {
+    return { id: "training", type: "train", title: "Training", cfg, theme: cfg.weak ? "himmel" : cfg.acc ? "zauber" : THEME[cfg.range], clef: "treble", notes: [] };
+  }
+  function trainSetup(app, preset, back) {
+    back = back || (() => map(app));
+    app.backdrop("himmel");
+    const p = app.profile, full = !(CONFIG.shop && !app.licensed), weakN = weakNotes(p).length;
+    let cfg = normalize({ ...p.trainCfg || {}, ...preset || {} });
+    const fix = () => {
+      if (!full) {
+        cfg.range = "treble";
+        cfg.acc = false;
+        cfg.weak = false;
+      }
+      if (cfg.weak && weakN < WEAK_MIN) cfg.weak = false;
+      cfg = normalize(cfg);
+    };
+    fix();
+    const start2 = () => {
+      p.trainCfg = { ...cfg };
+      app.save();
+      app.runLevel(trainLevel(cfg));
+    };
+    const go = async (keys) => {
+      app.audio.ensure();
+      if (keys) app.keysSession = true;
+      if (cfg.input === "play" && !app.keysOn) {
+        app.audio.micState = app.audio.micState === "on" ? "on" : "off";
+        const r = await app.audio.startMic();
+        if (r !== "on") return render();
+        if (!p.calibrated) return calibrate(app, start2);
+      }
+      start2();
+    };
+    const seg = (act, v, on, title2, sub, o = {}) => `<button class="btn opt seg ${on ? "sel" : ""}" data-act="${act}" data-v="${v}" ${o.dis ? "disabled" : ""} aria-pressed="${on}"><b>${title2}</b><small>${o.lock ? "Nur in der Vollversion" : sub}</small></button>`;
+    const render = () => {
+      const mic = app.audio.micState, keys = app.keysOn, play = cfg.input === "play", blocked = play && !keys && (mic === "denied" || mic === "unsupported"), d = disc(cfg), t = d && p.train && p.train[d], accOff = cfg.range === "bass" || cfg.weak;
+      const micLine = !play ? "" : keys ? '<p class="note">Du spielst mit den Bildschirm-Tasten.</p>' : mic === "on" ? '<p class="note ok">Mikrofon ist an.</p>' : mic === "off" ? '<p class="note">Stell dein Ger\xE4t aufs Klavier. Das Spiel fragt gleich nach dem Mikrofon.</p>' : `<p class="note warn">${mic === "denied" ? "Das Mikrofon wurde nicht erlaubt." : "Hier gibt es kein Mikrofon."} Du kannst mit den Bildschirm-Tasten spielen oder \u201ENamen antippen\u201C w\xE4hlen.</p>`;
+      const rec = cfg.weak ? "Hier geht es nur ums \xDCben: Wackelnoten-Runden z\xE4hlen nicht als Rekord." : t && t.best ? `Dein Rekord hier: <b>${t.best}</b> Noten pro Minute.` : "Hier hast du noch keinen Rekord.";
+      app.screen(`<div class="maphead"><div><small class="kicker">Tempo und Treffsicherheit</small><h2>Training</h2></div><button class="btn sm" data-act="back">Zur\xFCck</button></div>
+      <h3 class="segq">1. Wie antwortest du?</h3><div class="segrow c2">${seg("in", "play", play, "Am Klavier spielen", "Mit Mikrofon \u2013 die richtige Oktave z\xE4hlt")}${seg("in", "name", !play, "Namen antippen", "Ohne Klavier, nur lesen")}</div>
+      <h3 class="segq">2. Welche Noten?</h3><div class="segrow c4">${seg("range", "treble", !cfg.weak && cfg.range === "treble", "Violinschl\xFCssel", "c<sup>1</sup> bis a<sup>2</sup>")}${seg("range", "bass", !cfg.weak && cfg.range === "bass", "Bassschl\xFCssel", "C bis c<sup>1</sup>", { lock: !full })}${seg("range", "both", !cfg.weak && cfg.range === "both", "Beide Schl\xFCssel", "Die Schl\xFCssel wechseln", { lock: !full })}${seg("range", "weak", cfg.weak, "Meine Wackelnoten", weakN >= WEAK_MIN ? `${weakN} Noten, die noch nicht sitzen` : "Erst ab 3 unsicheren Noten", { dis: full && weakN < WEAK_MIN, lock: !full })}</div>
+      <button class="toggle ${cfg.acc ? "on" : ""}" data-act="acc" role="switch" aria-checked="${cfg.acc}" ${accOff ? "disabled" : ""}><i></i><span><b>Mit Vorzeichen (\u266F und \u266D)</b><small>${!full ? "Nur in der Vollversion" : accOff ? "Gibt es bisher nur im Violinschl\xFCssel" : "Kreuze und Bes aus dem Land der Zauberzeichen"}</small></span></button>
+      <h3 class="segq">3. Wie lange?</h3><div class="segrow c2">${seg("len", "time", cfg.len === "time", "60 Sekunden", "So viele Noten wie m\xF6glich")}${seg("len", "count", cfg.len === "count", "20 Noten", "In Ruhe \u2013 die Uhr l\xE4uft nur mit")}</div>
+      <p class="note" id="trainRec">${rec}</p>${micLine}
+      <div class="row stick">${blocked ? '<button class="btn go" data-act="keys">Mit Bildschirm-Tasten</button><button class="btn" data-act="go">Mikrofon nochmal versuchen</button>' : '<button class="btn go big" data-act="go">Los!</button>'}</div>`, {
+        back,
+        go: () => go(false),
+        keys: () => go(true),
+        in: (e) => {
+          cfg.input = e.dataset.v;
+          fix();
+          render();
+        },
+        len: (e) => {
+          cfg.len = e.dataset.v;
+          fix();
+          render();
+        },
+        range: (e) => {
+          const v = e.dataset.v;
+          if (!full && v !== "treble") return paywall(app, null);
+          if (v === "weak") cfg.weak = true;
+          else {
+            cfg.weak = false;
+            cfg.range = v;
+          }
+          fix();
+          render();
+        },
+        acc: () => {
+          if (!full) return paywall(app, null);
+          cfg.acc = !cfg.acc;
+          fix();
+          render();
+        }
+      }, "wide");
+    };
+    render();
+  }
+  var sec = (ms) => (ms / 1e3).toFixed(1).replace(".", ",");
+  function trainResult(app, level, r) {
+    const cfg = level.cfg, slow = slowest(r.times), setup = () => trainSetup(app, cfg);
+    const head = r.newBest ? "Neuer Rekord!" : r.counted && r.acc >= 90 ? "Stark gespielt!" : "Runde geschafft!";
+    const cmp = r.newBest ? r.prevBest ? `Vorher waren es ${r.prevBest} \u2013 du hast dich um <b>${r.npm - r.prevBest}</b> verbessert.` : "Das ist deine erste Bestmarke in dieser Disziplin." : r.counted ? `Dein Rekord: <b>${r.best}</b> Noten pro Minute.${r.best - r.npm <= 3 ? " Ganz knapp!" : ""}` : r.why === "weak" ? "Wackelnoten-Runden z\xE4hlen nicht als Rekord. Sie machen deine unsicheren Noten sicherer." : r.why === "few" ? "F\xFCr einen Rekord brauchst du mindestens 5 richtige Noten." : `F\xFCr einen Rekord brauchst du mindestens ${RECORD_MIN_ACC} % Treffer. Erst genau, dann schnell!`;
+    const st = cfg.len === "time" && r.disc ? `<div class="trstars">${stars(r.stars)}<span>${r.starsGained ? `<b>+${r.starsGained} ${r.starsGained === 1 ? "Stern" : "Sterne"}</b> f\xFCr deine H\xFCte! ` : ""}${r.nextStar ? `N\xE4chster Stern ab <b>${r.nextStar}</b> Noten pro Minute mit mindestens ${STAR_MIN_ACC} % Treffern.` : "Alle drei Sterne geholt!"}</span></div>` : "";
+    app.screen(`<small class="kicker">${esc(discLabel(cfg))}</small><h2>${head}</h2>
+    <div class="trnums"><div><p class="bigno" id="trNpm">${r.npm}</p><b>Noten pro Minute</b></div><div><p class="bigno" id="trAcc">${r.acc}<small> %</small></p><b>beim ersten Versuch richtig</b></div></div>
+    <p>${cfg.len === "count" ? `${r.correct} Noten in ${sec(r.ms)} Sekunden. ` : `${r.correct} Noten in 60 Sekunden. `}<span id="trCmp">${cmp}</span></p>${st}
+    ${slow.length ? `<p class="note">Am l\xE4ngsten gebraucht: ${slow.map((e) => `<b>${nameHtml(N(e.key))}</b> (${sec(e.ms)} s)`).join(", ")}</p>` : ""}
+    ${r.freed.length ? `<div class="freed"><p>Neu in deiner Sammlung:</p><div class="row tight">${r.freed.map((n) => `<span class="crcard"><span data-cr="${n.key}"></span><b>${nameHtml(n)}</b></span>`).join("")}</div></div>` : ""}
+    <div class="row"><button class="btn" data-act="map">Karte</button><button class="btn" data-act="setup">Andere Auswahl</button><button class="btn go" data-act="again">Nochmal</button></div>`, {
+      map: () => map(app),
+      setup,
+      again: () => {
+        app.audio.ensure();
+        app.runLevel(level);
+      }
+    });
+    app.audio.fanfare(r.newBest ? 3 : r.counted ? 2 : 1);
+  }
+  function spark(runs) {
+    const v = runs.slice(-12).map((x2) => x2.n), lo = Math.min(...v), hi = Math.max(...v), W = 190, H = 46, x = (i) => v.length < 2 ? W / 2 : 8 + i * (W - 16) / (v.length - 1), y = (n) => hi === lo ? H / 2 : H - 8 - (n - lo) * (H - 16) / (hi - lo);
+    return `<svg class="spark" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Verlauf der letzten Runden: ${v.join(", ")} Noten pro Minute"><polyline fill="none" stroke="#2998E8" stroke-width="3" points="${v.map((n, i) => `${x(i).toFixed(1)},${y(n).toFixed(1)}`).join(" ")}"/>${v.map((n, i) => `<rect x="${(x(i) - 3).toFixed(1)}" y="${(y(n) - 3).toFixed(1)}" width="6" height="6" fill="${i === v.length - 1 ? "#FF9D35" : "#26364B"}"/>`).join("")}</svg>`;
+  }
+  function trainCard(p) {
+    const ds = Object.values(p.train || {}).filter((t) => t.runs && t.runs.length);
+    if (!ds.length) return '<p class="muted">Noch keine Trainingsrunde gespielt.</p>';
+    return ds.map((t) => {
+      const last = t.runs[t.runs.length - 1];
+      return `<div class="trow"><div><b>${esc(discLabel(normalize(t.cfg)))}</b>${t.stars ? " " + stars(t.stars) : ""}<br><small>Rekord: <b>${t.best || "\u2013"}</b> Noten pro Minute \xB7 zuletzt ${last.n} mit ${last.a} % Treffern \xB7 ${t.runs.length} ${t.runs.length === 1 ? "Runde" : "Runden"}</small></div>${spark(t.runs)}</div>`;
+    }).join("");
   }
 
   // src/main.js
@@ -5196,7 +5650,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       this.hud.extra("");
       this.audio.keepAwake(true);
       this.audio.stopMusic();
-      const Cls = { jump: JumpScene, boss: JumpScene, regen: RegenScene, bau: BauScene }[level.type];
+      const Cls = { jump: JumpScene, boss: JumpScene, regen: RegenScene, bau: BauScene, train: TrainScene }[level.type];
       this.scene = new Cls(this, level);
       this.scene.enter();
     }
@@ -5226,6 +5680,17 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       this.bubble(null);
       this.$("hud").hidden = true;
       result(this, level, out);
+    }
+    /** Ende einer Trainingsrunde: rechnen, Rekord eintragen, Ergebnis zeigen. */
+    finishTraining(level, raw) {
+      const p = this.profile, rec = record(p, level.cfg, raw);
+      this.$("sndBtn").hidden = false;
+      this.scene.isLevel = false;
+      track("training/" + (rec.disc || "wackelnoten"));
+      this.flush();
+      this.bubble(null);
+      this.$("hud").hidden = true;
+      trainResult(this, level, { ...raw, ...rec });
     }
     loop(ts) {
       const dt = Math.min(0.05, (ts - this.last) / 1e3);
@@ -5262,6 +5727,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     window.__levels = LEVELS;
     window.__screens = screens_exports;
     window.__config = CONFIG;
+    window.__train = trainui_exports;
   };
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(start, start);
   else start();

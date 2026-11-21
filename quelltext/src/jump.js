@@ -92,7 +92,7 @@ export class JumpScene {
     if (this.phase !== 'done') for (let k = (this.boss ? 3 : 2); k >= 1; k--) { // gesuchte Note + Vorschau
       const pl = this.plats[this.idx + k]; if (!pl) continue; const nx = pl.x - 42 - cam, ny = G.yOfPos(pl.pos); if (nx > G.VIEW_W + 10) continue;
       G.drawLedgers(ctx, nx - 9, 19, ledgerPositions(pl.pos, this.clef), line);
-      if (k === 1) { if (this.phase === 'listen') G.drawGlow(ctx, nx, ny, 0.65 + 0.3 * Math.sin(this.t * 5)); G.drawNote(ctx, nx, ny, { style: 'gold', up: stemUp(pl.pos, this.clef), alt: pl.note.alt, line: G.C.K }); }
+      if (k === 1) { if (this.phase === 'listen') G.drawGlow(ctx, nx, ny, 0.65 + 0.3 * Math.sin(this.t * 5)); G.drawNote(ctx, nx, ny, { style: 'gold', halo: '#FFF1D6', up: stemUp(pl.pos, this.clef), alt: pl.note.alt, line: G.C.K }); }
       else { ctx.globalAlpha = 0.4; G.drawNote(ctx, nx, ny, { style: 'ink', up: stemUp(pl.pos, this.clef), alt: pl.note.alt, line }); ctx.globalAlpha = 1; }
     }
     if (this.ghost && this.ghost.pos >= -6 && this.ghost.pos <= 14) { const pl = this.plats[this.idx + 1], nx = pl.x - 42 - cam + 16, a = Math.max(0, 1 - this.ghost.t / 2.2);

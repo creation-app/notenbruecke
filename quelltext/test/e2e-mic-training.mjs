@@ -1,0 +1,17 @@
+// Training über den echten Mikrofon-Weg: Chrome spielt abwechselnd a¹ und c² als Mikrofon ein; die Runde muss die Töne zügig und ohne Fehlerkennung zählen.
+import { chromium } from 'playwright'; import path from 'node:path'; import { piano, writeWav } from './wav.mjs';
+const tone = +(process.argv[2] || 0.5), gap = +(process.argv[3] || 0.2); const sil = new Float32Array(Math.round(48000 * gap)), wav = path.resolve('shots/mic-train.wav'); const seq = []; for (let i = 0; i < 12; i++) seq.push(piano(69, tone), sil, piano(72, tone), sil); writeWav(wav, seq); const errors = [];
+const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox', '--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', `--use-file-for-fake-audio-capture=${wav}`, '--autoplay-policy=no-user-gesture-required'] });
+const page = await browser.newPage({ viewport: { width: 1280, height: 800 } }); page.on('pageerror', e => errors.push('pageerror: ' + e.message)); const act = a => page.click(`#screen [data-act="${a}"]`); const wait = ms => page.waitForTimeout(ms);
+await page.goto('file://' + path.resolve('dist/notenbruecke.html')); await wait(500); await act('go'); await page.fill('#pname', 'Mikro'); await act('ok'); await act('skip'); await act('new'); await act('skip'); await wait(100);
+await page.evaluate(() => { __nb.profile.calibrated = true; }); await act('train'); await wait(100); await act('go'); await page.waitForFunction(() => __nb.scene && __nb.scene.cfg, null, { timeout: 8000 });
+if (!(await page.evaluate(() => __nb.listening))) errors.push('Mikrofon hört nicht zu');
+await page.evaluate(() => { const s = __nb.scene; s.pool = [{ key: 'a1', clef: 'treble' }, { key: 'c2', clef: 'treble' }]; s.next = s.pick(null); s.advance(); });
+await page.waitForFunction(() => __nb.scene.live, null, { timeout: 8000 }); const secs = 24; await wait(secs * 1000); await page.screenshot({ path: 'shots/mic-train-1.png' });
+const r = await page.evaluate(() => { const s = __nb.scene; return { correct: s.correct, first: s.first, tried: s.tried, conf: __nb.profile.conf, el: s.elapsed }; }); const expected = Math.floor(r.el / (tone + gap));
+console.log(`gespielt ca. ${expected} Töne in ${r.el.toFixed(1)} s, gezählt ${r.correct}, davon beim ersten Versuch ${r.first}, Fehler ${r.tried - r.first}, Verwechslungen ${JSON.stringify(r.conf)}`);
+if (r.correct < expected - 3) errors.push(`zu wenige Töne erkannt: ${r.correct} von etwa ${expected}`); if (r.correct > expected + 1) errors.push(`mehr Töne gezählt als gespielt: ${r.correct} > ${expected}`); if (r.tried - r.first > 1) errors.push(`Fehlerkennungen: ${r.tried - r.first}`);
+const odd = Object.keys(r.conf).filter(k => !['a1>c2', 'c2>a1'].includes(k)); if (odd.length) errors.push('falscher Ton erkannt: ' + JSON.stringify(r.conf));
+await page.evaluate(() => { __nb.scene.elapsed = 59.6; }); await wait(1000); const npm = +(await page.textContent('#trNpm')), acc = parseInt(await page.textContent('#trAcc'), 10); await page.screenshot({ path: 'shots/mic-train-2.png' });
+if (!(npm >= r.correct && acc >= 90)) errors.push(`Ergebnis unplausibel: ${npm} Noten/min, ${acc} %`);
+console.log(errors.length ? errors.join('\n') : 'MIKROFON-TRAINING OK'); await browser.close(); process.exit(errors.length ? 1 : 0);

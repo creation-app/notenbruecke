@@ -118,7 +118,7 @@ export function drawNote(ctx, x, y, o = {}) {
   }
   if (st === 'gold') { px(ctx, x - 3, y - 2, '#FFF'); px(ctx, x - 2, y - 2, '#FFF'); px(ctx, x - 3, y - 1, '#FFF'); }
   if (o.stem !== false) { ctx.fillStyle = line; if (o.up !== false) ctx.fillRect(x + 5, y - 28, 1, 27); else ctx.fillRect(x - 5, y + 2, 1, 27); }
-  if (o.alt) drawAccidental(ctx, x - 13, y, o.alt, line);
+  if (o.alt) { if (o.halo) for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [1, -1], [-1, 1], [1, 1]]) drawAccidental(ctx, x - 13 + dx, y + dy, o.alt, o.halo); drawAccidental(ctx, x - 13, y, o.alt, line); } // halo: heller Rand, damit das Vorzeichen auf jedem Hintergrund lesbar ist
 }
 const SHARP = ['..X..X.', '..X..XX', '..XXXX.', 'XXX..X.', '..X..X.', '..X..XX', '..XXXX.', 'XXX..X.', '..X..X.'];
 const FLAT = ['X....', 'X....', 'X....', 'X....', 'X.XX.', 'XX..X', 'X...X', 'X..X.', 'XXX..'];

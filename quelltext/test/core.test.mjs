@@ -138,3 +138,35 @@ test('Wiederholung: langsam richtig reicht nicht für "sicher"', () => {
   S.update(a, true); assert.ok(S.isMastered(a)); S.update(a, true, true); assert.ok(S.isMastered(a), 'einmal langsam nimmt nichts weg');
   S.update(a, false); assert.equal(a.box, 1);
 });
+
+test('Training: Notenvorrat, Disziplin und Voreinstellungen', async () => {
+  const T = await import('../src/training.js'); const { N } = await import('../src/music.js');
+  const d = T.normalize({}); assert.deepEqual(d, { input: 'play', range: 'treble', acc: false, len: 'time', weak: false });
+  assert.equal(T.normalize({ range: 'bass', acc: true }).acc, false, 'Vorzeichen gibt es im Bass nicht'); assert.equal(T.normalize({ range: 'quatsch', input: 'x', len: 'y' }).range, 'treble');
+  const tr = T.pool(T.normalize({}), {}), ba = T.pool(T.normalize({ range: 'bass' }), {}), both = T.pool(T.normalize({ range: 'both' }), {}), acc = T.pool(T.normalize({ acc: true }), {});
+  assert.ok(tr.length >= 10 && tr.every(e => e.clef === 'treble' && N(e.key).alt === 0)); assert.ok(ba.length >= 10 && ba.every(e => e.clef === 'bass' && N(e.key).alt === 0));
+  assert.equal(both.length, tr.length + ba.length); assert.ok(acc.length > tr.length && acc.some(e => N(e.key).alt !== 0));
+  assert.equal(T.disc(T.normalize({})), 'play-treble-time'); assert.equal(T.disc(T.normalize({ acc: true, input: 'name', len: 'count' })), 'name-treble+v-count'); assert.equal(T.disc(T.normalize({ weak: true })), null);
+  assert.equal(new Set(['treble', 'bass', 'both'].flatMap(r => ['play', 'name'].flatMap(i => ['time', 'count'].map(l => T.disc(T.normalize({ range: r, input: i, len: l })))))).size, 12);
+  assert.match(T.discLabel(T.normalize({ range: 'both' })), /Beide Schlüssel · am Klavier · 60 Sekunden/);
+  const p = { notes: { c1: { box: 4, seen: 9, ok: 9 }, f1: { box: 1, seen: 3, ok: 1 }, G: { box: 0, seen: 2, ok: 0 }, a1: { box: 0, seen: 1, ok: 0 }, fis1: { box: 2, seen: 5, ok: 3 }, kaputt: { box: 0, seen: 5 } } };
+  assert.deepEqual(T.weakNotes(p), [{ key: 'f1', clef: 'treble' }, { key: 'G', clef: 'bass' }, { key: 'fis1', clef: 'treble' }]); assert.deepEqual(T.pool(T.normalize({ weak: true }), p), T.weakNotes(p));
+  assert.ok(T.sameSound({ key: 'cis2' }, { key: 'des2' })); assert.ok(!T.sameSound({ key: 'c1' }, { key: 'd1' })); assert.ok(!T.sameSound(null, { key: 'c1' }));
+});
+test('Training: Rechnung, Rekorde und Sterne', async () => {
+  const T = await import('../src/training.js'); const { totalStars } = await import('../src/levels.js');
+  assert.deepEqual(T.metrics({ correct: 30, first: 27, tried: 30, ms: 60000 }), { npm: 30, acc: 90 }); assert.deepEqual(T.metrics({ correct: 20, first: 20, tried: 20, ms: 40000 }), { npm: 30, acc: 100 });
+  assert.deepEqual(T.metrics({ correct: 0, first: 0, tried: 0, ms: 0 }), { npm: 0, acc: 0 });
+  assert.equal(T.starsFor('play', 14, 100), 0); assert.equal(T.starsFor('play', 15, 100), 1); assert.equal(T.starsFor('play', 25, 80), 2); assert.equal(T.starsFor('play', 60, 79), 0); assert.equal(T.starsFor('name', 40, 95), 2); assert.equal(T.starsFor('name', 55, 95), 3);
+  const p = { levels: { h1: { stars: 3 } }, notes: {} }, cfg = T.normalize({});
+  let r = T.record(p, cfg, { correct: 18, first: 16, tried: 18, ms: 60000 }, '2026-11-21'); assert.ok(r.counted && r.newBest); assert.equal(r.best, 18); assert.equal(r.stars, 1); assert.equal(r.starsGained, 1); assert.equal(r.nextStar, 25); assert.equal(totalStars(p), 4);
+  r = T.record(p, cfg, { correct: 16, first: 16, tried: 16, ms: 60000 }); assert.ok(r.counted && !r.newBest); assert.equal(r.best, 18); assert.equal(r.prevBest, 18); assert.equal(r.starsGained, 0);
+  r = T.record(p, cfg, { correct: 50, first: 20, tried: 50, ms: 60000 }); assert.ok(!r.counted && !r.newBest); assert.equal(r.why, 'acc'); assert.equal(r.best, 18, 'Drauflos-Raten bringt keinen Rekord'); assert.equal(r.stars, 1);
+  r = T.record(p, cfg, { correct: 3, first: 3, tried: 3, ms: 60000 }); assert.equal(r.why, 'few');
+  r = T.record(p, cfg, { correct: 41, first: 40, tried: 41, ms: 60000 }); assert.ok(r.newBest); assert.equal(r.stars, 3); assert.equal(r.starsGained, 2); assert.equal(r.nextStar, null); assert.equal(totalStars(p), 6); assert.equal(T.trainStars(p), 3);
+  assert.equal(p.train['play-treble-time'].runs.length, 5); for (let i = 0; i < 40; i++) T.record(p, cfg, { correct: 10, first: 10, tried: 10, ms: 60000 }); assert.equal(p.train['play-treble-time'].runs.length, 30);
+  const c20 = T.normalize({ len: 'count' }); r = T.record(p, c20, { correct: 20, first: 19, tried: 20, ms: 30000 }); assert.equal(r.npm, 40); assert.ok(r.newBest); assert.equal(r.stars, 0, '20-Noten-Runden geben keine Sterne'); assert.equal(r.nextStar, null);
+  r = T.record(p, T.normalize({ weak: true }), { correct: 20, first: 20, tried: 20, ms: 30000 }); assert.equal(r.disc, null); assert.equal(r.why, 'weak'); assert.ok(!r.newBest); assert.equal(Object.keys(p.train).length, 2);
+  const times = [['c1', 900], ['d1', 1000], ['e1', 950], ['f2', 3200], ['f2', 2800], ['a1', 2100], ['g1', 1000]].map(([key, ms]) => ({ key, clef: 'treble', ms }));
+  assert.deepEqual(T.slowest(times).map(e => e.key), ['f2', 'a1']); assert.equal(Math.round(T.slowest(times)[0].ms), 3000); assert.deepEqual(T.slowest(times.slice(0, 2)), []);
+});

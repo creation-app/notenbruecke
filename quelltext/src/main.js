@@ -10,6 +10,9 @@ import { starsFor, LEVELS, totalStars } from './levels.js';
 import { JumpScene } from './jump.js';
 import { RegenScene } from './regen.js';
 import { BauScene } from './bau.js';
+import { TrainScene } from './train.js';
+import * as T from './training.js';
+import * as TU from './trainui.js';
 import * as S from './screens.js';
 import { N } from './music.js';
 
@@ -102,7 +105,7 @@ class App {
   runLevel(level) {
     this.closeScreen(); this.paused = false; this.calib = null; this.bubble(null); this.hud.extra('');
     this.audio.keepAwake(true); this.audio.stopMusic();
-    const Cls = { jump: JumpScene, boss: JumpScene, regen: RegenScene, bau: BauScene }[level.type]; this.scene = new Cls(this, level); this.scene.enter();
+    const Cls = { jump: JumpScene, boss: JumpScene, regen: RegenScene, bau: BauScene, train: TrainScene }[level.type]; this.scene = new Cls(this, level); this.scene.enter();
   }
   finishLevel(level, res) {
     const p = this.profile, stars = res.stars != null ? res.stars : starsFor(res.ratio), prev = p.levels[level.id], rec = prev || { stars: 0 };
@@ -110,6 +113,11 @@ class App {
     if (res.time != null) { const nb = !rec.time || res.time < rec.time; if (nb) rec.time = Math.round(res.time * 10) / 10; if (p.mode === 'profi') { out.newBest = nb; out.bestTime = rec.time; } }
     if (res.score != null) { out.newBest = !rec.score || res.score > rec.score; rec.score = Math.max(rec.score || 0, res.score); out.bestScore = rec.score; p.regenBest = Math.max(p.regenBest || 0, res.score); }
     p.levels[level.id] = rec; this.$('sndBtn').hidden = false; this.scene.isLevel = false; track('level/' + level.id); this.flush(); this.bubble(null); this.$('hud').hidden = true; S.result(this, level, out);
+  }
+  /** Ende einer Trainingsrunde: rechnen, Rekord eintragen, Ergebnis zeigen. */
+  finishTraining(level, raw) {
+    const p = this.profile, rec = T.record(p, level.cfg, raw); this.$('sndBtn').hidden = false; this.scene.isLevel = false; track('training/' + (rec.disc || 'wackelnoten')); this.flush(); this.bubble(null); this.$('hud').hidden = true;
+    TU.trainResult(this, level, { ...raw, ...rec });
   }
   loop(ts) {
     const dt = Math.min(0.05, (ts - this.last) / 1000); this.last = ts; const sc = this.scene;
@@ -124,5 +132,5 @@ class App {
     requestAnimationFrame(t => this.loop(t));
   }
 }
-const start = () => { window.__nb = new App(); window.__levels = LEVELS; window.__screens = S; window.__config = CONFIG; };
+const start = () => { window.__nb = new App(); window.__levels = LEVELS; window.__screens = S; window.__config = CONFIG; window.__train = TU; };
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(start, start); else start();

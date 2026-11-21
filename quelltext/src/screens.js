@@ -6,6 +6,8 @@ import { HEROES, HATS, hatOf, buddyStage, BUDDY_STAGE, makeHero, makeCreature, c
 import { newProfile, importCode, exportShort, importShort, exportPayload, importPayload, streak, dayKey } from './save.js';
 import { CONFIG } from './config.js';
 import { SONGS } from './audio.js';
+import { trainSetup, trainCard } from './trainui.js';
+import { weakNotes, WEAK_MIN, BOARD_DISC } from './training.js';
 import { track } from './stats.js';
 import { classify } from './music.js';
 import { prevWorld } from './levels.js';
@@ -16,8 +18,8 @@ import { a4FromCents } from './pitch.js';
 import { INTRO, WORLD_INTRO, WORLD_OUTRO, LEVEL_STORY } from './story.js';
 import { fmtTime } from './jump.js';
 
-const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const stars = (n, cls = '') => `<span class="stars ${cls}" role="img" aria-label="${n} von 3 Sternen">${[0, 1, 2].map(i => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}</span>`;
+export const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+export const stars = (n, cls = '') => `<span class="stars ${cls}" role="img" aria-label="${n} von 3 Sternen">${[0, 1, 2].map(i => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}</span>`;
 const safeN = k => { try { return N(k); } catch (e) { return null; } };
 function crCanvas(key, locked, size = 64) { const n = N(key), c = makeCreature(((n.step % 7) + 7) % 7, n.alt, locked); c.style.width = c.style.height = size + 'px'; c.className = 'pix'; c.setAttribute('aria-hidden', 'true'); return c; }
 function heroCanvas(i, size = 72, hat = 0) { const c = makeHero(i, hat).idle0; c.style.width = size + 'px'; c.style.height = size * 24 / 18 + 'px'; c.className = 'pix'; c.setAttribute('aria-hidden', 'true'); return c; }
@@ -26,14 +28,15 @@ export function fill(root) { root.querySelectorAll('[data-cr]').forEach(e => e.a
 export function title(app) {
   app.backdrop('himmel'); const has = app.state.profiles.length > 0;
   app.screen(`<div class="title"><div class="logo">DIE<br>NOTENBRÜCKE</div><p class="sub">Ein Abenteuer auf fünf Linien</p>
-    <button class="btn big" data-act="go">${has ? 'Spielen' : 'Neues Spiel'}</button><p><button class="btn sm" data-act="info">Info und Datenschutz</button></p></div>`, { go: () => { app.audio.ensure(); app.musicReady = true; app.audio.startMusic(); has ? profiles(app) : newProf(app); }, info: () => about(app, () => title(app)) }, 'clear');
+    <button class="btn big" data-act="go">${has ? 'Weiterspielen' : 'Neues Spiel'}</button>${has ? '<p><button class="btn" data-act="quick">Schnelles Training</button></p>' : ''}<p><button class="btn sm" data-act="info">Info und Datenschutz</button></p></div>`, { go: () => { app.audio.ensure(); app.musicReady = true; app.audio.startMusic(); has ? profiles(app) : newProf(app); },
+    quick: () => { app.audio.ensure(); app.musicReady = true; app.audio.startMusic(); if (app.state.profiles.length === 1) { app.state.current = app.state.profiles[0].id; app.save(); app.applyProfile(); trainSetup(app); } else profiles(app, 'train'); }, info: () => about(app, () => title(app)) }, 'clear');
 }
-export function profiles(app) {
+export function profiles(app, to) {
   app.backdrop('himmel');
-  app.screen(`<h2>Wer spielt?</h2><div class="plist">${app.state.profiles.map(p => `<button class="pcard" data-act="pick" data-id="${p.id}"><span data-hero="${p.hero}" data-hat="${hatOf(p, totalStars(p))}"></span><b>${esc(p.name)}</b><small>${totalStars(p)} Sterne · ${p.creatures.length} Notenwesen</small></button>`).join('')}
+  app.screen(`<h2>${to === 'train' ? 'Wer trainiert?' : 'Wer spielt?'}</h2><div class="plist">${app.state.profiles.map(p => `<button class="pcard" data-act="pick" data-id="${p.id}"><span data-hero="${p.hero}" data-hat="${hatOf(p, totalStars(p))}"></span><b>${esc(p.name)}</b><small>${totalStars(p)} Sterne · ${p.creatures.length} Notenwesen</small></button>`).join('')}
     <button class="pcard new" data-act="new"><span class="plus">+</span><b>Neu</b><small>Neues Profil</small></button></div>
     <div class="row"><button class="btn" data-act="code">Spielstand-Code eingeben</button></div>`, {
-    pick: e => { app.state.current = e.dataset.id; app.save(); app.applyProfile(); map(app); }, new: () => newProf(app), code: () => importScreen(app) });
+    pick: e => { app.state.current = e.dataset.id; app.save(); app.applyProfile(); to === 'train' ? trainSetup(app) : map(app); }, new: () => newProf(app), code: () => importScreen(app) });
 }
 function newProf(app) {
   let hero = 0, mode = 'abenteuer';
@@ -73,7 +76,7 @@ export function placement(app, then) {
   const finish = () => { app.calib = null; const done = reached; if (done) { p.skip = done.skip.map((v, i) => Math.max(v, (p.skip || [])[i] || 0)); p.seenWorld = p.seenWorld || {}; } app.save(); track('einstufung-' + (done ? PLACEMENT.indexOf(done) + 1 : 0));
     const w = done ? (done.skip[2] ? 2 : done.skip[1] ? 1 : 0) : 0, start = done ? levelsOf(w)[Math.min(done.skip[w], levelsOf(w).length) - 1] : null;
     app.screen(`<h2>${done ? 'Dein Einstieg steht fest' : 'Du startest am Anfang'}</h2><p class="lead">${done ? `Sicher gelesen${mic ? ' und gespielt' : ''}: <b>${esc(done.name)}</b>.` : 'Das macht nichts: Im ersten Level lernst du die Noten Schritt für Schritt.'}</p>
-      ${start ? `<p>Du kannst jetzt direkt bei <b>${esc(start.title)}</b> in „${esc(WORLDS[w].name)}“ einsteigen. Alle Level davor sind offen, falls du sie trotzdem spielen möchtest.</p>` : ''}${mic ? '' : '<p class="note warn">Ohne Mikrofon wurde nur das Lesen getestet, nicht das Spielen am Klavier.</p>'}<div class="row"><button class="btn go" data-act="ok">Zur Karte</button></div>`, { ok: () => { if (done) p.lastWorld = w; then(); } }); };
+      ${start ? `<p>Du kannst jetzt direkt bei <b>${esc(start.title)}</b> in „${esc(WORLDS[w].name)}“ einsteigen. Alle Level davor sind offen, falls du sie trotzdem spielen möchtest.</p>` : ''}${mic ? '' : '<p class="note warn">Ohne Mikrofon wurde nur das Lesen getestet, nicht das Spielen am Klavier.</p>'}<div class="row">${done && PLACEMENT.indexOf(done) >= 2 ? '<button class="btn" data-act="train">Direkt ins Training</button>' : ''}<button class="btn go" data-act="ok">Zur Karte</button></div>${done && PLACEMENT.indexOf(done) >= 2 ? '<p class="muted">Im Training übst du Tempo und Treffsicherheit, ohne Level und Geschichte.</p>' : ''}`, { ok: () => { if (done) p.lastWorld = w; then(); }, train: () => { p.lastWorld = w; app.save(); trainSetup(app); } }); };
   const passed = () => { reached = PLACEMENT[si]; si++; qi = 0; right = 0; mode = 'read'; fb = 'Stufe geschafft! Weiter geht es.'; if (si >= PLACEMENT.length) return finish(); pick(); render(); };
   const judge = ok => { const slow = performance.now() - t0 > (mode === 'read' ? READ_MS : PLAY_MS); if (ok && !slow) right++; else if (ok) fb = 'Richtig – aber noch nicht flüssig. Das üben wir.'; qi++; const st = PLACEMENT[si], total = mode === 'read' ? PLACEMENT_Q : PLAY_Q, need = mode === 'read' ? PLACEMENT_PASS : PLAY_PASS;
     if (qi >= total) { if (right < need) return finish(); if (mode === 'read' && mic) { mode = 'play'; qi = 0; right = 0; fb = 'Gut gelesen! Jetzt am Klavier.'; } else return passed(); }
@@ -111,8 +114,8 @@ export function map(app, world) {
     <h3 class="mapq">Wähle eine Welt und dann ein Level:</h3>
     <div class="tabs" role="tablist">${WORLDS.map((w, i) => { const open = worldUnlocked(p, i); return `<button role="tab" aria-selected="${i === world}" class="tab ${i === world ? 'sel' : ''}" ${open ? '' : 'disabled'} data-act="world" data-w="${i}">${open ? esc(w.name) : `Noch im Nebel: ${WORLDS[i].need} Level in „${WORLDS[prevWorld(i)].short}“ schaffen`}</button>`; }).join('')}</div>
     <div class="nodes">${ls.map((l, i) => { const open = levelUnlocked(p, l), rec = p.levels[l.id]; return `<button class="node t-${l.type} ${rec ? 'done' : ''}" ${open ? '' : 'disabled'} data-act="lvl" data-id="${l.id}"><span class="num">${i + 1}</span><b>${esc(l.title)}</b><small>${TYPE_LABEL[l.type]}</small>${!open ? '<small class="lock">im Nebel</small>' : app.locked(l) ? '<small class="lock full">Vollversion</small>' : stars(rec ? rec.stars : 0)}</button>`; }).join('')}</div>
-    <nav class="mapnav" aria-label="Bereiche"><button class="btn" data-act="coll"><b>Sammlung</b><small>${p.creatures.length} von ${creatureTotal()} Wesen · Hüte</small></button><button class="btn" data-act="pass"><b>Übungspass</b><small>Was du geübt hast</small></button><button class="btn" data-act="book"><b>Geschichte</b><small>Nachlesen</small></button><button class="btn" data-act="board"><b>Bestenliste</b><small>Auf diesem Gerät</small></button><button class="btn" data-act="set"><b>Einstellungen</b><small>Ton, Mikrofon, Code</small></button></nav>`, {
-    prof: () => profiles(app), coll: () => collection(app), pass: () => pass(app), board: () => board(app), set: () => settings(app), book: () => storyBook(app, null, () => map(app, world)),
+    <nav class="mapnav" aria-label="Bereiche"><button class="btn tr" data-act="train"><b>Training</b><small>Tempo und Treffer</small></button><button class="btn" data-act="coll"><b>Sammlung</b><small>${p.creatures.length} von ${creatureTotal()} Wesen · Hüte</small></button><button class="btn" data-act="pass"><b>Übungspass</b><small>Dein Fortschritt</small></button><button class="btn" data-act="book"><b>Geschichte</b><small>Nachlesen</small></button><button class="btn" data-act="board"><b>Bestenliste</b><small>Auf diesem Gerät</small></button><button class="btn" data-act="set"><b>Einstellungen</b><small>Ton, Mikro, Code</small></button></nav>`, {
+    prof: () => profiles(app), train: () => trainSetup(app), coll: () => collection(app), pass: () => pass(app), board: () => board(app), set: () => settings(app), book: () => storyBook(app, null, () => map(app, world)),
     world: e => map(app, +e.dataset.w), lvl: e => levelCard(app, LEVELS.find(l => l.id === e.dataset.id)) }, 'wide');
 }
 
@@ -156,7 +159,7 @@ export function result(app, level, res) {
 }
 export function pause(app) {
   app.paused = true;
-  app.screen(`<h2>Pause</h2><div class="col"><button class="btn go" data-act="go">Weiterspielen</button><button class="btn" data-act="snd">${app.audio.muted ? 'Ton einschalten' : 'Ton ausschalten'}</button><button class="btn" data-act="again">Level neu starten</button><button class="btn" data-act="map">Zur Karte</button></div>`, {
+  app.screen(`<h2>Pause</h2><div class="col"><button class="btn go" data-act="go">Weiterspielen</button><button class="btn" data-act="snd">${app.audio.muted ? 'Ton einschalten' : 'Ton ausschalten'}</button><button class="btn" data-act="again">${app.scene.level && app.scene.level.type === 'train' ? 'Runde neu starten' : 'Level neu starten'}</button><button class="btn" data-act="map">Zur Karte</button></div>`, {
     go: () => { app.paused = false; app.closeScreen(); }, snd: () => { app.setMuted(!app.audio.muted); pause(app); }, again: () => { app.paused = false; app.runLevel(app.scene.level); }, map: () => { app.paused = false; app.flush(); map(app); } });
 }
 
@@ -183,14 +186,15 @@ export function pass(app) {
   app.screen(`<div class="maphead"><h2>Übungspass von ${esc(p.name)}</h2><button class="btn sm" data-act="back">Zurück</button></div>
     <div class="passgrid"><div class="card"><h3>Geübt</h3><p class="bigno">${streak(p)}<small> Tage in Folge</small></p><p>Diese Woche: <b>${Math.round(week / 60)} min</b> · Insgesamt: <b>${Math.round(total / 60)} min</b></p><div class="cal" role="img" aria-label="Übungstage der letzten vier Wochen">${cells.join('')}</div><small class="muted">Die letzten 4 Wochen, heute unten rechts</small></div>
     <div class="card"><h3>Fortschritt</h3><p><b>${totalStars(p)}</b> Sterne · <b>${p.creatures.length}</b> von ${creatureTotal()} Notenwesen</p>${WORLDS.map((w, i) => `<p>${esc(w.short)}: ${doneCount(p, i)} von ${levelsOf(i).length} Leveln <span class="bar"><i style="width:${100 * doneCount(p, i) / levelsOf(i).length}%"></i></span></p>`).join('')}</div>
-    <div class="card"><h3>Diese Noten sitzen sicher <small>(richtig und zügig)</small></h3><div class="tags">${list(sure)}</div><h3>Diese Noten noch üben</h3><div class="tags">${list(weak)}</div></div>
-    <div class="card"><h3>Häufige Verwechslungen</h3>${conf.length ? conf.map(c => `<p><b>${nameHtml(N(c.target))}</b> wird oft mit <b>${nameHtml(N(c.played))}</b> verwechselt <span class="muted">(${c.n}×)</span></p>`).join('') : '<p class="muted">Bisher keine auffälligen Verwechslungen.</p>'}</div></div>`, { back: () => map(app) }, 'wide');
+    <div class="card"><h3>Diese Noten sitzen sicher <small>(richtig und zügig)</small></h3><div class="tags">${list(sure)}</div><h3>Diese Noten noch üben</h3><div class="tags">${list(weak)}</div>${weakNotes(p).length >= WEAK_MIN ? '<p><button class="btn sm go" data-act="weak">Diese Noten trainieren</button></p>' : ''}</div>
+    <div class="card"><h3>Häufige Verwechslungen</h3>${conf.length ? conf.map(c => `<p><b>${nameHtml(N(c.target))}</b> wird oft mit <b>${nameHtml(N(c.played))}</b> verwechselt <span class="muted">(${c.n}×)</span></p>`).join('') : '<p class="muted">Bisher keine auffälligen Verwechslungen.</p>'}</div>
+    <div class="card span2"><div class="maphead"><h3>Training <small>(Tempo und Treffsicherheit)</small></h3><button class="btn sm" data-act="train">Training starten</button></div>${trainCard(p)}</div></div>`, { back: () => map(app), train: () => trainSetup(app, null, () => pass(app)), weak: () => trainSetup(app, { weak: true }, () => pass(app)) }, 'wide');
 }
 export function board(app) {
   const rows = app.state.profiles.map(p => ({ p, s: totalStars(p) })).sort((a, b) => b.s - a.s || b.p.regenBest - a.p.regenBest);
   app.screen(`<div class="maphead"><h2>Bestenliste auf diesem Gerät</h2><button class="btn sm" data-act="back">Zurück</button></div>
-    <table class="board"><thead><tr><th>Platz</th><th>Name</th><th>Sterne</th><th>Notenwesen</th><th>Notenregen-Rekord</th><th>Tage in Folge</th></tr></thead><tbody>${rows.map((r, i) => `<tr class="${r.p.id === app.profile.id ? 'me' : ''}"><td>${i + 1}.</td><td>${esc(r.p.name)}</td><td>${r.s}</td><td>${r.p.creatures.length}</td><td>${r.p.regenBest || '–'}</td><td>${streak(r.p)}</td></tr>`).join('')}</tbody></table>
-    <p class="muted">Die Liste zeigt alle Profile, die auf diesem Gerät spielen.</p>`, { back: () => map(app) }, 'wide');
+    <table class="board"><thead><tr><th>Platz</th><th>Name</th><th>Sterne</th><th>Notenwesen</th><th>Notenregen-Rekord</th><th>Training (Noten pro Minute)</th><th>Tage in Folge</th></tr></thead><tbody>${rows.map((r, i) => `<tr class="${r.p.id === app.profile.id ? 'me' : ''}"><td>${i + 1}.</td><td>${esc(r.p.name)}</td><td>${r.s}</td><td>${r.p.creatures.length}</td><td>${r.p.regenBest || '–'}</td><td>${(r.p.train && r.p.train[BOARD_DISC] && r.p.train[BOARD_DISC].best) || '–'}</td><td>${streak(r.p)}</td></tr>`).join('')}</tbody></table>
+    <p class="muted">Die Liste zeigt alle Profile, die auf diesem Gerät spielen. Training: Violinschlüssel am Klavier, 60 Sekunden.</p>`, { back: () => map(app) }, 'wide');
 }
 export function settings(app, msg = '') {
   const p = app.profile, mic = { on: 'an', off: 'noch nicht eingeschaltet', denied: 'nicht erlaubt', unsupported: 'hier nicht verfügbar' }[app.audio.micState];
@@ -258,7 +262,7 @@ export async function shareSave(app) {
   document.getElementById('qrHere').appendChild(qrCanvas(link));
 }
 
-export const VERSION = '2.0 · 21.11.2026';
+export const VERSION = '2.1 · 21.11.2026';
 /** Info, Datenschutz und Quellen. */
 export function about(app, back) {
   app.screen(`<div class="maphead"><h2>Info und Datenschutz</h2><button class="btn sm" data-act="back">Zurück</button></div><div class="book">

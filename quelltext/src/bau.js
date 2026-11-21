@@ -51,7 +51,7 @@ export class BauScene {
     for (let i = 0; i < this.n; i++) { const x = Math.round(this.xs[i]);
       if (i < this.placed.length) { const n = this.placed[i], pos = staffPos(n, this.clef); G.drawLedgers(ctx, x - 9, 19, ledgerPositions(pos, this.clef), line); G.drawNote(ctx, x, G.yOfPos(pos), { style: 'ok', up: stemUp(pos, this.clef), alt: n.alt, line: G.C.K }); }
       else if (i === this.slot && !this.locked) { const sx = x + (this.wrongT > 0 ? Math.round(Math.sin(this.wrongT * 50) * 2) : 0), y = G.yOfPos(this.pos);
-        G.drawLedgers(ctx, x - 9, 19, ledgerPositions(this.pos, this.clef), line); G.drawGlow(ctx, sx, y, 0.55 + 0.25 * Math.sin(this.t * 5)); G.drawNote(ctx, sx, y, { style: 'gold', up: stemUp(this.pos, this.clef), alt: this.alt, line: G.C.K });
+        G.drawLedgers(ctx, x - 9, 19, ledgerPositions(this.pos, this.clef), line); G.drawGlow(ctx, sx, y, 0.55 + 0.25 * Math.sin(this.t * 5)); G.drawNote(ctx, sx, y, { style: 'gold', halo: '#FFF1D6', up: stemUp(this.pos, this.clef), alt: this.alt, line: G.C.K });
         if (this.tries >= 2 && !tk.word) { const tp = staffPos(tk.notes[0], this.clef); ctx.globalAlpha = 0.45; G.drawNote(ctx, x, G.yOfPos(tp), { style: 'ghost', stem: false, line: G.C.G2 }); ctx.globalAlpha = 1; } }
       if (tk.word) label(tx, tk.word[i], x, 126, { size: 30, color: i < this.placed.length ? '#B4EB6B' : '#FFFFFF', stroke: G.C.K }); }
     this.parts.draw(ctx);

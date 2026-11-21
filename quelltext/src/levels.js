@@ -80,7 +80,8 @@ export function levelUnlocked(profile, level) {
 }
 export function nextLevel(level) { const i = LEVELS.indexOf(level); return LEVELS[i + 1] || null; }
 export function starsFor(ratio) { return ratio >= 0.85 ? 3 : ratio >= 0.65 ? 2 : 1; }
-export function totalStars(profile) { return Object.values(profile.levels).reduce((a, l) => a + (l.stars || 0), 0); }
+/** Sterne aus Leveln plus Sterne aus dem Training. */
+export function totalStars(profile) { return Object.values(profile.levels).reduce((a, l) => a + (l.stars || 0), 0) + Object.values(profile.train || {}).reduce((a, t) => a + (t.stars || 0), 0); }
 
 /** Einstufung: Wer eine Stufe besteht, darf entsprechend weit vorne einsteigen. skip = freigeschaltete Level je Welt. */
 export const PLACEMENT = [
