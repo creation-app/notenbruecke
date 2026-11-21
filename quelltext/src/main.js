@@ -40,6 +40,7 @@ class App {
     // Gerät zugeklappt, Tab gewechselt oder App verlassen: sofort alles stumm schalten
     const quiet = () => { this.audio.stopMusic(); try { if (this.audio.bus) this.audio.bus.gain.value = 0; if (this.audio.ctx && this.audio.ctx.state === 'running') this.audio.ctx.suspend(); } catch (e) { /* egal */ } };
     window.addEventListener('pagehide', quiet); window.addEventListener('freeze', quiet); this.quiet = quiet;
+    $('panel').addEventListener('click', e => { if (e.target.closest('#lvlBtn') && this.scene && this.scene.isLevel && !this.paused) { this.paused = true; S.levelCheck(this, () => { this.paused = false; this.closeScreen(); }); } });
     $('pauseBtn').addEventListener('click', () => { if (this.scene && this.scene.isLevel) S.pause(this); });
     const pt = e => { if (!this.scene || !this.scene.pointer || this.paused) return; const r = this.world.getBoundingClientRect(); const u = (e.clientX - r.left) / r.width, v = (e.clientY - r.top) / r.height; if (this.rot) this.scene.pointer(v * G.VIEW_W, (1 - u) * this.H / 4); else this.scene.pointer(u * G.VIEW_W, v * this.H / 4); };
     $('stage').addEventListener('pointerdown', e => { if (e.target.closest('#panel,#screen,#hud')) return; pt(e); }); $('stage').addEventListener('pointermove', e => { if (e.buttons && !e.target.closest('#panel,#screen,#hud')) pt(e); });
@@ -82,7 +83,7 @@ class App {
   resizeStage(W, H) { this.W = W; this.H = H; const st = this.$('stage'); st.style.width = W + 'px'; st.style.height = H + 'px';
     for (const c of [this.world, this.$('text')]) { c.width = W; c.height = H; c.style.width = W + 'px'; c.style.height = H + 'px'; }
     this.ctx.setTransform(4, 0, 0, 4, 0, 0); this.ctx.imageSmoothingEnabled = false; G.setViewW(W / 4); this.$('panel').style.height = (H - 600) + 'px'; st.classList.toggle('tall', H - 600 >= 300); }
-  applyProfile() { const p = this.profile; this.refreshLook(); this.audio.muted = !!this.state.muted; this.audio.song = this.state.song || 'tanz'; if (p) { this.audio.setA4(p.a4); this.audio.musicOff = p.music === false; } if (this.audio.muted || this.audio.musicOff) this.audio.stopMusic(); if (this.paintSound) this.paintSound(); }
+  applyProfile() { const p = this.profile; this.refreshLook(); this.audio.muted = !!this.state.muted; this.audio.setGain(this.state.micGain || 1); this.audio.song = this.state.song || 'tanz'; if (p) { this.audio.setA4(p.a4); this.audio.musicOff = p.music === false; } if (this.audio.muted || this.audio.musicOff) this.audio.stopMusic(); if (this.paintSound) this.paintSound(); }
   /** Ton für das ganze Gerät an oder aus (Musik, Spielklänge, Erfolgsmelodie). */
   setMuted(m) { this.state.muted = !!m; this.audio.muted = !!m; this.save(); if (m) { this.audio.stopMusic(); if (this.audio.bus) this.audio.bus.gain.value = 0; } else { this.audio.ensure(); if (this.musicReady && this.scene instanceof Backdrop && !this.calib) this.audio.startMusic(); } this.paintSound(); }
   save() { return persist(this.store, this.state); }
@@ -127,12 +128,12 @@ class App {
   }
   loop(ts) {
     const dt = Math.min(0.05, (ts - this.last) / 1000); this.last = ts; const sc = this.scene;
-    if (!this.paused) {
+    if (!this.paused || this.calib) {
       const ev = this.audio.poll(ts), sink = this.calib || (this.$('screen').hidden ? sc : null);
       if (ev && sink && sink.onNote && (this.calib || this.listening)) sink.onNote(ev.midi, ev);
       if (this.calib) this.calib.level(this.audio.level);
       else if (sc && sc.isLevel && sc.onNote) { const h = this.listening ? this.audio.heard : null; this.panel.setLevel(this.listening ? this.audio.level : 0); this.panel.setHeard(h ? h.midi : null); }
-      if (sc) { sc.update(dt); if (sc.isLevel) { this.sec += dt; if (this.sec > 20) this.flush(); } }
+      if (sc && !this.paused) { sc.update(dt); if (sc.isLevel) { this.sec += dt; if (this.sec > 20) this.flush(); } }
     }
     if (sc) { this.ctx.fillStyle = (G.THEMES[sc.theme] || G.THEMES.himmel).hill[4]; this.ctx.fillRect(0, 0, G.VIEW_W, this.H / 4); this.tx.clearRect(0, 0, this.W, this.H); sc.draw(this.ctx, this.tx); }
     requestAnimationFrame(t => this.loop(t));

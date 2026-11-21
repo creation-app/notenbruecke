@@ -14,8 +14,9 @@ export class TrainScene {
     this.t = 0; this.count = COUNTDOWN; this.elapsed = 0; this.done = false; this.correct = 0; this.first = 0; this.tried = 0; this.times = []; this.freed = []; this.parts = new G.Particles();
     this.slide = 1; this.hop = 0; this.shake = 0; this.accMidi = null; this.accAt = -1e9; this.cur = null; this.next = this.pick(null); this.kbClef = null;
     if (cfg.input === 'play') app.panel.showMic(true); else { app.panel.showMic(false); const names = [...new Set(this.pool.map(e => letterName(N(e.key))))].sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b)); app.panel.answers(names, (l, btn) => this.answer(l, btn)); }
+    app.panel.task(cfg.input === 'name' ? 'Tippe <b>unten den Namen</b> jeder Note – so schnell du kannst.' : app.listening ? 'Spiele jede Note <b>auf deinem Klavier</b> – so schnell du kannst.' : 'Tippe jede Note <b>unten auf der Tastatur</b> – so schnell du kannst.');
     app.hud.show(level.title, true); app.hud.progress(0, cfg.len === 'count' ? TRAIN_COUNT : 0); this.advance(); this.hudUpdate();
-    if (cfg.input === 'play') app.panel.say(app.listening ? 'Ich höre …' : 'Tippe die Taste', 'Gleich geht es los.');
+    if (cfg.input === 'play') app.panel.say(app.listening ? 'Ich höre …' : 'Bildschirm-Tasten', 'Gleich geht es los.');
     app.bubble(cfg.input === 'play' ? 'Spiele jede Note einmal – so viele wie möglich!' : 'Tippe den Namen jeder Note – so viele wie möglich!', COUNTDOWN);
   }
   /** Nächste Note: unsichere kommen öfter; nie dieselbe (oder gleich klingende) zweimal hintereinander. */
@@ -39,7 +40,7 @@ export class TrainScene {
     p.notes[c.key] = srsUpdate(p.notes[c.key] || newStat(), !this.curTried, ms > SLOW_MS[cfg.input]); this.times.push({ key: c.key, clef: c.clef, ms });
     if (cfg.input === 'play' && !p.creatures.includes(c.key)) { p.creatures.push(c.key); this.freed.push(c.n); }
     app.audio.sfx('ok'); this.parts.burst(NOTE_X, G.yOfPos(c.pos), [G.C.YE, G.C.W, G.C.OR], 12); this.hop = 1;
-    if (cfg.input === 'play') { app.panel.flash(midi, 'good'); app.panel.say(app.listening ? 'Ich höre …' : 'Tippe die Taste', `<b>${nameHtml(c.n)}</b> – richtig!`, 'ok'); }
+    if (cfg.input === 'play') { app.panel.flash(midi, 'good'); app.panel.say(app.listening ? 'Ich höre …' : 'Bildschirm-Tasten', `<b>${nameHtml(c.n)}</b> – richtig!`, 'ok'); }
     if (cfg.len === 'count' && this.correct >= TRAIN_COUNT) { this.hudUpdate(); return this.finish(); }
     this.advance(); this.hudUpdate();
   }
@@ -51,7 +52,7 @@ export class TrainScene {
     const cls = classify(tm, midi);
     if (cls === 'correct') { this.accMidi = midi; this.accAt = now; return this.hit(midi); }
     const heard = noteOfMidi(midi, c.n.alt < 0); this.miss(heard.key); app.panel.flash(midi, 'bad');
-    app.panel.say(app.listening ? 'Ich höre …' : 'Tippe die Taste', cls === 'wrong' ? `Das war <b>${nameHtml(heard)}</b>.` : `Eine Oktave zu ${cls === 'octave-high' ? 'hoch' : 'tief'}.`, 'warn');
+    app.panel.say(app.listening ? 'Ich höre …' : 'Bildschirm-Tasten', cls === 'wrong' ? `Das war <b>${nameHtml(heard)}</b>.` : `Eine Oktave zu ${cls === 'octave-high' ? 'hoch' : 'tief'}.`, 'warn');
   }
   /** Antwortknopf (Namen antippen). */
   answer(l, btn) { if (this.cfg.input !== 'name' || !this.live) return; if (letterName(this.cur.n) === l) return this.hit(null); this.miss(l); btn.classList.add('shake'); setTimeout(() => btn.classList.remove('shake'), 350); }
@@ -59,7 +60,7 @@ export class TrainScene {
   update(dt) {
     place(); this.t += dt; this.parts.update(dt); if (this.slide < 1) this.slide = Math.min(1, this.slide + dt / 0.14); if (this.hop > 0) this.hop = Math.max(0, this.hop - dt * 3.5); if (this.shake > 0) this.shake -= dt;
     if (this.done) return;
-    if (this.count > 0) { this.count -= dt; if (this.count <= 0) { this.noteStart = 0; if (this.cfg.input === 'play') this.app.panel.say(this.app.listening ? 'Ich höre …' : 'Tippe die Taste', 'Los!'); } return; }
+    if (this.count > 0) { this.count -= dt; if (this.count <= 0) { this.noteStart = 0; if (this.cfg.input === 'play') this.app.panel.say(this.app.listening ? 'Ich höre …' : 'Bildschirm-Tasten', 'Los!'); } return; }
     this.elapsed += dt; const el = document.getElementById('tTime');
     if (this.cfg.len === 'time') { if (el) el.textContent = Math.max(0, Math.ceil(TRAIN_SECS - this.elapsed)); if (this.elapsed >= TRAIN_SECS) this.finish(); } else if (el) el.textContent = Math.floor(this.elapsed);
   }

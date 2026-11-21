@@ -29,12 +29,13 @@ export class JumpScene {
   prompt(first) {
     const { app } = this, tg = this.target; this.tries = 0; const isNew = !app.profile.notes[tg.key]; this.t0 = performance.now(); this.fresh = isNew;
     this.hint = isNew; app.panel.setHint(isNew ? midiOf(tg) : null);
+    app.panel.task(this.boss ? (app.listening ? 'Spiele die Melodie Ton für Ton <b>auf deinem Klavier</b>.' : 'Spiele die Melodie Ton für Ton – <b>tippe die Tasten unten</b>.') : app.listening ? 'Spiele die leuchtende Note <b>auf deinem Klavier</b>.' : 'Tippe die leuchtende Note <b>unten auf der Tastatur</b>.');
     app.hud.progress(this.idx, this.targets.length);
     app.hud.extra(app.profile.mode === 'profi' ? `<span id="jTime">0:00</span>${this.combo > 1 ? ` &middot; <b>${this.combo}×</b> Serie` : ''}` : '');
     if (isNew) app.bubble(`Neu: <b>${nameHtml(tg)}</b> – ${describePos(staffPos(tg, this.clef), this.clef)}. Die Taste leuchtet.`, 0);
     else if (first) app.bubble(this.boss ? `Spiele die Melodie: <b>${this.level.title}</b>` : 'Welcher Ton baut die Brücke?', 4);
     else app.bubble(null);
-    if (first) app.panel.say(app.listening ? 'Ich höre …' : 'Tippe die Taste', app.listening ? 'Ich höre noch nichts.' : '');
+    if (first) app.panel.say(app.listening ? 'Ich höre …' : 'Bildschirm-Tasten', app.listening ? 'Ich höre noch nichts.' : '');
   }
   onNote(midi) {
     if (this.phase === 'jump') { this.queue = midi; return; }
@@ -45,14 +46,14 @@ export class JumpScene {
     if (cls === 'correct') {
       const first = this.tries === 0; p.notes[tg.key] = srsUpdate(p.notes[tg.key] || newStat(), first, !this.fresh && performance.now() - this.t0 > SLOW_PLAY_MS);
       if (first) { this.firstTry++; this.combo++; } else this.combo = 0;
-      app.panel.say('Ich höre …', `Perfekt! <b>${nameHtml(tg)}</b> erkannt!`, 'ok'); app.panel.flash(midi, 'good'); app.panel.setHint(null); app.bubble(null);
+      app.panel.say(app.listening ? 'Ich höre …' : 'Bildschirm-Tasten', `Perfekt! <b>${nameHtml(tg)}</b> erkannt!`, 'ok'); app.panel.flash(midi, 'good'); app.panel.setHint(null); app.bubble(null);
       if (!p.creatures.includes(tg.key)) { p.creatures.push(tg.key); this.freed.push(tg); this.freeAt = tg; }
       app.audio.sfx('ok'); this.phase = 'jump'; this.jumpT = 0; this.from = { ...this.hero }; this.accMidi = midi; this.accAt = now; this.ghost = null;
     } else {
       this.tries++; this.combo = 0; const ck = `${tg.key}>${heard.key}`; p.conf[ck] = (p.conf[ck] || 0) + 1;
       this.ghost = { note: heard, pos: staffPos(heard, this.clef), t: 0 }; this.oopsT = 0.5; app.audio.sfx('oops'); app.panel.flash(midi, 'bad');
-      if (cls === 'wrong') app.panel.say('Ich höre …', `Das war <b>${nameHtml(heard)}</b>. Versuch es noch einmal!`, 'warn');
-      else app.panel.say('Ich höre …', `Das ist ein <b>${letterName(tg)}</b>, aber eine Oktave zu ${cls === 'octave-high' ? 'hoch' : 'tief'}.`, 'warn');
+      if (cls === 'wrong') app.panel.say(app.listening ? 'Ich höre …' : 'Bildschirm-Tasten', `Das war <b>${nameHtml(heard)}</b>. Versuch es noch einmal!`, 'warn');
+      else app.panel.say(app.listening ? 'Ich höre …' : 'Bildschirm-Tasten', `Das ist ein <b>${letterName(tg)}</b>, aber eine Oktave zu ${cls === 'octave-high' ? 'hoch' : 'tief'}.`, 'warn');
       if (this.tries >= this.hintAfter && !this.hint) { this.hint = true; app.panel.setHint(tm); app.bubble('Tipp: Die leuchtende Taste ist richtig.', 4); }
     }
   }

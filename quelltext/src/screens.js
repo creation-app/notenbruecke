@@ -5,7 +5,7 @@ import { letterName } from './music.js';
 import { HEROES, HATS, hatOf, buddyStage, BUDDY_STAGE, makeHero, makeCreature, cv, drawStaff, drawClef, drawNote, drawLedgers, yOfPos, C } from './gfx.js';
 import { newProfile, importCode, exportShort, importShort, exportPayload, importPayload, streak, dayKey } from './save.js';
 import { CONFIG } from './config.js';
-import { SONGS } from './audio.js';
+import { SONGS, gainFor, GAIN_PROBE } from './audio.js';
 import { trainSetup, trainCard } from './trainui.js';
 import { weakNotes, WEAK_MIN, BOARD_DISC } from './training.js';
 import { track } from './stats.js';
@@ -134,19 +134,31 @@ export function levelCard(app, level) {
 }
 
 export function calibrate(app, then) {
-  app.audio.stopMusic(); const p = app.profile, cents = []; app.audio.setA4(440); let last = 'Ich höre noch nichts.';
-  const finish = (skip) => { app.calib = null; if (!skip) { p.a4 = a4FromCents(cents); } p.calibrated = true; app.audio.setA4(p.a4); app.save(); then(); };
+  app.audio.stopMusic(); const p = app.profile, cents = [], peaks = [], g0 = app.audio.gain; let last = 'Ich höre noch nichts.', peak = 0; app.audio.setA4(440); app.audio.setGain(GAIN_PROBE); // zum Messen stark verstärkt hören
+  const finish = (skip) => { app.calib = null; if (!skip) { p.a4 = a4FromCents(cents); app.state.micGain = gainFor(peaks); } app.audio.setGain(skip ? g0 : app.state.micGain); p.calibrated = true; app.audio.setA4(p.a4); app.save(); then(); };
   const render = () => app.screen(`<h2>Klavier einstimmen</h2><p>Spiele dreimal nacheinander das <b>c<sup>1</sup></b> – das mittlere c. So stellt sich das Spiel auf dein Klavier ein.</p>
     <div class="calib"><div class="dots">${[0, 1, 2].map(i => `<i class="${i < cents.length ? 'on' : ''}"></i>`).join('')}</div><p id="calMsg" role="status">${last}</p><div class="meter big" id="calMeter" aria-hidden="true">${'<i></i>'.repeat(12)}</div></div>
     <div class="row"><button class="btn quiet" data-act="skip">Ohne Einstimmen weiter</button></div>`, { skip: () => finish(true) });
   app.calib = { onNote(midi, ev) { const dev = (midi - 60) * 100 + (ev ? ev.cents : 0);
-      if (Math.abs(dev) <= 80) { cents.push(dev); last = `Gut! Noch ${3 - cents.length}×`; app.audio.sfx('ok'); if (cents.length >= 3) { const c = Math.round(cents.slice().sort((a, b) => a - b)[1]);
+      if (Math.abs(dev) <= 80) { cents.push(dev); peaks.push(peak); peak = 0; last = `Gut! Noch ${3 - cents.length}×`; app.audio.sfx('ok'); if (cents.length >= 3) { const c = Math.round(cents.slice().sort((a, b) => a - b)[1]);
         last = Math.abs(c) < 8 ? 'Dein Klavier ist gut gestimmt.' : `Dein Klavier klingt ${Math.abs(c)} Cent ${c > 0 ? 'höher' : 'tiefer'}. Das ist gespeichert.`; render(); app.calib = null; setTimeout(() => finish(false), 1600); return; } }
       else last = `Das war ${nameStr(noteOfMidi(midi))} – ich brauche das mittlere c.`; render(); },
-    level(rms) { const m = document.getElementById('calMeter'); if (!m) return; const n = rms > 0 ? Math.max(0, Math.min(12, Math.round((Math.log10(rms) + 2.6) * 6))) : 0; [...m.children].forEach((b, i) => { b.className = i < n ? 'on' : ''; }); } };
+    level(rms) { peak = Math.max(peak, rms / app.audio.gain); const m = document.getElementById('calMeter'); if (!m) return; rms = rms / app.audio.gain * gainFor([peak || 1]); const n = rms > 0 ? Math.max(0, Math.min(12, Math.round((Math.log10(rms) + 2.6) * 6))) : 0; [...m.children].forEach((b, i) => { b.className = i < n ? 'on' : ''; }); } };
   render();
 }
 
+/** Mikrofon-Pegel neu einstellen (Gerät oder Instrument gewechselt): drei beliebige Töne genügen. */
+export function levelCheck(app, then) {
+  app.audio.stopMusic(); const g0 = app.audio.gain, peaks = []; let peak = 0, msg = 'Spiele dreimal einen Ton – egal welchen, so laut wie du sonst spielst.', done = false; app.audio.setGain(GAIN_PROBE);
+  const close = ok => { app.calib = null; app.audio.setGain(ok ? app.state.micGain : g0); then(); };
+  const render = () => app.screen(`<h2>Mikrofon-Pegel</h2><p>${msg}</p><div class="calib"><div class="dots">${[0, 1, 2].map(i => `<i class="${i < peaks.length ? 'on' : ''}"></i>`).join('')}</div><div class="meter big" id="calMeter" aria-hidden="true">${'<i></i>'.repeat(12)}</div></div>
+    <div class="row"><button class="btn quiet" data-act="x">${done ? 'Fertig' : 'Abbrechen'}</button></div>`, { x: () => close(done) });
+  app.calib = { onNote() { if (done) return; peaks.push(peak); peak = 0; app.audio.sfx('ok');
+      if (peaks.length >= 3) { done = true; const g = gainFor(peaks); app.state.micGain = g; app.save(); msg = g > 1.2 ? `Eingestellt: Das Spiel hört jetzt ${String(g).replace('.', ',')}-mal so empfindlich hin.` : 'Eingestellt: Dein Mikrofon ist laut genug.'; render(); app.calib = null; app.audio.setGain(g); setTimeout(() => { if (done && !document.getElementById('screen').hidden && document.getElementById('calMeter')) close(true); }, 1800); return; }
+      msg = `Gut! Noch ${3 - peaks.length}×`; render(); },
+    level(rms) { peak = Math.max(peak, rms / app.audio.gain); const m = document.getElementById('calMeter'); if (!m) return; const n = rms > 0 ? Math.max(0, Math.min(12, Math.round((Math.log10(rms / app.audio.gain * gainFor([peak || 1])) + 2.6) * 6))) : 0; [...m.children].forEach((b, i) => { b.className = i < n ? 'on' : ''; }); } };
+  render();
+}
 export function result(app, level, res) {
   const p = app.profile, nx = nextLevel(level), lastOfWorld = !nx || nx.world !== level.world, canNext = nx && levelUnlocked(p, nx);
   const best = res.bestTime ? `<p>Deine Zeit: <b>${fmtTime(res.time)}</b>${res.newBest ? ' – neue Bestzeit!' : ` · Bestzeit ${fmtTime(res.bestTime)}`}</p>` : res.score != null ? `<p>${res.newBest ? 'Neuer Rekord!' : `Dein Rekord: <b>${res.bestScore}</b> Punkte`}</p>` : '';
@@ -201,13 +213,14 @@ export function settings(app, msg = '') {
   const tg = (act, on, label, hint) => `<button class="toggle ${on ? 'on' : ''}" role="switch" aria-checked="${on}" data-act="${act}"><i></i><span><b>${label}</b><small>${hint}</small></span></button>`;
   app.screen(`<div class="maphead"><h2>Einstellungen</h2><button class="btn sm" data-act="back">Zurück</button></div><div class="setgrid">
     <div class="card"><h3>Spielen</h3>${tg('mode', p.mode === 'profi', 'Profi-Spielart', 'Stoppuhr, Serien und weniger Tipps')}${tg('keys', p.keys, 'Bildschirm-Tasten', 'Ohne Klavier spielen: Tasten antippen')}${tg('mute', !app.audio.muted, 'Ton', 'Alles an oder aus: Musik, Spielklänge, Erfolgsmelodie')}${tg('music', p.music !== false, 'Titelmusik', 'Läuft nur in den Menüs, nie im Level')}<button class="btn sm" data-act="song">Titelmusik: ${(SONGS[app.state.song] || SONGS.tanz).name} (wechseln)</button> <button class="btn sm" data-act="goal">Tagesziel: ${p.goal || 5} Minuten (ändern)</button></div>
-    <div class="card"><h3>Mikrofon</h3><p>Mikrofon: <b>${mic}</b></p><p>Kammerton: <b>${Math.round(p.a4 * 10) / 10} Hz</b></p><button class="btn sm" data-act="cal">Mikrofon testen und Klavier einstimmen</button><h3>Einstieg</h3><button class="btn sm" data-act="place">Einstufung machen</button> <button class="btn sm" data-act="info">Info und Datenschutz</button></div>
+    <div class="card"><h3>Mikrofon</h3><p>Mikrofon: <b>${mic}</b></p><p>Kammerton: <b>${Math.round(p.a4 * 10) / 10} Hz</b></p><button class="btn sm" data-act="cal">Mikrofon testen und Klavier einstimmen</button> <button class="btn sm" data-act="lvl">Nur Pegel anpassen</button><p class="muted">Pegel: ${(app.state.micGain || 1) > 1.2 ? `${String(app.state.micGain).replace('.', ',')}-fach verstärkt` : 'normal'} (gilt für dieses Gerät)</p><h3>Einstieg</h3><button class="btn sm" data-act="place">Einstufung machen</button> <button class="btn sm" data-act="info">Info und Datenschutz</button></div>
     <div class="card"><h3>Spielstand mitnehmen</h3><p>Dein Kurzcode zum Aufschreiben:</p><p class="shortcode" aria-label="Kurzcode">${exportShort(p, worldIds())}</p><p class="muted">Der Kurzcode merkt sich, wie weit du bist. Alles (Name, Sterne, Übungspass) steckt im QR-Code.</p><button class="btn sm" data-act="exp">QR-Code und Link</button> <button class="btn sm" data-act="imp">Code eingeben</button></div>
     <div class="card"><h3>Für Lehrkräfte</h3>${tg('unlock', p.unlockAll, 'Alle Level freischalten', 'Zum gezielten Üben einzelner Noten')}<button class="btn sm ${app._del ? 'danger' : ''}" data-act="del">${app._del ? 'Wirklich löschen? Nochmal tippen' : 'Dieses Profil löschen'}</button>${CONFIG.shop ? `<h3>Vollversion</h3><p>${app.licensed ? (app.license.until ? `Abo aktiv bis ${app.license.until.toLocaleDateString('de-DE')}` : 'Freigeschaltet (Einmalkauf)') : 'Noch nicht freigeschaltet'}</p>${app.licensed ? '' : '<button class="btn sm" data-act="buy">Vollversion ansehen</button>'}` : ''}</div></div><p class="note" role="status">${msg}</p>`, {
     back: () => { app._del = false; map(app); }, mode: () => { p.mode = p.mode === 'profi' ? 'abenteuer' : 'profi'; app.save(); settings(app); }, keys: () => { p.keys = !p.keys; app.save(); settings(app); },
     mute: () => { app.setMuted(!app.audio.muted); settings(app); },
     song: () => { const ks = Object.keys(SONGS); app.state.song = ks[(ks.indexOf(app.state.song || 'tanz') + 1) % ks.length]; app.save(); app.audio.stopMusic(); app.applyProfile(); setTimeout(() => app.audio.startMusic(), 320); settings(app); },
     music: () => { p.music = p.music === false; app.save(); app.applyProfile(); if (p.music) app.audio.startMusic(); settings(app); }, info: () => about(app, () => settings(app)), unlock: () => { p.unlockAll = !p.unlockAll; app.save(); settings(app); },
+    lvl: async () => { app.audio.ensure(); const r = await app.audio.startMic(); if (r !== 'on') return settings(app, 'Das Mikrofon ist nicht verfügbar.'); levelCheck(app, () => settings(app, 'Gespeichert.')); },
     cal: async () => { app.audio.ensure(); const r = await app.audio.startMic(); if (r !== 'on') return settings(app, r === 'denied' ? 'Das Mikrofon wurde nicht erlaubt. Erlaube es in den Einstellungen deines Browsers.' : 'Auf dieser Seite gibt es kein Mikrofon.'); calibrate(app, () => settings(app, 'Gespeichert.')); },
     exp: () => shareSave(app),
     goal: () => { p.goal = { 5: 10, 10: 15, 15: 20, 20: 5 }[p.goal || 5]; app.save(); settings(app); }, buy: () => paywall(app, null),
@@ -262,7 +275,7 @@ export async function shareSave(app) {
   document.getElementById('qrHere').appendChild(qrCanvas(link));
 }
 
-export const VERSION = '2.5 · 21.11.2026';
+export const VERSION = '2.6 · 21.11.2026';
 /** Info, Datenschutz und Quellen. */
 export function about(app, back) {
   app.screen(`<div class="maphead"><h2>Info und Datenschutz</h2><button class="btn sm" data-act="back">Zurück</button></div><div class="book">

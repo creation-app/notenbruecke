@@ -170,3 +170,8 @@ test('Training: Rechnung, Rekorde und Sterne', async () => {
   const times = [['c1', 900], ['d1', 1000], ['e1', 950], ['f2', 3200], ['f2', 2800], ['a1', 2100], ['g1', 1000]].map(([key, ms]) => ({ key, clef: 'treble', ms }));
   assert.deepEqual(T.slowest(times).map(e => e.key), ['f2', 'a1']); assert.equal(Math.round(T.slowest(times)[0].ms), 3000); assert.deepEqual(T.slowest(times.slice(0, 2)), []);
 });
+
+test('Mikrofon-Verstärkung aus gemessenen Pegeln', async () => {
+  const { gainFor, GAIN_MAX } = await import('../src/audio.js');
+  assert.equal(gainFor([]), 1); assert.equal(gainFor([0.08, 0.1, 0.06]), 1, 'laute Geräte bleiben unverstärkt'); assert.equal(gainFor([0.004, 0.005, 0.0045]), 8.9); assert.equal(gainFor([0.0001, 0.0002, 0.0001]), GAIN_MAX); assert.equal(gainFor([0.01, 0.5, 0.01]), 4, 'Ausreißer zählt nicht (Median)');
+});

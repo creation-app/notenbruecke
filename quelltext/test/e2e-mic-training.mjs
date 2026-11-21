@@ -5,7 +5,7 @@ const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome'
 const page = await browser.newPage({ viewport: { width: 1280, height: 800 } }); page.on('pageerror', e => errors.push('pageerror: ' + e.message)); const act = a => page.click(`#screen [data-act="${a}"]`); const wait = ms => page.waitForTimeout(ms);
 await page.goto('file://' + path.resolve('dist/notenbruecke.html')); await wait(500); await act('go'); await page.fill('#pname', 'Mikro'); await act('ok'); await act('skip'); await act('new'); await act('skip'); await wait(100);
 await page.evaluate(() => { __nb.profile.calibrated = true; }); await act('train'); await wait(100); await act('go'); await page.waitForFunction(() => __nb.scene && __nb.scene.cfg, null, { timeout: 8000 });
-if (!(await page.evaluate(() => __nb.listening))) errors.push('Mikrofon hört nicht zu');
+if (!(await page.evaluate(() => __nb.listening))) errors.push('Mikrofon hört nicht zu'); if (!(await page.textContent('#panelTask')).includes('auf deinem Klavier')) errors.push('Aufgabe sagt nicht „auf deinem Klavier“: ' + await page.textContent('#panelTask'));
 await page.evaluate(() => { const s = __nb.scene; s.pool = [{ key: 'a1', clef: 'treble' }, { key: 'c2', clef: 'treble' }]; s.next = s.pick(null); s.advance(); });
 await page.waitForFunction(() => __nb.scene.live, null, { timeout: 8000 }); const secs = 24; await wait(secs * 1000); await page.screenshot({ path: 'shots/mic-train-1.png' });
 const r = await page.evaluate(() => { const s = __nb.scene; return { correct: s.correct, first: s.first, tried: s.tried, conf: __nb.profile.conf, el: s.elapsed }; }); const expected = Math.floor(r.el / (tone + gap));

@@ -13,7 +13,7 @@ export class RegenScene {
     this.speed = app.profile.mode === 'profi' ? 30 : 20; this.maxSpeed = app.profile.mode === 'profi' ? 85 : 60;
     const order = ['c', 'cis', 'des', 'd', 'dis', 'es', 'e', 'f', 'fis', 'g', 'gis', 'as', 'a', 'b', 'h'];
     const names = [...new Set(level.notes.map(k => letterName(N(k))))].sort((a, b) => order.indexOf(a) - order.indexOf(b));
-    app.panel.showMic(false); app.panel.answers(names, (l, btn) => this.answer(l, btn)); app.hud.show(level.title, true); app.hud.progress(0, 0);
+    app.panel.showMic(false); app.panel.answers(names, (l, btn) => this.answer(l, btn)); app.panel.task('Tippe <b>unten den Namen</b> der Note an, bevor sie das rote Tor erreicht.'); app.hud.show(level.title, true); app.hud.progress(0, 0);
     app.bubble('Tippe den Namen der leuchtenden Note, bevor sie das Tor erreicht!', 5);
     for (let i = 0; i < 5; i++) this.spawn(G.VIEW_W + 20 + i * SPACING); this.hudUpdate();
   }

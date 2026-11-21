@@ -23,8 +23,13 @@ export const SONGS = {
     'D2/A2 C2/G2 A#1/F2 A1/E2 D2/A2 G2/D3 A2/E3 D2/A2', 'F4/A4 E4/G4 D4/F4 C#4/E4 F4/A4 G4/A#4 C#4/E4 F4/A4'),
 };
 export const SONG = SONGS.original;
+export const GAIN_MAX = 16, GAIN_TARGET = 0.04, GAIN_PROBE = 8;
+/** Verstärkung aus den gemessenen Spitzenpegeln (ohne Verstärkung) einiger Töne: Ziel ist ein kräftiger, aber nicht übersteuerter Pegel. */
+export function gainFor(peaks) { const v = peaks.filter(x => x > 0).sort((a, b) => a - b); if (!v.length) return 1; const med = v[Math.floor(v.length / 2)]; return Math.max(1, Math.min(GAIN_MAX, Math.round(GAIN_TARGET / med * 10) / 10)); }
 export class GameAudio {
-  constructor() { this.ctx = null; this.micState = 'off'; this.gateUntil = 0; this.gated = false; this.level = 0; this.tracker = new NoteTracker(); this.lastPoll = 0; this.muted = false; }
+  constructor() { this.ctx = null; this.micState = 'off'; this.gateUntil = 0; this.gated = false; this.level = 0; this.tracker = new NoteTracker(); this.lastPoll = 0; this.muted = false; this.gain = 1; }
+  /** Verstärkung für leise Mikrofone (pro Gerät eingestellt). Die Tonhöhen-Erkennung hängt nicht von der Lautstärke ab – nur die Schwellen für Stille und Anschlag. */
+  setGain(g) { this.gain = Math.max(1, Math.min(GAIN_MAX, +g || 1)); }
   ensure() {
     try { if (!this.ctx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) this.ctx = new AC(); }
       if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume().catch(() => {}); } catch (e) { this.ctx = null; }
@@ -55,7 +60,7 @@ export class GameAudio {
     if (this.analyser.getFloatTimeDomainData) this.analyser.getFloatTimeDomainData(this.buf); else { this.analyser.getByteTimeDomainData(this.bytes); for (let i = 0; i < 4096; i++) this.buf[i] = (this.bytes[i] - 128) / 128; }
     if (now < this.gateUntil) { this.gated = true; this.level = 0; return null; }
     if (this.gated) { this.gated = false; this.tracker.resume(); }
-    const d = this.half; for (let i = 0; i < 2048; i++) d[i] = (this.buf[2 * i] + this.buf[2 * i + 1]) * 0.5;
+    const d = this.half, k = 0.5 * this.gain; for (let i = 0; i < 2048; i++) d[i] = (this.buf[2 * i] + this.buf[2 * i + 1]) * k;
     const res = detectPitch(d, this.ctx.sampleRate / 2); this.level = res ? res.rms : 0;
     return this.tracker.push(res, now);
   }
