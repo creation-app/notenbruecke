@@ -45,7 +45,7 @@ class App {
       if (document.hidden && this.scene && this.scene.isLevel && !this.paused && $('screen').hidden) S.pause(this); });
     window.addEventListener('error', () => { if (!this._err) { this._err = true; this.toast('Etwas ist schiefgegangen. Bitte lade die Seite neu – dein Spielstand bleibt erhalten.'); } });
     // Hochkant (z. B. Handy mit Drehsperre): Das Spiel wird um 90° gedreht und füllt den Bildschirm, statt den Weg zu versperren.
-    const fit = () => { const w = window.innerWidth, h = window.innerHeight, rot = w < h, s = rot ? Math.min(h / 1280, w / 800) : Math.min(w / 1280, h / 800); const was = this.rot; this.rot = rot;
+    const fit = () => { const w = window.innerWidth, h = window.innerHeight, rot = w < h, s = rot ? Math.min(h / 1280, w / 800) : Math.min(w / 1280, h / 800); const was = this.rot; this.rot = rot; $('stage').classList.toggle('phone', s < 0.62);
       $('stage').style.transform = `translate(-50%,-50%) ${rot ? 'rotate(90deg) ' : ''}scale(${s})`; const el = $('rotate'); if (rot && !was) { el.hidden = false; clearTimeout(this._rotT); this._rotT = setTimeout(() => { el.hidden = true; }, 6000); } else if (!rot) el.hidden = true; };
     window.addEventListener('orientationchange', () => setTimeout(fit, 250)); window.addEventListener('resize', fit); fit();
     this.applyProfile(); this.hud.hide(); S.title(this); this.last = performance.now(); requestAnimationFrame(t => this.loop(t)); track('start'); this.ready = this.boot();
