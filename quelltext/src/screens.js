@@ -7,6 +7,8 @@ import { newProfile, importCode, exportShort, importShort, exportPayload, import
 import { CONFIG } from './config.js';
 import { SONGS, gainFor, GAIN_PROBE } from './audio.js';
 import { trainSetup, trainCard } from './trainui.js';
+import { accountScreen, loginForm } from './accountui.js';
+import { accountsOn, ago, pull } from './account.js';
 import { weakNotes, WEAK_MIN, BOARD_DISC } from './training.js';
 import { track } from './stats.js';
 import { classify } from './music.js';
@@ -28,15 +30,15 @@ export function fill(root) { root.querySelectorAll('[data-cr]').forEach(e => e.a
 export function title(app) {
   app.backdrop('himmel'); const has = app.state.profiles.length > 0;
   app.screen(`<div class="title"><div class="logo">DIE<br>NOTENBRÜCKE</div><p class="sub">Ein Abenteuer auf fünf Linien</p>
-    <button class="btn big" data-act="go">${has ? 'Weiterspielen' : 'Neues Spiel'}</button>${has ? '<p><button class="btn" data-act="quick">Schnelles Training</button></p>' : ''}<p><button class="btn sm" data-act="info">Info und Datenschutz</button></p></div>`, { go: () => { app.audio.ensure(); app.musicReady = true; app.audio.startMusic(); has ? profiles(app) : newProf(app); },
+    <button class="btn big" data-act="go">${has ? 'Weiterspielen' : 'Neues Spiel'}</button>${has ? '<p><button class="btn" data-act="quick">Schnelles Training</button></p>' : ''}${accountsOn() ? '<p><button class="btn" data-act="acc">Mit Konto anmelden</button></p>' : ''}<p><button class="btn sm" data-act="info">Info und Datenschutz</button></p></div>`, { acc: () => { app.audio.ensure(); loginForm(app, () => title(app)); }, go: () => { app.audio.ensure(); app.musicReady = true; app.audio.startMusic(); has ? profiles(app) : newProf(app); },
     quick: () => { app.audio.ensure(); app.musicReady = true; app.audio.startMusic(); if (app.state.profiles.length === 1) { app.state.current = app.state.profiles[0].id; app.save(); app.applyProfile(); trainSetup(app); } else profiles(app, 'train'); }, info: () => about(app, () => title(app)) }, 'clear');
 }
 export function profiles(app, to) {
   app.backdrop('himmel');
   app.screen(`<h2>${to === 'train' ? 'Wer trainiert?' : 'Wer spielt?'}</h2><div class="plist">${app.state.profiles.map(p => `<button class="pcard" data-act="pick" data-id="${p.id}"><span data-hero="${p.hero}" data-hat="${hatOf(p, totalStars(p))}"></span><b>${esc(p.name)}</b><small>${totalStars(p)} Sterne · ${p.creatures.length} Notenwesen</small></button>`).join('')}
     <button class="pcard new" data-act="new"><span class="plus">+</span><b>Neu</b><small>Neues Profil</small></button></div>
-    <div class="row"><button class="btn" data-act="code">Spielstand-Code eingeben</button></div>`, {
-    pick: e => { app.state.current = e.dataset.id; app.save(); app.applyProfile(); to === 'train' ? trainSetup(app) : map(app); }, new: () => newProf(app), code: () => importScreen(app) });
+    <div class="row">${accountsOn() ? '<button class="btn go" data-act="acc">Mit Konto anmelden</button>' : ''}<button class="btn" data-act="code">Spielstand-Code eingeben</button></div>`, {
+    pick: e => { app.state.current = e.dataset.id; app.save(); app.applyProfile(); pull(app, app.profile); to === 'train' ? trainSetup(app) : map(app); }, new: () => newProf(app), code: () => importScreen(app), acc: () => loginForm(app, () => profiles(app, to)) });
 }
 function newProf(app) {
   let hero = 0, mode = 'abenteuer';
@@ -114,7 +116,7 @@ export function map(app, world) {
     <h3 class="mapq">Wähle eine Welt und dann ein Level:</h3>
     <div class="tabs" role="tablist">${WORLDS.map((w, i) => { const open = worldUnlocked(p, i); return `<button role="tab" aria-selected="${i === world}" class="tab ${i === world ? 'sel' : ''}" ${open ? '' : 'disabled'} data-act="world" data-w="${i}">${open ? esc(w.name) : `Noch im Nebel: ${WORLDS[i].need} Level in „${WORLDS[prevWorld(i)].short}“ schaffen`}</button>`; }).join('')}</div>
     <div class="nodes">${ls.map((l, i) => { const open = levelUnlocked(p, l), rec = p.levels[l.id]; return `<button class="node t-${l.type} ${rec ? 'done' : ''}" ${open ? '' : 'disabled'} data-act="lvl" data-id="${l.id}"><span class="num">${i + 1}</span><b>${esc(l.title)}</b><small>${TYPE_LABEL[l.type]}</small>${!open ? '<small class="lock">im Nebel</small>' : app.locked(l) ? '<small class="lock full">Vollversion</small>' : stars(rec ? rec.stars : 0)}</button>`; }).join('')}</div>
-    <nav class="mapnav" aria-label="Bereiche"><button class="btn tr" data-act="train"><b>Training</b><small>Tempo und Treffer</small></button><button class="btn" data-act="coll"><b>Sammlung</b><small>${p.creatures.length} von ${creatureTotal()} Wesen · Hüte</small></button><button class="btn" data-act="pass"><b>Übungspass</b><small>Dein Fortschritt</small></button><button class="btn" data-act="book"><b>Geschichte</b><small>Nachlesen</small></button><button class="btn" data-act="board"><b>Bestenliste</b><small>Auf diesem Gerät</small></button><button class="btn" data-act="set"><b>Einstellungen</b><small>Ton, Mikro, Code</small></button></nav>`, {
+    <nav class="mapnav" aria-label="Bereiche"><button class="btn tr" data-act="train"><b>Training</b><small>Tempo und Treffer</small></button><button class="btn" data-act="coll"><b>Sammlung</b><small>${p.creatures.length} von ${creatureTotal()} Wesen · Hüte</small></button><button class="btn" data-act="pass"><b>Übungspass</b><small>Dein Fortschritt</small></button><button class="btn" data-act="book"><b>Geschichte</b><small>Nachlesen</small></button><button class="btn" data-act="board"><b>Bestenliste</b><small>Auf diesem Gerät</small></button><button class="btn" data-act="set"><b>Einstellungen</b><small>${accountsOn() ? (p.acct ? 'Konto, Ton, Mikro' : 'Ton, Mikro, Konto') : 'Ton, Mikro, Code'}</small></button></nav>`, {
     prof: () => profiles(app), train: () => trainSetup(app), coll: () => collection(app), pass: () => pass(app), board: () => board(app), set: () => settings(app), book: () => storyBook(app, null, () => map(app, world)),
     world: e => map(app, +e.dataset.w), lvl: e => levelCard(app, LEVELS.find(l => l.id === e.dataset.id)) }, 'wide');
 }
@@ -214,6 +216,7 @@ export function settings(app, msg = '') {
   app.screen(`<div class="maphead"><h2>Einstellungen</h2><button class="btn sm" data-act="back">Zurück</button></div><div class="setgrid">
     <div class="card"><h3>Spielen</h3>${tg('mode', p.mode === 'profi', 'Profi-Spielart', 'Stoppuhr, Serien und weniger Tipps')}${tg('keys', p.keys, 'Bildschirm-Tasten', 'Ohne Klavier spielen: Tasten antippen')}${tg('mute', !app.audio.muted, 'Ton', 'Alles an oder aus: Musik, Spielklänge, Erfolgsmelodie')}${tg('music', p.music !== false, 'Titelmusik', 'Läuft nur in den Menüs, nie im Level')}<button class="btn sm" data-act="song">Titelmusik: ${(SONGS[app.state.song] || SONGS.tanz).name} (wechseln)</button> <button class="btn sm" data-act="goal">Tagesziel: ${p.goal || 5} Minuten (ändern)</button></div>
     <div class="card"><h3>Mikrofon</h3><p>Mikrofon: <b>${mic}</b></p><p>Kammerton: <b>${Math.round(p.a4 * 10) / 10} Hz</b></p><button class="btn sm" data-act="cal">Mikrofon testen und Klavier einstimmen</button> <button class="btn sm" data-act="lvl">Nur Pegel anpassen</button><p class="muted">Pegel: ${(app.state.micGain || 1) > 1.2 ? `${String(app.state.micGain).replace('.', ',')}-fach verstärkt` : 'normal'} (gilt für dieses Gerät)</p><h3>Einstieg</h3><button class="btn sm" data-act="place">Einstufung machen</button> <button class="btn sm" data-act="info">Info und Datenschutz</button></div>
+    ${accountsOn() ? `<div class="card"><h3>Konto</h3>${p.acct ? `<p>Angemeldet als <b>${esc(p.acct.name)}</b>.</p><p class="muted">${p.acct.expired ? 'Bitte neu anmelden.' : p.acct.err ? 'Noch nicht gesichert – das Spiel versucht es später nochmal.' : `Online gesichert ${ago(p.acct.at)}.`}</p>` : '<p>Sichere deinen Spielstand online und spiele auf jedem Gerät weiter.</p>'}<button class="btn sm ${p.acct ? '' : 'go'}" data-act="acc">${p.acct ? 'Konto verwalten' : 'Konto anlegen oder anmelden'}</button></div>` : ''}
     <div class="card"><h3>Spielstand mitnehmen</h3><p>Dein Kurzcode zum Aufschreiben:</p><p class="shortcode" aria-label="Kurzcode">${exportShort(p, worldIds())}</p><p class="muted">Der Kurzcode merkt sich, wie weit du bist. Alles (Name, Sterne, Übungspass) steckt im QR-Code.</p><button class="btn sm" data-act="exp">QR-Code und Link</button> <button class="btn sm" data-act="imp">Code eingeben</button></div>
     <div class="card"><h3>Für Lehrkräfte</h3>${tg('unlock', p.unlockAll, 'Alle Level freischalten', 'Zum gezielten Üben einzelner Noten')}<button class="btn sm ${app._del ? 'danger' : ''}" data-act="del">${app._del ? 'Wirklich löschen? Nochmal tippen' : 'Dieses Profil löschen'}</button>${CONFIG.shop ? `<h3>Vollversion</h3><p>${app.licensed ? (app.license.until ? `Abo aktiv bis ${app.license.until.toLocaleDateString('de-DE')}` : 'Freigeschaltet (Einmalkauf)') : 'Noch nicht freigeschaltet'}</p>${app.licensed ? '' : '<button class="btn sm" data-act="buy">Vollversion ansehen</button>'}` : ''}</div></div><p class="note" role="status">${msg}</p>`, {
     back: () => { app._del = false; map(app); }, mode: () => { p.mode = p.mode === 'profi' ? 'abenteuer' : 'profi'; app.save(); settings(app); }, keys: () => { p.keys = !p.keys; app.save(); settings(app); },
@@ -222,7 +225,7 @@ export function settings(app, msg = '') {
     music: () => { p.music = p.music === false; app.save(); app.applyProfile(); if (p.music) app.audio.startMusic(); settings(app); }, info: () => about(app, () => settings(app)), unlock: () => { p.unlockAll = !p.unlockAll; app.save(); settings(app); },
     lvl: async () => { app.audio.ensure(); const r = await app.audio.startMic(); if (r !== 'on') return settings(app, 'Das Mikrofon ist nicht verfügbar.'); levelCheck(app, () => settings(app, 'Gespeichert.')); },
     cal: async () => { app.audio.ensure(); const r = await app.audio.startMic(); if (r !== 'on') return settings(app, r === 'denied' ? 'Das Mikrofon wurde nicht erlaubt. Erlaube es in den Einstellungen deines Browsers.' : 'Auf dieser Seite gibt es kein Mikrofon.'); calibrate(app, () => settings(app, 'Gespeichert.')); },
-    exp: () => shareSave(app),
+    exp: () => shareSave(app), acc: () => accountScreen(app),
     goal: () => { p.goal = { 5: 10, 10: 15, 15: 20, 20: 5 }[p.goal || 5]; app.save(); settings(app); }, buy: () => paywall(app, null),
     imp: () => importScreen(app, a => settings(a)), place: () => startPlacement(app, () => map(app)),
     del: () => { if (!app._del) { app._del = true; return settings(app); } app._del = false; app.state.profiles = app.state.profiles.filter(q => q.id !== p.id); app.state.current = null; app.save(); app.state.profiles.length ? profiles(app) : title(app); } }, 'wide');
@@ -275,14 +278,15 @@ export async function shareSave(app) {
   document.getElementById('qrHere').appendChild(qrCanvas(link));
 }
 
-export const VERSION = '2.6 · 21.11.2026';
+export const VERSION = '2.7 · 23.11.2026';
 /** Info, Datenschutz und Quellen. */
 export function about(app, back) {
   app.screen(`<div class="maphead"><h2>Info und Datenschutz</h2><button class="btn sm" data-act="back">Zurück</button></div><div class="book">
     <h3>Die Notenbrücke</h3><p>Ein Lernspiel zum Notenlesen am Klavier. Version ${VERSION}${CONFIG.shop ? ' · Kauf-Fassung' : ' · Test-Fassung'}.</p>
     <h3>Datenschutz in Kürze</h3><p><b>Mikrofon:</b> Das Spiel wertet den Ton direkt auf diesem Gerät aus, um die gespielte Note zu erkennen. Es wird nichts aufgenommen, gespeichert oder übertragen.</p>
-    <p><b>Spielstände:</b> Name, Fortschritt und Übungszeiten liegen nur im Browser dieses Geräts. Sie verlassen das Gerät nur, wenn du selbst einen Code, QR-Code oder Link weitergibst.</p>
-    <p><b>Zählung:</b> ${CONFIG.statsCode ? 'Es wird anonym gezählt, wie oft gespielt wird (ohne Namen, ohne Cookies, über den Dienst GoatCounter).' : 'Derzeit wird nichts gezählt und nichts an Dritte gesendet.'}</p>
+    <p><b>Spielstände ohne Konto:</b> Name, Fortschritt und Übungszeiten liegen nur im Browser dieses Geräts. Sie verlassen das Gerät nur, wenn du selbst einen Code, QR-Code oder Link weitergibst.</p>
+    ${CONFIG.apiUrl ? `<p><b>Mit Konto (freiwillig):</b> Gespeichert werden Benutzername, Passwort (nur verschlüsselt, als nicht umkehrbarer Hash), auf Wunsch eine E-Mail-Adresse sowie der Spielstand (Fortschritt, Übungszeiten, Einstellungen). Die Daten liegen in einer Datenbank beim Dienst Cloudflare und sind nur für die Lehrkraft einsehbar, die das Spiel betreibt. Sie werden nicht weitergegeben. Das Konto kann jederzeit über die Lehrkraft gelöscht werden. Es werden keine Cookies verwendet.</p>
+    <p><b>Zählung:</b> Anonym wird gezählt, welche Teile des Spiels wie oft und wie lange gespielt werden – ohne Namen, ohne Cookies, ohne Geräte-Kennung –, damit das Spiel verbessert werden kann.</p>` : '<p><b>Zählung:</b> Derzeit wird nichts gezählt und nichts an Dritte gesendet.</p>'}
     <p><b>Bereitstellung:</b> Die Seite wird über GitHub Pages ausgeliefert. Dabei verarbeitet GitHub technisch notwendige Verbindungsdaten wie die IP-Adresse.</p>
     <h3>Verantwortlich</h3><p>Die Angaben zum Anbieter werden vor der allgemeinen Veröffentlichung ergänzt. Fragen bitte an die Lehrkraft, von der du den Link bekommen hast.</p>
     <h3>Quellen</h3><p>Schriften: Atkinson Hyperlegible und Press Start 2P (SIL Open Font License). Notenschlüssel aus Noto Music (SIL Open Font License). QR-Code: qrcode-generator (MIT-Lizenz). Musik und Grafik entstanden eigens für dieses Spiel. Die Melodien in den Leveln sind überlieferte Lieder sowie Werke von Beethoven.</p></div>`, { back }, 'wide');

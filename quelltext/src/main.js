@@ -2,7 +2,8 @@
 import { load, persist, addPractice, dayKey, importPayload } from './save.js';
 import { CONFIG } from './config.js';
 import { verifyKey, isActive } from './license.js';
-import { track } from './stats.js';
+import { track, flushStats } from './stats.js';
+import * as ACC from './account.js';
 import { GameAudio } from './audio.js';
 import { Panel } from './panel.js';
 import * as G from './gfx.js';
@@ -46,7 +47,7 @@ class App {
     $('stage').addEventListener('pointerdown', e => { if (e.target.closest('#panel,#screen,#hud')) return; pt(e); }); $('stage').addEventListener('pointermove', e => { if (e.buttons && !e.target.closest('#panel,#screen,#hud')) pt(e); });
     document.addEventListener('keydown', e => { const sc = this.scene; if (!sc || !sc.isLevel || this.paused || !$('screen').hidden) return;
       if (e.key === 'Escape') S.pause(this); else if (sc.move && e.key === 'ArrowUp') { sc.move(1); e.preventDefault(); } else if (sc.move && e.key === 'ArrowDown') { sc.move(-1); e.preventDefault(); } else if (sc.place && e.key === 'Enter') sc.place(); });
-    document.addEventListener('visibilitychange', () => { if (document.hidden) this.quiet(); else { this.audio.ensure(); if (this.scene && this.scene.isLevel) this.audio.keepAwake(true); else if (this.musicReady && this.scene instanceof Backdrop && !this.calib) this.audio.startMusic(); }
+    document.addEventListener('visibilitychange', () => { if (document.hidden) { this.quiet(); if (this.sec >= 1) this.flush(); flushStats(); const p = this.profile; if (p && p.acct && p.acct.dirty) ACC.sync(this, p, true); } else { this.audio.ensure(); if (this.scene && this.scene.isLevel) this.audio.keepAwake(true); else if (this.musicReady && this.scene instanceof Backdrop && !this.calib) this.audio.startMusic(); }
       if (document.hidden && this.scene && this.scene.isLevel && !this.paused && $('screen').hidden) S.pause(this); });
     window.addEventListener('error', () => { if (!this._err) { this._err = true; this.toast('Etwas ist schiefgegangen. Bitte lade die Seite neu – dein Spielstand bleibt erhalten.'); } });
     // Hochkant (z. B. Handy mit Drehsperre): Das Spiel wird um 90° gedreht und füllt den Bildschirm, statt den Weg zu versperren.
@@ -56,7 +57,7 @@ class App {
       const s = Math.min(lw / W, lh / H); const was = this.rot; this.rot = rot; $('stage').classList.toggle('phone', s < 0.62);
       $('stage').style.transform = `translate(-50%,-50%) ${rot ? 'rotate(90deg) ' : ''}scale(${s})`; const el = $('rotate'); if (rot && !was) { el.hidden = false; clearTimeout(this._rotT); this._rotT = setTimeout(() => { el.hidden = true; }, 6000); } else if (!rot) el.hidden = true; };
     window.addEventListener('orientationchange', () => setTimeout(fit, 250)); window.addEventListener('resize', fit); fit();
-    this.applyProfile(); this.hud.hide(); S.title(this); this.last = performance.now(); requestAnimationFrame(t => this.loop(t)); track('start'); this.ready = this.boot();
+    this.applyProfile(); this.hud.hide(); S.title(this); this.last = performance.now(); requestAnimationFrame(t => this.loop(t)); track('start'); track('geraet/' + (/iPad|Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1 ? 'tablet' : /Mobi|Android|iPhone/.test(navigator.userAgent) ? (Math.min(screen.width, screen.height) >= 600 ? 'tablet' : 'handy') : 'computer')); if (this.profile) ACC.pull(this, this.profile); this.ready = this.boot();
   }
   /** Gespeicherten Schlüssel prüfen und Adress-Anhänge auswerten: #k=Schlüssel schaltet frei, #s=Spielstand lädt einen Spielstand. */
   async boot() {
@@ -86,12 +87,12 @@ class App {
   applyProfile() { const p = this.profile; this.refreshLook(); this.audio.muted = !!this.state.muted; this.audio.setGain(this.state.micGain || 1); this.audio.song = this.state.song || 'tanz'; if (p) { this.audio.setA4(p.a4); this.audio.musicOff = p.music === false; } if (this.audio.muted || this.audio.musicOff) this.audio.stopMusic(); if (this.paintSound) this.paintSound(); }
   /** Ton für das ganze Gerät an oder aus (Musik, Spielklänge, Erfolgsmelodie). */
   setMuted(m) { this.state.muted = !!m; this.audio.muted = !!m; this.save(); if (m) { this.audio.stopMusic(); if (this.audio.bus) this.audio.bus.gain.value = 0; } else { this.audio.ensure(); if (this.musicReady && this.scene instanceof Backdrop && !this.calib) this.audio.startMusic(); } this.paintSound(); }
-  save() { return persist(this.store, this.state); }
+  save() { const ok = persist(this.store, this.state); if (!this._quiet) ACC.touch(this); return ok; }
   flush() {
     const p = this.profile;
     if (p && this.sec >= 1) { const k = dayKey(), before = p.days[k] || 0, goal = (p.goal || 5) * 60; addPractice(p, this.sec); this.playTotal += this.sec; this.sec = 0;
       if (before < goal && p.days[k] >= goal) { this.toast(`Tagesziel geschafft: <b>${p.goal || 5} Minuten</b> geübt!`); this.audio.sfx('star'); track('tagesziel'); }
-      while (this.playTotal >= 300) { this.playTotal -= 300; track('spielzeit-5min'); } }
+      track('zeit/' + (this.scene && this.scene.level ? (this.scene.level.type === 'boss' ? 'melodie' : this.scene.level.type) : 'menue'), Math.round(this.playTotal)); this.playTotal = 0; }
     this.save();
   }
   background(theme) { return this.bgCache[theme] || (this.bgCache[theme] = G.makeBackground(theme)); }
@@ -112,6 +113,7 @@ class App {
   runLevel(level) {
     this.closeScreen(); this.paused = false; this.calib = null; this.bubble(null); this.hud.extra('');
     this.audio.keepAwake(true); this.audio.stopMusic();
+    track('levelstart/' + level.id);
     const Cls = { jump: JumpScene, boss: JumpScene, regen: RegenScene, bau: BauScene, train: TrainScene }[level.type]; this.scene = new Cls(this, level); this.scene.enter();
   }
   finishLevel(level, res) {
@@ -139,5 +141,5 @@ class App {
     requestAnimationFrame(t => this.loop(t));
   }
 }
-const start = () => { window.__nb = new App(); window.__levels = LEVELS; window.__screens = S; window.__config = CONFIG; window.__train = TU; };
+const start = () => { window.__nb = new App(); window.__levels = LEVELS; window.__screens = S; window.__config = CONFIG; window.__train = TU; window.__acc = ACC; window.__flushStats = flushStats; };
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(start, start); else start();

@@ -6,4 +6,8 @@ const js = r.outputFiles[0].text.replace(/<\/script/g, '<\\/script');
 // Zwei Adressen, ein Spiel: die Test-Fassung (alles frei) und die Kauf-Fassung (Schranke nach den ersten Leveln).
 const page = shop => fs.readFileSync('src/index.template.html', 'utf8').replace('/*FONTS*/', () => fonts).replace('/*BUNDLE*/', () => (shop ? 'window.NB_SHOP=true;\n' : '') + js);
 fs.mkdirSync('dist/shop', { recursive: true }); fs.writeFileSync('dist/notenbruecke.html', page(false)); fs.writeFileSync('dist/index.html', page(false)); fs.writeFileSync('dist/shop/index.html', page(true));
+// Lehrer-Seite (eigene kleine Seite, gleiche Server-Adresse wie das Spiel)
+const api = (fs.readFileSync('src/config.js', 'utf8').match(/API_URL = '([^']*)'/) || [])[1] || '';
+const lr = await build({ entryPoints: ['src/lehrer.js'], bundle: true, format: 'iife', minify: true, write: false, target: 'es2019' });
+fs.mkdirSync('dist/lehrer', { recursive: true }); fs.writeFileSync('dist/lehrer/index.html', fs.readFileSync('src/lehrer.template.html', 'utf8').replace("/*API*/''", () => JSON.stringify(api)).replace('/*BUNDLE*/', () => lr.outputFiles[0].text.replace(/<\/script/g, '<\\/script')));
 console.log('gebaut:', (page(false).length / 1024).toFixed(0), 'KB (Test- und Kauf-Fassung)');

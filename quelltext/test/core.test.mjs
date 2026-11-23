@@ -175,3 +175,19 @@ test('Mikrofon-Verstärkung aus gemessenen Pegeln', async () => {
   const { gainFor, GAIN_MAX } = await import('../src/audio.js');
   assert.equal(gainFor([]), 1); assert.equal(gainFor([0.08, 0.1, 0.06]), 1, 'laute Geräte bleiben unverstärkt'); assert.equal(gainFor([0.004, 0.005, 0.0045]), 8.9); assert.equal(gainFor([0.0001, 0.0002, 0.0001]), GAIN_MAX); assert.equal(gainFor([0.01, 0.5, 0.01]), 4, 'Ausreißer zählt nicht (Median)');
 });
+
+test('Spielstände zusammenführen (Konto auf zwei Geräten)', async () => {
+  const { mergeProfiles } = await import('../src/merge.js');
+  const server = { id: 's', name: 'Lea', hero: 1, levels: { h1: { stars: 3 }, h2: { stars: 1, best: 50 } }, notes: { c1: { box: 4, seen: 9 }, d1: { box: 0, seen: 1 } }, conf: { 'c1>d1': 2 }, creatures: ['c1', 'd1'], days: { '2026-11-20': 300, '2026-11-21': 100 },
+    train: { 'play-treble-time': { best: 30, bestAcc: 90, stars: 2, runs: [1, 2, 3] } }, regenBest: 12, skip: [1, 0, 0], seenIntro: true };
+  const local = { id: 'l', name: 'Lea M.', hero: 2, levels: { h2: { stars: 2, best: 40 }, h3: { stars: 1 } }, notes: { c1: { box: 1, seen: 3 }, d1: { box: 2, seen: 4 }, e1: { box: 0, seen: 1 } }, conf: { 'c1>d1': 1, 'e1>f1': 1 }, creatures: ['e1', 'c1'], days: { '2026-11-21': 400 },
+    train: { 'play-treble-time': { best: 25, bestAcc: 99, stars: 3, runs: [1] }, 'name-bass-count': { best: 40, stars: 0, runs: [1] } }, regenBest: 9, skip: [0, 1], seenIntro: false };
+  const m = mergeProfiles(server, local);
+  assert.equal(m.name, 'Lea M.'); assert.equal(m.hero, 2, 'Einstellungen vom Gerät'); assert.deepEqual(m.levels, { h1: { stars: 3 }, h2: { stars: 2, best: 40 }, h3: { stars: 1 } });
+  assert.deepEqual(m.notes.c1, { box: 4, seen: 9 }); assert.deepEqual(m.notes.d1, { box: 2, seen: 4 }); assert.ok(m.notes.e1); assert.deepEqual(m.conf, { 'c1>d1': 2, 'e1>f1': 1 });
+  assert.deepEqual(m.creatures.sort(), ['c1', 'd1', 'e1']); assert.deepEqual(m.days, { '2026-11-20': 300, '2026-11-21': 400 });
+  assert.equal(m.train['play-treble-time'].best, 30); assert.equal(m.train['play-treble-time'].bestAcc, 90); assert.equal(m.train['play-treble-time'].stars, 3); assert.equal(m.train['play-treble-time'].runs.length, 3); assert.ok(m.train['name-bass-count']);
+  assert.equal(m.regenBest, 12); assert.deepEqual(m.skip, [1, 1, 0]); assert.equal(m.seenIntro, true);
+  assert.deepEqual(mergeProfiles(mergeProfiles(server, local), local).levels, m.levels, 'mehrfaches Zusammenführen ändert nichts');
+  assert.ok(mergeProfiles(null, local).levels.h3 && mergeProfiles(server, {}).levels.h1, 'leere Stände');
+});
