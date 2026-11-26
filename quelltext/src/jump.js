@@ -2,9 +2,12 @@
 import { stemUp, N, midiOf, staffPos, classify, noteOfMidi, nameHtml, letterName, describePos, ledgerPositions } from './music.js';
 import { pickNext, update as srsUpdate, newStat, SLOW_PLAY_MS } from './srs.js';
 import * as G from './gfx.js';
+import { INSTR, isGuitar, gripText } from './instrument.js';
 import { label, noteLabel } from './text.js';
 
-const STRIDE = 84, PW = 46, HERO_SX = 78, JUMP_S = 0.42;
+const STRIDE = 84, PW = 46, JUMP_S = 0.42;
+/** Wo die Figur auf dem Bildschirm steht. Auf schmalen (hochkant) Bildschirmen weiter links, damit die nächste Plattform ganz zu sehen ist. */
+const heroSX = () => (G.VIEW_W < 250 ? Math.round(G.VIEW_W * 0.3) : 78);
 export class JumpScene {
   constructor(app, level) { this.app = app; this.level = level; this.isLevel = true; }
   enter() {
@@ -14,7 +17,7 @@ export class JumpScene {
     const first = staffPos(this.targets[0], this.clef), home = this.clef === 'grand' ? 4 : 0, startPos = first === home ? home - 2 : home;
     this.plats = [{ x: 70, pos: startPos, note: null, built: true }, ...this.targets.map((n, i) => ({ x: 70 + (i + 1) * STRIDE, pos: staffPos(n, this.clef), note: n, built: false }))];
     this.idx = 0; this.firstTry = 0; this.combo = 0; this.t = 0; this.elapsed = 0; this.started = false; this.freed = [];
-    this.hero = { x: 70, y: G.yOfPos(startPos) }; this.camX = 70 - HERO_SX; this.phase = 'listen'; this.oopsT = 0; this.landT = 0; this.ghost = null; this.queue = null;
+    this.hero = { x: 70, y: G.yOfPos(startPos) }; this.camX = 70 - heroSX(); this.phase = 'listen'; this.oopsT = 0; this.landT = 0; this.ghost = null; this.queue = null;
     this.guard = G.makeCreature(4, 0, true); this.parts = new G.Particles(); this.accMidi = null; this.accAt = -1e9; this.hintAfter = (p.mode === 'profi' ? 3 : 2) + (this.boss ? 1 : 0);
     app.panel.showMic(true); app.panel.keyboard(this.clef); app.hud.show(level.title, true); this.prompt(true);
   }
@@ -29,13 +32,14 @@ export class JumpScene {
   prompt(first) {
     const { app } = this, tg = this.target; this.tries = 0; const isNew = !app.profile.notes[tg.key]; this.t0 = performance.now(); this.fresh = isNew;
     this.hint = isNew; app.panel.setHint(isNew ? midiOf(tg) : null);
-    app.panel.task(this.boss ? (app.listening ? 'Spiele die Melodie Ton für Ton <b>auf deinem Klavier</b>.' : 'Spiele die Melodie Ton für Ton – <b>tippe die Tasten unten</b>.') : app.listening ? 'Spiele die leuchtende Note <b>auf deinem Klavier</b>.' : 'Tippe die leuchtende Note <b>unten auf der Tastatur</b>.');
+    app.panel.task(this.boss ? (app.listening ? `Spiele die Melodie Ton für Ton <b>${INSTR.on}</b>.` : `Spiele die Melodie Ton für Ton – <b>${INSTR.tapPad}</b>.`) : app.listening ? `Spiele die leuchtende Note <b>${INSTR.on}</b>.` : `Tippe die leuchtende Note <b>${INSTR.padWhere}</b>.`);
+    { const pos = staffPos(tg, this.clef), from = this.idx > 0 ? staffPos(this.targets[this.idx - 1], this.clef) : 0; app.bubbleSide(pos <= -5 || from <= -5); }
     app.hud.progress(this.idx, this.targets.length);
     app.hud.extra(app.profile.mode === 'profi' ? `<span id="jTime">0:00</span>${this.combo > 1 ? ` &middot; <b>${this.combo}×</b> Serie` : ''}` : '');
-    if (isNew) app.bubble(`Neu: <b>${nameHtml(tg)}</b> – ${describePos(staffPos(tg, this.clef), this.clef)}. Die Taste leuchtet.`, 0);
+    if (isNew) app.bubble(isGuitar() ? `Neu: <b>${nameHtml(tg)}</b> – ${describePos(staffPos(tg, this.clef), this.clef)}. Greife: ${gripText(midiOf(tg))}.` : `Neu: <b>${nameHtml(tg)}</b> – ${describePos(staffPos(tg, this.clef), this.clef)}. Die Taste leuchtet.`, 0);
     else if (first) app.bubble(this.boss ? `Spiele die Melodie: <b>${this.level.title}</b>` : 'Welcher Ton baut die Brücke?', 4);
     else app.bubble(null);
-    if (first) app.panel.say(app.listening ? 'Ich höre …' : 'Bildschirm-Tasten', app.listening ? 'Ich höre noch nichts.' : '');
+    if (first) app.panel.say(app.listening ? 'Ich höre …' : INSTR.pad, app.listening ? 'Ich höre noch nichts.' : '');
   }
   onNote(midi) {
     if (this.phase === 'jump') { this.queue = midi; return; }
@@ -46,15 +50,15 @@ export class JumpScene {
     if (cls === 'correct') {
       const first = this.tries === 0; p.notes[tg.key] = srsUpdate(p.notes[tg.key] || newStat(), first, !this.fresh && performance.now() - this.t0 > SLOW_PLAY_MS);
       if (first) { this.firstTry++; this.combo++; } else this.combo = 0;
-      app.panel.say(app.listening ? 'Ich höre …' : 'Bildschirm-Tasten', `Perfekt! <b>${nameHtml(tg)}</b> erkannt!`, 'ok'); app.panel.flash(midi, 'good'); app.panel.setHint(null); app.bubble(null);
+      app.panel.say(app.listening ? 'Ich höre …' : INSTR.pad, `Perfekt! <b>${nameHtml(tg)}</b> erkannt!`, 'ok'); app.panel.flash(midi, 'good'); app.panel.setHint(null); app.bubble(null);
       if (!p.creatures.includes(tg.key)) { p.creatures.push(tg.key); this.freed.push(tg); this.freeAt = tg; }
       app.audio.sfx('ok'); this.phase = 'jump'; this.jumpT = 0; this.from = { ...this.hero }; this.accMidi = midi; this.accAt = now; this.ghost = null;
     } else {
       this.tries++; this.combo = 0; const ck = `${tg.key}>${heard.key}`; p.conf[ck] = (p.conf[ck] || 0) + 1;
       this.ghost = { note: heard, pos: staffPos(heard, this.clef), t: 0 }; this.oopsT = 0.5; app.audio.sfx('oops'); app.panel.flash(midi, 'bad');
-      if (cls === 'wrong') app.panel.say(app.listening ? 'Ich höre …' : 'Bildschirm-Tasten', `Das war <b>${nameHtml(heard)}</b>. Versuch es noch einmal!`, 'warn');
-      else app.panel.say(app.listening ? 'Ich höre …' : 'Bildschirm-Tasten', `Das ist ein <b>${letterName(tg)}</b>, aber eine Oktave zu ${cls === 'octave-high' ? 'hoch' : 'tief'}.`, 'warn');
-      if (this.tries >= this.hintAfter && !this.hint) { this.hint = true; app.panel.setHint(tm); app.bubble('Tipp: Die leuchtende Taste ist richtig.', 4); }
+      if (cls === 'wrong') app.panel.say(app.listening ? 'Ich höre …' : INSTR.pad, `Das war <b>${nameHtml(heard)}</b>. Versuch es noch einmal!`, 'warn');
+      else app.panel.say(app.listening ? 'Ich höre …' : INSTR.pad, `Das ist ein <b>${letterName(tg)}</b>, aber eine Oktave zu ${cls === 'octave-high' ? 'hoch' : 'tief'}${isGuitar() ? ' – eine andere Saite' : ''}.`, 'warn');
+      if (this.tries >= this.hintAfter && !this.hint) { this.hint = true; app.panel.setHint(tm); app.bubble(isGuitar() ? `Tipp: ${gripText(tm)}.` : 'Tipp: Die leuchtende Taste ist richtig.', isGuitar() ? 6 : 4); }
     }
   }
   update(dt) {
@@ -75,7 +79,7 @@ export class JumpScene {
       if (this.doneT > 1.1 && !this.reported) { this.reported = true; app.finishLevel(this.level, { ratio: this.firstTry / this.targets.length, time: this.elapsed, freed: this.freed,
         line: `Beim ersten Versuch richtig: <b>${this.firstTry} von ${this.targets.length}</b>` }); }
     }
-    this.camX += (this.hero.x - HERO_SX - this.camX) * Math.min(1, dt * 6);
+    this.camX += (this.hero.x - heroSX() - this.camX) * Math.min(1, dt * 6);
   }
   draw(ctx, tx) {
     const cam = G.q(this.camX), T = this.theme, line = this.line, light = T !== 'himmel';

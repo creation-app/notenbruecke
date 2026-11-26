@@ -52,12 +52,14 @@ export function importCode(code) {
 // Alles andere (Name, einzelne Sterne, Übungstage, Noten-Statistik) steckt im Spielstand-Link bzw. QR-Code.
 const B32 = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 function shortSum(body) { let s = 7; for (let i = 0; i < body.length; i++) s = (s * 31 + B32.indexOf(body[i]) * (i + 3)) % 1024; return B32[s >> 5] + B32[s & 31]; }
-/** worlds = Liste der Level-IDs je Welt (höchstens 4 Welten, je höchstens 15 Level). */
-export function exportShort(profile, worlds) {
+/** worlds = Liste der Level-IDs je Welt (höchstens 4 Welten, je höchstens 15 Level). Beim Einlesen: entweder eine solche Liste (Klavier) oder { klavier: [...], gitarre: [...] }. */
+export function exportShort(profile, worlds, instr = 'klavier') {
+  const skip = (instr === 'gitarre' ? profile.skipG : profile.skip) || [];
   const bits = []; const push = (v, n) => { for (let i = n - 1; i >= 0; i--) bits.push((v >> i) & 1); };
   push(2, 2); push(profile.hero & 7, 3); push(profile.mode === 'profi' ? 1 : 0, 1); push(profile.unlockAll ? 1 : 0, 1);
   for (let w = 0; w < 4; w++) { const done = (worlds[w] || []).filter(id => profile.levels[id]); const sum = done.reduce((a, id) => a + (profile.levels[id].stars || 1), 0);
-    push(Math.min(15, done.length), 4); push(done.length ? Math.max(1, Math.min(3, Math.round(sum / done.length))) : 0, 2); push(Math.min(15, (profile.skip || [])[w] || 0), 4); }
+    push(Math.min(15, done.length), 4); push(done.length ? Math.max(1, Math.min(3, Math.round(sum / done.length))) : 0, 2); push(Math.min(15, skip[w] || 0), 4); }
+  push(instr === 'gitarre' ? 1 : 0, 1); // Bit 48: Instrument (alte Codes haben hier 0 = Klavier)
   while (bits.length % 5) bits.push(0);
   let body = ''; for (let i = 0; i < bits.length; i += 5) body += B32[bits.slice(i, i + 5).reduce((a, b) => a * 2 + b, 0)];
   return (body + shortSum(body)).replace(/(.{4})(?=.)/g, '$1-');
@@ -69,8 +71,9 @@ export function importShort(code, worlds) {
   const bits = []; for (const ch of body) { const v = B32.indexOf(ch); for (let i = 4; i >= 0; i--) bits.push((v >> i) & 1); }
   let k = 0; const take = n => { let v = 0; for (let i = 0; i < n; i++) v = v * 2 + bits[k++]; return v; };
   if (take(2) !== 2) throw new Error('Dieser Kurzcode gehört zu einer anderen Spielversion.');
-  const p = newProfile('Spieler', take(3), take(1) ? 'profi' : 'abenteuer'); p.unlockAll = !!take(1); p.skip = [];
-  for (let w = 0; w < 4; w++) { const n = take(4), avg = take(2); p.skip.push(take(4)); (worlds[w] || []).slice(0, n).forEach(id => { p.levels[id] = { stars: avg || 1 }; }); }
+  const p = newProfile('Spieler', take(3), take(1) ? 'profi' : 'abenteuer'); p.unlockAll = !!take(1); const guitar = bits[47] === 1 && !Array.isArray(worlds), skip = [];
+  if (guitar) { p.instr = 'gitarre'; p.skipG = skip; } else p.skip = skip; if (!Array.isArray(worlds)) worlds = worlds[guitar ? 'gitarre' : 'klavier'];
+  for (let w = 0; w < 4; w++) { const n = take(4), avg = take(2); skip.push(take(4)); (worlds[w] || []).slice(0, n).forEach(id => { p.levels[id] = { stars: avg || 1 }; }); }
   p.seenIntro = true; return p;
 }
 

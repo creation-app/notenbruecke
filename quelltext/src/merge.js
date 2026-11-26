@@ -16,6 +16,7 @@ export function mergeProfiles(a, b) {
     out.train[k] = { ...x, ...y, best: num(bx.best), bestAcc: num(bx.bestAcc), stars: Math.max(num(x.stars), num(y.stars)), runs: ry.length >= rx.length ? ry : rx }; }
   out.regenBest = Math.max(num(a.regenBest), num(b.regenBest));
   if (Array.isArray(a.skip) || Array.isArray(b.skip)) { const sa = a.skip || [], sb = b.skip || []; out.skip = Array.from({ length: Math.max(sa.length, sb.length) }, (_, i) => Math.max(num(sa[i]), num(sb[i]))); }
+  if (Array.isArray(a.skipG) || Array.isArray(b.skipG)) { const sa = a.skipG || [], sb = b.skipG || []; out.skipG = Array.from({ length: Math.max(sa.length, sb.length) }, (_, i) => Math.max(num(sa[i]), num(sb[i]))); }
   out.seenIntro = !!(a.seenIntro || b.seenIntro); out.calibrated = !!(a.calibrated || b.calibrated);
   if (Array.isArray(a.storyRead) || Array.isArray(b.storyRead)) out.storyRead = [...new Set([...(a.storyRead || []), ...(b.storyRead || [])])];
   return out;

@@ -23,13 +23,20 @@ export const SONGS = {
     'D2/A2 C2/G2 A#1/F2 A1/E2 D2/A2 G2/D3 A2/E3 D2/A2', 'F4/A4 E4/G4 D4/F4 C#4/E4 F4/A4 G4/A#4 C#4/E4 F4/A4'),
 };
 export const SONG = SONGS.original;
-export const GAIN_MAX = 16, GAIN_TARGET = 0.04, GAIN_PROBE = 8;
+export const GAIN_MAX = 16, GAIN_TARGET = 0.04, GAIN_PROBE = 8, FLOOR_PART = 0.1;
+/** Mittlerer Spitzenpegel der gemessenen Töne (unverstärkt). */
+export function refFor(peaks) { const v = peaks.filter(x => x > 0).sort((a, b) => a - b); return v.length ? v[Math.floor(v.length / 2)] : 0; }
 /** Verstärkung aus den gemessenen Spitzenpegeln (ohne Verstärkung) einiger Töne: Ziel ist ein kräftiger, aber nicht übersteuerter Pegel. */
 export function gainFor(peaks) { const v = peaks.filter(x => x > 0).sort((a, b) => a - b); if (!v.length) return 1; const med = v[Math.floor(v.length / 2)]; return Math.max(1, Math.min(GAIN_MAX, Math.round(GAIN_TARGET / med * 10) / 10)); }
 export class GameAudio {
   constructor() { this.ctx = null; this.micState = 'off'; this.gateUntil = 0; this.gated = false; this.level = 0; this.tracker = new NoteTracker(); this.lastPoll = 0; this.muted = false; this.gain = 1; }
   /** Verstärkung für leise Mikrofone (pro Gerät eingestellt). Die Tonhöhen-Erkennung hängt nicht von der Lautstärke ab – nur die Schwellen für Stille und Anschlag. */
-  setGain(g) { this.gain = Math.max(1, Math.min(GAIN_MAX, +g || 1)); }
+  setGain(g) { this.gain = Math.max(1, Math.min(GAIN_MAX, +g || 1)); this.applyFloor(); }
+  /** Bezugspegel: so laut kommt das Instrument auf diesem Gerät an (unverstärkt gemessen). Deutlich Leiseres – Stimmen im Raum, Nebengeräusche – wird überhört. 0 = unbekannt. */
+  setRef(peak) { this.ref = +peak > 0 ? +peak : 0; this.applyFloor(); }
+  applyFloor() { this.tracker.minRms = this.probing || !this.ref ? 0.002 : Math.max(0.002, Math.min(0.03, FLOOR_PART * this.ref * this.gain)); }
+  /** Zum Einmessen: stark verstärkt und ohne Schwelle zuhören. */
+  probe(on) { this.probing = !!on; if (on) this.gain = GAIN_PROBE; this.applyFloor(); }
   ensure() {
     try { if (!this.ctx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) this.ctx = new AC(); }
       if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume().catch(() => {}); } catch (e) { this.ctx = null; }
@@ -112,7 +119,7 @@ export class GameAudio {
   }
   /** Klavierähnlicher Ton (für Brückenbauer und Sammlung). */
   playNote(midi) {
-    if (this.muted || !this.ensure()) return; const t = this.ctx.currentTime + 0.01, f = freqOfMidi(midi);
+    if (this.muted || !this.ensure()) return; const t = this.ctx.currentTime + 0.01, f = freqOfMidi(midi - (this.shift || 0));
     try { this.tone(f, t, 0.9, 'triangle', 0.16); this.tone(f * 2, t, 0.5, 'sine', 0.05); } catch (e) { return; }
     this.gateUntil = Math.max(this.gateUntil, performance.now() + 1050);
   }

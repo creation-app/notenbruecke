@@ -3,7 +3,7 @@
 export const API_URL = '';
 export const CONFIG = {
   shop: typeof window !== 'undefined' && !!window.NB_SHOP,
-  freeLevels: ['h1', 'h2', 'h3', 'h4', 'h5'],       // in der Kauf-Variante ohne Schlüssel spielbar
+  freeLevels: ['h1', 'h2', 'h3', 'h4', 'h5', 'ga1', 'ga2', 'ga3', 'ga4', 'ga5'],       // in der Kauf-Variante ohne Schlüssel spielbar
   priceOnce: '12,99 €', priceAbo: '2,99 € im Monat', // Platzhalter, bis die Preise feststehen
   checkoutOnce: '', checkoutAbo: '',                 // Kauf-Adressen des Zahlungsanbieters; leer = Kauf noch nicht freigeschaltet
   apiUrl: (typeof window !== 'undefined' && window.NB_API !== undefined) ? window.NB_API : API_URL,  // Server für Konten und Statistik; leer = beides aus

@@ -191,3 +191,75 @@ test('Spielstände zusammenführen (Konto auf zwei Geräten)', async () => {
   assert.deepEqual(mergeProfiles(mergeProfiles(server, local), local).levels, m.levels, 'mehrfaches Zusammenführen ändert nichts');
   assert.ok(mergeProfiles(null, local).levels.h3 && mergeProfiles(server, {}).levels.h1, 'leere Stände');
 });
+
+// ---------- Sprache soll nicht als Note zählen ----------
+function rng(seed) { let s = seed >>> 0; return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
+/** Sprechähnlich: Silben mit gleitender Tonhöhe, Formanten, wechselnder Lautstärke. glide in Halbtönen pro Sekunde. */
+function speech(seconds, seed, { lo = 180, hi = 330, minGlide = 3, maxGlide = 12, gain = 0.2 } = {}) {
+  const r = rng(seed), out = new Float32Array(Math.round(seconds * SR)); let i = 0, ph = 0;
+  while (i < out.length) {
+    const dur = 0.16 + r() * 0.24, n = Math.round(dur * SR), f0 = lo + r() * (hi - lo), g = (minGlide + r() * (maxGlide - minGlide)) * (r() < 0.5 ? -1 : 1), F1 = 400 + r() * 500, F2 = 1000 + r() * 1200, a = gain * (0.6 + r() * 0.4);
+    for (let k = 0; k < n && i < out.length; k++, i++) { const t = k / SR, f = f0 * Math.pow(2, g * t / 12) * (1 + 0.004 * Math.sin(2 * Math.PI * 5.5 * t)); ph += 2 * Math.PI * f / SR; let s = 0;
+      for (let h = 1; h <= 14 && f * h < 5000; h++) { const fh = f * h, w = 1 / h * (1 + 3 * Math.exp(-((fh - F1) ** 2) / 20000) + 2 * Math.exp(-((fh - F2) ** 2) / 60000)); s += w * Math.sin(ph * h); }
+      out[i] = a * 0.25 * s * Math.sin(Math.PI * Math.min(1, k / n)) ** 0.5 + 0.003 * (r() * 2 - 1); }
+    i += Math.round((0.04 + r() * 0.1) * SR);
+  }
+  return out;
+}
+/** Gezupfte Saite: startet etwas zu hoch und sinkt in gut 100 ms auf die Tonhöhe, klingt schnell aus. */
+function pluck(midi, dur, sharpCents = 25, gain = 0.25) {
+  const f = M.freqOfMidi(midi), n = Math.round(dur * SR), out = new Float32Array(n); let ph = 0;
+  for (let i = 0; i < n; i++) { const t = i / SR, fi = f * Math.pow(2, sharpCents * Math.exp(-t / 0.05) / 1200); ph += 2 * Math.PI * fi / SR; let s = 0; for (let h = 1; h <= 8; h++) s += Math.sin(ph * h) / h * Math.exp(-t * (2.5 + 1.2 * h)); out[i] = gain * s * Math.min(1, t / 0.003) + 0.003 * (Math.random() * 2 - 1); }
+  return out;
+}
+test('Sprache: gleitende Stimme löst (fast) keine Noten aus, Klavier und Gitarre weiterhin jede', () => {
+  const secs = 30, count = (o, opt) => { let n = 0; for (const seed of [1, 2, 3, 4]) n += run(speech(secs, seed, o), opt).length; return n; };
+  for (const [name, o, maxPart] of [['fast monoton (0–1 Halbton/s)', { minGlide: 0, maxGlide: 1 }, 1], ['leicht gleitend (1–3)', { minGlide: 1, maxGlide: 3 }, 0.6], ['normal gleitend (2–6)', { minGlide: 2, maxGlide: 6 }, 0.35], ['lebhaft (3–12)', { minGlide: 3, maxGlide: 12 }, 0.2]]) {
+    const old = count(o, { steadyCents: 1e9 }), now = count(o); console.log(`      Sprache ${name}: früher ${old} Fehl-Noten in 2 min, jetzt ${now}`); assert.ok(now <= Math.max(1, old * maxPart), `${name}: ${now} von ${old}`); }
+  // Klavier: Tonfolge mit Wiederholungen, alles muss ankommen
+  const mel = [60, 62, 64, 64, 65, 67, 67, 60, 72, 48, 43, 36], sig = concat(mel.flatMap(m => [piano(m, 0, 0.5), silence(0.12)])); assert.deepEqual(run(sig), mel);
+  // Gitarre: gezupft, anfangs zu hoch, tiefe Saiten (klingend E = 40) bis hohes g
+  const gm = [40, 45, 47, 50, 55, 59, 64, 65, 67, 40, 41, 43], gs = concat(gm.flatMap(m => [pluck(m, 0.55), silence(0.1)])); assert.deepEqual(run(gs), gm);
+  assert.deepEqual(run(concat(gm.flatMap(m => [pluck(m, 0.55, 45), silence(0.1)]))), gm, 'kräftig gezupft (45 Cent zu hoch am Anfang)');
+});
+test('Leises wird überhört, wenn der Pegel des Instruments bekannt ist', () => {
+  const loud = concat([piano(60, 0, 0.6), silence(0.2), piano(64, 0, 0.6), silence(0.2)]), quiet = loud.map(x => x * 0.05);
+  assert.deepEqual(run(quiet), [60, 64], 'ohne Bezugspegel zählt auch Leises'); const ref = 0.12; // etwa der Spitzenpegel des lauten Signals
+  assert.deepEqual(run(quiet, { minRms: 0.1 * ref }), [], 'ein Zwanzigstel so laut wie das Instrument: überhört'); assert.deepEqual(run(loud, { minRms: 0.1 * ref }), [60, 64]); assert.deepEqual(run(loud.map(x => x * 0.4), { minRms: 0.1 * ref }), [60, 64], 'leiser gespielt zählt noch');
+});
+
+test('Gitarre: Level-Satz, Namen wie im Heft, Griffe, Reihenfolge der Töne', async () => {
+  const L = await import('../src/levels.js'), I = await import('../src/instrument.js');
+  assert.equal(L.LEVELS[0].id, 'h1'); assert.equal(M.nameStr(M.N('f2')), 'f²');
+  I.setInstr('gitarre');
+  try {
+    assert.equal(L.LEVELS[0].id, 'ga1'); assert.equal(L.WORLDS.length, 4); assert.equal(L.SKIP_KEY, 'skipG'); assert.equal(I.INSTR.shift, 12);
+    // Reihenfolge wie im Inhaltsverzeichnis von „Garantiert Gitarre lernen für Kinder 1“: e f g | h c d | g a | d e f | a h c | e f g
+    const order = []; for (const l of L.LEVELS) for (const k of l.fresh) if (!order.includes(k)) order.push(k);
+    assert.deepEqual(order, ['e2', 'f2', 'g2', 'h1', 'c2', 'd2', 'g1', 'a1', 'd1', 'e1', 'f1', 'a', 'h', 'c1', 'e', 'f', 'g']);
+    assert.deepEqual(L.ALL_NOTES.map(a => a.length), [6, 5, 6, 0]); assert.equal(L.creatureTotal(), 17);
+    const names = { e2: 'hohes e', f2: 'hohes f', g2: 'hohes g', h1: 'mittleres h', c2: 'mittleres c', d2: 'hohes d', g1: 'mittleres g', a1: 'mittleres a', d1: 'mittleres d', e1: 'mittleres e', f1: 'mittleres f', a: 'tiefes a', h: 'tiefes h', c1: 'tiefes c', e: 'tiefes e', f: 'tiefes f', g: 'tiefes g' };
+    for (const [k, v] of Object.entries(names)) { assert.equal(M.nameStr(M.N(k)), v); assert.equal(M.nameHtml(M.N(k)), v); assert.equal(M.N(k).key, k, 'Kennung bleibt'); }
+    assert.deepEqual(M.shownParts(M.N('g2')), { base: 'g', sup: 'hoch', word: true });
+    // Griffe: Saite und Bund wie im Heft; jede Level-Note ist in der ersten Lage bis zum 3. Bund greifbar
+    const g = k => I.grip(M.midiOf(M.N(k))); assert.deepEqual(g('e2'), { string: 5, fret: 0 }); assert.deepEqual(g('f2'), { string: 5, fret: 1 }); assert.deepEqual(g('g2'), { string: 5, fret: 3 }); assert.deepEqual(g('h1'), { string: 4, fret: 0 }); assert.deepEqual(g('d2'), { string: 4, fret: 3 });
+    assert.deepEqual(g('a1'), { string: 3, fret: 2 }); assert.deepEqual(g('f1'), { string: 2, fret: 3 }); assert.deepEqual(g('h'), { string: 1, fret: 2 }); assert.deepEqual(g('c1'), { string: 1, fret: 3 }); assert.deepEqual(g('e'), { string: 0, fret: 0 }); assert.deepEqual(g('g'), { string: 0, fret: 3 });
+    for (const l of L.LEVELS) for (const k of [...l.notes, ...(l.melody || [])]) { const x = g(k); assert.ok(x && x.fret <= 3, l.id + ' ' + k); assert.equal(M.N(k).alt, 0); }
+    assert.equal(I.gripText(M.midiOf(M.N('h'))), 'A-Saite, 2. Bund (Mittelfinger)'); assert.equal(I.gripText(M.midiOf(M.N('e2'))), 'hohe e-Saite, leer (ohne Finger)');
+    // Melodien nur mit Tönen, die bis dahin gelernt sind
+    const known = new Set(); for (const l of L.LEVELS) { l.fresh.forEach(k => known.add(k)); l.notes.forEach(k => assert.ok(known.has(k), `${l.id}: ${k} noch nicht eingeführt`)); (l.melody || []).forEach(k => assert.ok(known.has(k), `${l.id}: Melodieton ${k} noch nicht eingeführt`)); }
+    for (const st of L.PLACEMENT) { assert.equal(st.skip.length, 4); st.skip.forEach((v, w) => assert.ok(v <= L.levelsOf(w).length)); }
+    const p = { levels: {}, skipG: [10, 1, 0, 0], skip: [0, 0, 0, 0] }; assert.ok(L.worldUnlocked(p, 1) && !L.worldUnlocked(p, 2)); assert.ok(L.levelUnlocked(p, L.LEVELS[9]));
+  } finally { I.setInstr('klavier'); }
+  assert.equal(L.LEVELS[0].id, 'h1'); assert.equal(M.nameStr(M.N('f2')), 'f²'); assert.equal(L.ALL_LEVELS.length, 73);
+  const known = new Set(); for (const l of L.SETS.klavier.levels) { l.fresh.forEach(k => known.add(k)); } assert.ok(known.size > 20);
+});
+
+test('Kurzcode trägt das Instrument; alte Codes bleiben Klavier', async () => {
+  const L = await import('../src/levels.js'); const ids = set => set.worlds.map((w, i) => set.levels.filter(l => l.world === i).map(l => l.id)), both = { klavier: ids(L.SETS.klavier), gitarre: ids(L.SETS.gitarre) };
+  const g = V.newProfile('G', 3, 'profi'); g.instr = 'gitarre'; g.levels = { ga1: { stars: 3 }, ga2: { stars: 2 }, gb1: { stars: 1 } }; g.skipG = [10, 1, 0, 0]; g.skip = [15, 13, 0, 0];
+  const code = V.exportShort(g, both.gitarre, 'gitarre'); assert.match(code, /^[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{4}$/); const back = V.importShort(code, both);
+  assert.equal(back.instr, 'gitarre'); assert.deepEqual(Object.keys(back.levels), ['ga1', 'ga2', 'gb1']); assert.deepEqual(back.skipG, [10, 1, 0, 0]); assert.equal(back.skip, undefined); assert.equal(back.hero, 3); assert.equal(back.mode, 'profi');
+  const p = V.newProfile('P', 1); p.levels = { h1: { stars: 3 }, t1: { stars: 2 } }; p.skip = [6, 0, 0, 0]; const pc = V.exportShort(p, both.klavier); const pb = V.importShort(pc, both);
+  assert.equal(pb.instr, undefined); assert.deepEqual(Object.keys(pb.levels), ['h1', 't1']); assert.deepEqual(pb.skip, [6, 0, 0, 0]); assert.deepEqual(V.importShort(pc, both.klavier).levels, pb.levels, 'alte Aufrufform');
+});

@@ -1,5 +1,6 @@
 // Unteres Bedienfeld: Mikrofon-Anzeige links, rechts Klaviatur / Antwortknöpfe / Brückenbauer-Steuerung.
 import { noteOfMidi, nameHtml, N, midiOf } from './music.js';
+import { isGuitar, OPEN, FRETS, STRING_SHORT } from './instrument.js';
 
 const WHITE = [0, 2, 4, 5, 7, 9, 11], BLACK_AFTER = [0, 1, 3, 4, 5];
 export class Panel {
@@ -18,7 +19,18 @@ export class Panel {
   showMic(v) { this.root.querySelector('.mic').hidden = !v; this.root.classList.toggle('solo', !v); }
   clear() { this.right.innerHTML = ''; this.keys.clear(); this.heard = this.hint = null; }
 
+  /** Griffbrett wie im Gitarrenheft: Sattel oben, Saiten von links (tiefe E-Saite) nach rechts (hohe e-Saite), darunter der 1. bis 3. Bund. */
+  fretboard() {
+    this.clear(); const fb = document.createElement('div'); fb.className = 'fb'; fb.setAttribute('role', 'group'); fb.setAttribute('aria-label', 'Griffbrett');
+    const add = (cls, html) => { const e = document.createElement('span'); e.className = cls; e.innerHTML = html; fb.appendChild(e); return e; };
+    add('fn', ''); STRING_SHORT.forEach(s => add('sn', s));
+    for (let f = 0; f <= FRETS; f++) { add('fn', f ? f + '.' : 'leer');
+      for (let s = 0; s < 6; s++) { const midi = OPEN[s] + f, k = document.createElement('button'); k.className = 'fc' + (f ? '' : ' open'); k.style.setProperty('--sw', [6, 5, 4, 3, 2, 2][s] + 'px'); k.innerHTML = `<i>${f || ''}</i>`;
+        k.setAttribute('aria-label', `${STRING_SHORT[s]}-Saite, ${f ? f + '. Bund' : 'leer'}`); k.tabIndex = -1; k.addEventListener('pointerdown', e => { e.preventDefault(); this.app.keyTap(midi); }); this.keys.set(midi, k); fb.appendChild(k); } }
+    this.right.appendChild(fb);
+  }
   keyboard(clef) {
+    if (isGuitar()) return this.fretboard();
     this.clear(); const base = clef === 'bass' ? 36 : clef === 'grand' ? 48 : 60; const kb = document.createElement('div'); kb.className = 'kb'; kb.setAttribute('role', 'group'); kb.setAttribute('aria-label', 'Klaviatur');
     for (let i = 0; i < 15; i++) { const midi = base + 12 * Math.floor(i / 7) + WHITE[i % 7], n = noteOfMidi(midi);
       const k = this.key(midi, 'wk', i % 7 === 0 ? nameHtml(n) : ''); k.style.left = i * 36 + 'px'; kb.appendChild(k);

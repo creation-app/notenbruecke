@@ -1,22 +1,38 @@
 // Die Geschichte: Der Graue Nebel hat das Klangreich verstummen lassen. Jede richtig gespielte Note vertreibt ihn ein Stück.
-export const INTRO = [
+const P_INTRO = [
   'Im Klangreich hatte jeder Ton ein Zuhause: Hoch oben im Himmel wohnten die hellen Töne, tief unten im Meer die dunklen.',
   'Dann kam der Graue Nebel. Er verschluckte jeden Klang, sperrte die Notenwesen ein und ließ die Brücken zwischen den Tönen zerfallen.',
   'Seitdem ist es still. Nur fünf Linien ziehen sich noch durch die Welt – und auf ihnen warten die Notenwesen darauf, gehört zu werden.',
   'Der Nebel fürchtet nur eines: einen echten Ton. Lies die Note, spiel sie auf deinem Klavier – und die Brücke wächst unter deinen Füßen.',
 ];
-export const WORLD_INTRO = [
+const P_WORLD_INTRO = [
   ['Der Himmel der hohen Töne. Irgendwo dort oben, auf der schwebenden Insel, steht das Schloss der Klänge – stumm und grau verhangen.', 'Der Violinschlüssel zeigt dir den Weg: Er ringelt sich um die Linie, auf der das g¹ wohnt.'],
   ['Unter der Brücke am mittleren c beginnt die Tiefe. Hier hat der Nebel die dunklen Töne versteckt.', 'Der Bassschlüssel ist dein Kompass: Seine zwei Punkte bewachen die Linie, auf der das kleine f wohnt.'],
   ['Hinter dem Meer liegt das Land der Zauberzeichen. Hier trägt mancher Ton ein Zeichen: Das Kreuz hebt ihn einen halben Schritt, das b senkt ihn.', 'Die schwarzen Tasten kennt der Nebel am wenigsten. Genau deshalb hat er sich hier verkrochen.'],
   ['Zwischen Himmel und Tiefe spannt sich die größte aller Brücken: zwei Systeme übereinander, oben für die rechte Hand, unten für die linke.', 'Genau in der Mitte, auf einer einzigen kleinen Linie, wohnt das mittlere c. Von dort aus erreichst du beide Welten.'],
 ];
-export const WORLD_OUTRO = [
+const P_WORLD_OUTRO = [
   ['Das Schloss der Klänge leuchtet wieder! Aus allen Fenstern klingt es – und die Notenwesen des Himmels tanzen auf den Linien.', 'Doch aus der Tiefe steigt noch immer grauer Dunst. Unter dem mittleren c wartet der nächste Weg.'],
   ['Die Tiefe singt wieder. Vom höchsten Schloss bis zum Meeresgrund sind die Brücken zurück – und das mittlere c hält beide Welten zusammen.', 'Der Graue Nebel flieht dorthin, wo er sich am sichersten fühlt: ins Land der Zauberzeichen.'],
   ['Mit dem letzten Ton zerreißt der Graue Nebel wie ein alter Vorhang. Dahinter: Farben, Stimmen, Musik.', 'Das Klangreich ist frei. Und du kannst jetzt etwas, das dir niemand mehr nimmt: Du kannst Noten lesen.', 'Die Notenwesen bleiben bei dir. Besuche sie in deiner Sammlung – und komm wieder, damit kein Ton je wieder verstummt.'],
   ['Beide Hände, beide Schlüssel, eine Melodie: Die große Brücke trägt. Wer hier hinüberkommt, liest Klaviernoten so, wie sie wirklich im Heft stehen.'],
 ];
+const G_INTRO = [P_INTRO[0], P_INTRO[1], P_INTRO[2],
+  'Der Nebel fürchtet nur eines: einen echten Ton. Lies die Note, spiel sie auf deiner Gitarre – und die Brücke wächst unter deinen Füßen.'];
+const G_WORLD_INTRO = [
+  ['Der Himmel der hohen Töne. Irgendwo dort oben, auf der schwebenden Insel, steht das Schloss der Klänge – stumm und grau verhangen.', 'Deine zwei dünnsten Saiten zeigen dir den Weg: zuerst die hohe e-Saite, dann die h-Saite.'],
+  ['Hinter dem Schloss liegt das Tal der mittleren Töne. Hier hat der Nebel die Lieder versteckt, die jeder kennt.', 'Die g-Saite und die d-Saite holen sie zurück. Ihre Noten sitzen unten im System.'],
+  ['Unter dem Tal beginnt die Tiefe. Hier brummen die dunklen Töne der beiden dicken Saiten.', 'Ihre Noten wohnen unter dem System, auf kleinen Hilfslinien. Zähle sie in Ruhe ab.'],
+  ['Von ganz unten bis ganz oben spannt sich die größte aller Brücken: sechs Saiten, ein Weg.', 'Jetzt kommen alle Töne durcheinander. Schau genau hin: hoch, mittel oder tief?'],
+];
+const G_WORLD_OUTRO = [
+  ['Das Schloss der Klänge leuchtet wieder! Aus allen Fenstern klingt es – und die Notenwesen des Himmels tanzen auf den Linien.', 'Doch im Tal dahinter hängt noch grauer Dunst. Dort warten die mittleren Saiten.'],
+  ['Das Tal singt wieder – mit Liedern, die jeder mitsummen kann.', 'Der Graue Nebel flieht nach unten, in die Tiefe der dicken Saiten.'],
+  ['Mit dem letzten tiefen Ton zerreißt der Graue Nebel wie ein alter Vorhang. Dahinter: Farben, Stimmen, Musik.', 'Das Klangreich ist frei. Und du kannst jetzt etwas, das dir niemand mehr nimmt: Du kannst Noten lesen – auf allen sechs Saiten.', 'Die Notenwesen bleiben bei dir. Besuche sie in deiner Sammlung – und komm wieder, damit kein Ton je wieder verstummt.'],
+  ['Sechs Saiten, alle Töne, eine Melodie: Die große Brücke trägt. Wer hier hinüberkommt, liest Gitarrennoten so, wie sie wirklich im Heft stehen.'],
+];
+export let INTRO = P_INTRO, WORLD_INTRO = P_WORLD_INTRO, WORLD_OUTRO = P_WORLD_OUTRO;
+export function setStorySet(id) { const g = id === 'gitarre'; INTRO = g ? G_INTRO : P_INTRO; WORLD_INTRO = g ? G_WORLD_INTRO : P_WORLD_INTRO; WORLD_OUTRO = g ? G_WORLD_OUTRO : P_WORLD_OUTRO; }
 export const LEVEL_STORY = {
   h1: 'Zwei Notenwesen rufen leise durch den Nebel: das mittlere c und das g auf der Schlüssel-Linie. Hol sie zurück!',
   h2: 'Zwischen c und g fehlt eine Stufe. Mit dem e baust du die erste Treppe in den Himmel.',
@@ -58,4 +74,37 @@ export const LEVEL_STORY = {
   b3: 'Rund um das mittlere c liegen die Töne dicht beieinander – mal im oberen, mal im unteren System.',
   b4: 'Jetzt schreibst du selbst ins große System. Achte darauf, in welches der beiden die Note gehört.',
   b5: 'Der Wächter der großen Brücke lässt nur durch, wer mit beiden Händen spielt.',
+  ga1: 'Zwei Notenwesen rufen leise durch den Nebel: das hohe e – deine dünnste Saite, ganz ohne Finger – und das hohe f im 1. Bund.',
+  ga2: 'Über dem System, gleich über der obersten Linie, wohnt das hohe g. Dein Ringfinger holt es im 3. Bund.',
+  ga3: 'Der Nebel wirbelt die Noten durcheinander. Erkenne sie, bevor sie im Tor verschwinden!',
+  ga4: 'Eine Saite weiter wartet die h-Saite: leer klingt das h, mit dem Zeigefinger das c.',
+  ga5: 'Jetzt baust du selbst: Schreib die Noten an ihren Platz, dann trägt die Brücke.',
+  ga6: 'Im 3. Bund der h-Saite sitzt das hohe d. Damit hast du schon sechs Töne beisammen.',
+  ga7: 'Ein Wolkenbruch aus Noten! Bleib ruhig und lies genau.',
+  ga8: 'Ein Nebelwächter versperrt den Weg. Er weicht nur einer ganzen Melodie – spiel sie ihm vor!',
+  ga9: 'Zwei Saiten, sechs Töne, immer im Wechsel. Je sicherer du springst, desto dünner wird der Nebel.',
+  ga10: 'Der letzte Wächter des Himmels steht vor dem Schloss. Eine Melodie voller Freude öffnet das Tor.',
+  gb1: 'Die g-Saite klingt leer wie die Linie, um die sich der Violinschlüssel ringelt. Im 2. Bund wartet das a.',
+  gb2: 'Es regnet Noten von drei Saiten. Achte auf die Höhe: Linie oder Zwischenraum?',
+  gb3: 'Der Wächter des Tals schläft. Weck ihn mit einem Lied, das jedes Kind kennt.',
+  gb4: 'Die d-Saite: Ihr leeres d hängt gleich unter dem System. Mit dem Mittelfinger greifst du das e.',
+  gb5: 'Zwischen e und g fehlt noch ein Ton. Das mittlere f sitzt im ersten Zwischenraum.',
+  gb6: 'Die Notenwesen flüstern dir Wörter zu. Schreib sie mit Noten auf!',
+  gb7: 'Der Nebel wehrt sich mit einem Sturm. Zeig ihm, wie schnell du lesen kannst.',
+  gb8: 'Der zweite Wächter liebt Kanons. Spiel ihm Bruder Jakob vor – vom mittleren g bis hinunter zum d.',
+  gb9: 'Vier Saiten, elf Töne. Wer hier sicher springt, kommt überall hin.',
+  gc1: 'Die A-Saite brummt schon tiefer. Ihre Noten hängen an Hilfslinien unter dem System: das tiefe a und das tiefe h.',
+  gc2: 'Das tiefe c sitzt auf einer einzigen Hilfslinie. Auf der Gitarre greifst du es im 3. Bund der A-Saite.',
+  gc3: 'Blubberblasen tragen Noten nach oben. Lies sie, bevor sie zerplatzen!',
+  gc4: 'Der Wächter der Grotte kennt nur ein Lied. Spiel es ihm – vom tiefen c an aufwärts.',
+  gc5: 'Die dickste Saite: das tiefe e, ganz ohne Finger. Tiefer geht es auf der Gitarre nicht.',
+  gc6: 'Im 3. Bund der tiefen E-Saite wartet das letzte Notenwesen: das tiefe g.',
+  gc7: 'Tief unten wird gebaut. Die Notenwesen diktieren, du schreibst.',
+  gc8: 'Tiefenrausch! Der Nebel schickt alles, was er hat.',
+  gc9: 'Der Wächter der Tiefe ist riesig und stumm. Das Lied der tiefen Saiten bringt ihn zum Klingen.',
+  gd1: 'Kreuz und quer über alle sechs Saiten. Vor jedem Sprung: hoch, mittel oder tief?',
+  gd2: 'Alle Noten auf einmal. Wer jetzt ruhig bleibt, kann wirklich lesen.',
+  gd3: 'Jetzt schreibst du selbst – von der tiefsten Hilfslinie bis über die oberste Linie.',
+  gd4: 'Bruder Jakob einmal ganz tief: Der Wächter staunt, wie warm die dicken Saiten klingen.',
+  gd5: 'Die letzte Probe: alle Töne der Reihe nach, hinauf und wieder hinunter. Dann trägt die Brücke.',
 };

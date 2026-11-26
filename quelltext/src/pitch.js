@@ -39,6 +39,7 @@ export function detectPitch(buf, sampleRate, opt = {}) {
 export class NoteTracker {
   constructor(opt = {}) {
     this.holdMs = opt.holdMs || 200; this.minClarity = opt.minClarity || 0.86; this.minRms = opt.minRms || 0.002; // leiser erlaubt: viele Geräte nehmen das Klavier nur schwach auf
+    this.steadyN = opt.steadyN || 4; this.steadyCents = opt.steadyCents || 22; // Sprache gleitet in der Tonhöhe, ein Instrument steht
     this.a4 = opt.a4 || 440; this.reset();
   }
   reset() { this.cand = null; this.since = 0; this.cents = []; this.lastEmit = null; this.lowRms = Infinity; this.onset = true; this.current = null; this.emitRms = 0; }
@@ -58,9 +59,11 @@ export class NoteTracker {
     const held = t - this.since;
     // Anderer Ton ohne hörbaren Anschlag (Legato): nur wenn er nicht bloß ein leiser Ausklang-Fehler ist
     const changed = this.lastEmit !== null && m !== this.lastEmit && (res.rms >= 0.3 * this.emitRms || held >= 2.5 * this.holdMs);
-    if (held >= this.holdMs && (this.onset || changed)) {
+    // Die letzten Messungen müssen eng beieinander liegen. Ein Instrumententon steht (nach dem Anschlag), eine Sprechstimme gleitet.
+    const c = this.cents, k = c.length; let steady = k >= this.steadyN; if (steady) { let lo = 1e9, hi = -1e9; for (let i = k - this.steadyN; i < k; i++) { if (c[i] < lo) lo = c[i]; if (c[i] > hi) hi = c[i]; } steady = hi - lo <= this.steadyCents; }
+    if (held >= this.holdMs && steady && (this.onset || changed)) {
       this.onset = false; this.lastEmit = m; this.lowRms = res.rms; this.emitRms = res.rms;
-      const s = this.cents.slice().sort((x, y) => x - y);
+      const s = this.cents.slice(-this.steadyN).sort((x, y) => x - y);
       return { midi: m, cents: s[s.length >> 1], freq: res.freq };
     }
     return null;

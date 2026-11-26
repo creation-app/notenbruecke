@@ -22,8 +22,13 @@ export function nameParts(n) {
   if (o <= -2) base = base[0].toUpperCase() + base.slice(1);
   return { base, sup: o >= 0 ? String(o + 1) : '' };
 }
-export function nameStr(n) { const p = nameParts(n); return p.base + (p.sup ? SUP[+p.sup] : ''); }
-export function nameHtml(n) { const p = nameParts(n); return p.base + (p.sup ? `<sup>${p.sup}</sup>` : ''); }
+/** Anzeige-Namen. Klavier: c¹, g², F. Gitarre (wie im Gitarrenheft): „hohes g“, „mittleres c“, „tiefes a“ – die Kennungen (key) bleiben immer gleich. */
+let namer = null;
+export function setNamer(fn) { namer = fn || null; }
+/** Für die Schrift in der Spielwelt: Stammname plus kleiner Zusatz (Oktavzahl oder hoch/mittel/tief). */
+export function shownParts(n) { if (namer) { const r = namer(n); return { base: r.base, sup: r.tag, word: true }; } return nameParts(n); }
+export function nameStr(n) { if (namer) return namer(n).full; const p = nameParts(n); return p.base + (p.sup ? SUP[+p.sup] : ''); }
+export function nameHtml(n) { if (namer) return namer(n).full; const p = nameParts(n); return p.base + (p.sup ? `<sup>${p.sup}</sup>` : ''); }
 
 function make(step, alt) {
   const n = { step, alt: alt || 0 }; const p = nameParts(n); n.key = p.base + p.sup; return n;

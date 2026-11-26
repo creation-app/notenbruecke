@@ -4,8 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Die Notenbrücke</title>
-<meta name="description" content="Die Notenbrücke: ein Lernspiel zum Notenlesen am Klavier. Lies die Note, spiel sie am echten Klavier, und die Brücke wächst.">
+<meta name="description" content="Die Notenbrücke: ein Lernspiel zum Notenlesen am Klavier und auf der Gitarre. Lies die Note, spiel sie auf deinem Instrument, und die Brücke wächst.">
 <meta name="theme-color" content="#26364B">
+<meta name="color-scheme" content="only light">
+<meta name="supported-color-schemes" content="light only">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'%3E%3Crect width='16' height='16' fill='%2375CCF5'/%3E%3Cg fill='%2326364B'%3E%3Crect y='5' width='16' height='1'/%3E%3Crect y='10' width='16' height='1'/%3E%3Crect x='10' y='2' width='1' height='9'/%3E%3C/g%3E%3Crect x='5' y='9' width='6' height='4' fill='%23FFD966' stroke='%2326364B'/%3E%3C/svg%3E">
@@ -15,6 +17,9 @@
 @font-face{font-family:"Press Start 2P";font-weight:400;font-display:block;src:url(data:font/woff2;base64,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) format("woff2")}
 :root{--k:#26364B;--cream:#FFF1D6;--b1:#2998E8;--b2:#174B83;--sky:#75CCF5;--g1:#78B833;--g2:#467C35;--or:#FF9D35;--ye:#FFD966;--red:#EF5350}
 *{box-sizing:border-box}
+/* Das Spiel hat feste Farben: Dunkelmodus und automatisches Abdunkeln des Browsers dürfen nichts umfärben. */
+:root{color-scheme:only light;forced-color-adjust:none}
+input,textarea,select,button{color-scheme:only light;color:var(--k)}input,textarea,select{background-color:#fff}
 html,body{margin:0;height:100%;-webkit-text-size-adjust:100%;overscroll-behavior:none;background:#101826;overflow:hidden;touch-action:manipulation;-webkit-user-select:none;user-select:none}
 body{font-family:"Atkinson Hyperlegible",system-ui,sans-serif;color:var(--k);font-size:22px;line-height:1.3}
 #stage{position:absolute;left:50%;top:50%;width:1280px;height:800px;transform-origin:center;overflow:hidden;background:var(--k)}
@@ -54,7 +59,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:4px soli
 .pause{pointer-events:auto;width:56px;height:56px;border:none;background:var(--red);box-shadow:4px 4px 0 var(--k);display:flex;align-items:center;justify-content:center;gap:8px}
 .pause i{width:8px;height:22px;background:var(--k)}
 .snd{background:var(--cream)}.snd.off{background:#B9A98A}.snd.float{position:absolute;right:14px;bottom:14px;z-index:7}
-#bubble{position:absolute;left:40px;top:530px;max-width:1000px;padding:10px 18px;background:var(--cream);border:4px solid var(--k);box-shadow:4px 4px 0 rgba(38,54,75,.35);font-size:25px;font-weight:700;pointer-events:none}
+#bubble{position:absolute;left:40px;bottom:calc(var(--H,800) * 1px - var(--wy,0px) - 586px);max-width:min(1000px,calc(100% - 80px));padding:10px 18px;background:var(--cream);border:4px solid var(--k);box-shadow:4px 4px 0 rgba(38,54,75,.35);font-size:25px;font-weight:700;pointer-events:none}
 #toast{position:absolute;left:50%;top:14px;z-index:2;transform:translateX(-50%);display:flex;align-items:center;gap:12px;padding:10px 20px;background:var(--k);color:var(--cream);box-shadow:4px 4px 0 var(--or);font-size:26px;font-weight:700;pointer-events:none;white-space:nowrap}
 #toast canvas{width:48px;height:48px}#toast b{color:var(--ye)}
 /* Panel */
@@ -78,6 +83,14 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:4px soli
 .kb .hint{background:var(--or);box-shadow:inset 0 -8px 0 #D97A1C;animation:blink .7s steps(2) infinite}
 .kb .good{background:var(--g1)!important;box-shadow:inset 0 -8px 0 var(--g2)!important}
 .kb .bad{background:var(--red)!important}
+.fb{display:grid;grid-template-columns:46px repeat(6,var(--fw,60px));grid-template-rows:22px calc(var(--fh,30px) - 5px) repeat(3,var(--fh,30px));background:#7A5230;border:4px solid var(--k);padding:0 10px 6px 0;flex:none}
+.fb .sn{color:#FFF1D6;font-size:18px;font-weight:700;text-align:center;line-height:22px}.fb .fn{color:#FFF1D6;font-size:15px;text-align:right;padding-right:8px;align-self:center;white-space:nowrap}
+.fc{position:relative;background:none;border:0;border-bottom:3px solid #CFC6B0;padding:0;cursor:pointer;min-width:0}.fc.open{border-bottom:8px solid #FFF1D6;background:#5C3D22}
+.fc::before{content:"";position:absolute;left:50%;top:0;bottom:-8px;width:var(--sw,2px);margin-left:calc(var(--sw,2px) / -2);background:#E8DFC9}
+.fc i{position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;border:3px solid var(--k);display:none;align-items:center;justify-content:center;font-style:normal;font-size:16px;font-weight:700;color:var(--k);z-index:1}
+.fc.heard i{display:flex;background:var(--b1)}.fc.hint i{display:flex;background:var(--or);animation:blink .7s steps(2) infinite}.fc.good i{display:flex;background:var(--g1)}.fc.bad i{display:flex;background:var(--red);color:#fff}
+#stage.tall .fb{--fw:96px;--fh:54px;grid-template-columns:54px repeat(6,var(--fw));grid-template-rows:32px calc(var(--fh) - 5px) repeat(3,var(--fh))}#stage.tall .fb .sn{font-size:25px;line-height:32px}#stage.tall .fb .fn{font-size:19px}#stage.tall .fc i{width:38px;height:38px;margin:-19px 0 0 -19px;font-size:22px}#stage.phone .fb{transform:scale(1.45,1.04);transform-origin:right center;margin-left:190px}
+#bubble.top{bottom:auto;top:calc(100px + var(--wy,0px))}
 @keyframes blink{50%{filter:brightness(1.35)}}
 .answers{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;width:100%;max-width:1400px}
 .btn.ans{min-width:120px;min-height:100px;font-size:50px;letter-spacing:1px}
@@ -105,7 +118,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:4px soli
 .note{background:#F3E3C3;padding:8px 12px;border-left:0;font-size:20px;min-height:0}.note:empty{display:none}.note.ok{background:#D6EFB3}.note.warn{background:#FFE2A8}
 .err{color:#B3261E;font-weight:700;min-height:26px;margin:4px 0}
 .muted{color:#5A6478;font-size:19px}
-.fld{display:block;font-weight:700;margin:12px 0}.fld small{display:block;font-weight:400;font-size:17px;margin-top:4px;color:#4A5568}.pwrow{display:flex;gap:10px;align-items:stretch}.pwrow input{flex:1;min-width:0}.pwrow .btn{margin-top:6px}.aform{max-width:640px}.fld input{display:block;width:100%;font:inherit;padding:10px;border:4px solid var(--k);background:#fff;margin-top:6px;user-select:text;-webkit-user-select:text}
+.fld{display:block;font-weight:700;margin:12px 0}.row.instr{margin-top:6px}.row.instr .btn.opt{min-height:52px;flex:1}.fld small{display:block;font-weight:400;font-size:17px;margin-top:4px;color:#4A5568}.pwrow{display:flex;gap:10px;align-items:stretch}.pwrow input{flex:1;min-width:0}.pwrow .btn{margin-top:6px}.aform{max-width:640px}.fld input{display:block;width:100%;font:inherit;padding:10px;border:4px solid var(--k);background:#fff;margin-top:6px;user-select:text;-webkit-user-select:text}
 textarea{width:100%;font:16px/1.3 ui-monospace,monospace;border:4px solid var(--k);padding:8px;background:#fff;user-select:text;-webkit-user-select:text;margin:8px 0;word-break:break-all}
 .heroes{display:flex;gap:10px;margin-top:6px}.hpick{background:#fff;border:4px solid var(--k);padding:6px 10px;min-width:84px;min-height:92px}.hpick.sel{background:var(--ye);box-shadow:4px 4px 0 var(--k)}
 .plist{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
@@ -158,10 +171,38 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 .toggle.on i{background:var(--g1)}.toggle.on i::after{left:30px}
 .calib{text-align:center;background:#F3E3C3;padding:14px;margin-top:10px}.dots{display:flex;gap:14px;justify-content:center}.dots i{width:34px;height:34px;border:4px solid var(--k);background:#fff}.dots i.on{background:var(--g1)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
+
+/* ---------- Hochkant: oben Anzeigen, darunter die Welt, darunter ein großes Bedienfeld ---------- */
+#stage.port #hud{left:14px;right:14px;top:12px;flex-wrap:wrap;row-gap:10px}#stage.port.hud2 #hud .hl{flex:1 0 100%}#stage.port.hud2 #hud .hr{margin-left:auto}
+#stage.port #toast{white-space:normal;max-width:92%;width:max-content;top:calc(var(--wy) + 10px);font-size:24px}
+#stage.port #bubble{left:14px;right:14px;max-width:none;bottom:calc(var(--H) * 1px - var(--wy) - 594px);font-size:27px;line-height:1.2}#stage.port #bubble.top{bottom:auto;top:calc(var(--wy) + 6px)}
+#stage.port #panel{flex-direction:column;justify-content:center;align-items:stretch;gap:20px;padding:76px 20px 20px}
+#stage.port .ptask,#stage.port.phone .ptask{left:20px;right:20px;top:12px;white-space:normal;font-size:27px;line-height:1.2;text-align:left;overflow:visible}#stage.port .ptask span{font-size:17px}
+#stage.port .mic{width:auto;flex:none}#stage.port .mic-l1{font-size:25px}#stage.port .mic-l2{font-size:30px;min-height:72px}#stage.port .lvlbtn{font-size:22px;padding:6px 14px}
+#stage.port .right{margin:0;flex:none;justify-content:center}#stage.port #panel.solo .right{flex:1;align-items:center}
+#stage.port .kb,#stage.port.phone .kb{transform:scale(1.24,var(--ksy));transform-origin:center;margin:calc((var(--ksy) - 1) * 75px) 0}#stage.port .kb span,#stage.port.phone .kb span{display:inline-block;transform:scale(calc(1 / 1.24 * 1.3),calc(1 / var(--ksy) * 1.3))}
+#stage.port .fb,#stage.port.phone .fb{--fw:100px;--fh:calc(33px * var(--ksy));transform:none;margin:0;grid-template-columns:54px repeat(6,var(--fw));grid-template-rows:34px calc(var(--fh) - 5px) repeat(3,var(--fh))}
+#stage.port .fb .sn{font-size:26px;line-height:34px}#stage.port .fb .fn{font-size:20px}#stage.port .fc i{width:44px;height:44px;margin:-22px 0 0 -22px;font-size:26px;border-width:4px}
+#stage.port .answers{gap:16px}#stage.port .btn.ans{min-width:150px;min-height:120px;font-size:58px}#stage.port.pbig .btn.ans{min-height:160px;font-size:66px}
+#stage.port .bauctl{gap:22px}#stage.port .btn.sq{width:150px;min-height:150px;font-size:56px}#stage.port .bauctl .go{min-height:150px;font-size:44px;padding:0 44px}
+#stage.port #sndHud,#stage.port #pauseBtn{zoom:1.25}
+#stage.port #screen{padding:14px}#stage.port.phone #screen{padding:8px}
+#stage.port .sheet{max-height:calc(var(--H) * 1px - 28px);padding:22px}#stage.port #screen.wide .sheet{height:calc(var(--H) * 1px - 28px);max-width:none}
+#stage.port.phone .sheet{max-height:calc(var(--H) * 1px / 1.45 - 16px);padding:14px 16px}#stage.port.phone #screen.wide .sheet{height:calc(var(--H) * 1px / 1.45 - 16px)}
+#stage.port.phone .maphead h2{font-size:.82em;overflow-wrap:anywhere}#stage.port .title .logo{font-size:48px}#stage.port.phone .title .logo{font-size:32px}#stage.port .title .sub{font-size:24px;margin:14px 0 22px}
+#stage.port .maphead:has(.row){flex-wrap:wrap}#stage.port .maphead .row{flex-wrap:wrap;margin-top:0}#stage.port .maphead>h2,#stage.port .maphead>div:not(.row){min-width:0;flex:1}#stage.port .maphead>.btn{flex:none}
+#stage.port #sndBtn{top:10px;bottom:auto;right:10px}#stage.port #screen.wide .maphead{padding-right:64px}#stage.port.phone #screen.wide .maphead{padding-right:46px}
+#stage.port .tabs{display:grid;grid-template-columns:1fr 1fr}#stage.port .tab{min-height:56px}
+#stage.port .nodes{grid-template-columns:repeat(3,minmax(0,1fr))}#stage.port.phone .nodes{grid-template-columns:repeat(2,minmax(0,1fr))}
+#stage.port .mapnav{grid-template-columns:repeat(3,minmax(0,1fr));position:sticky;bottom:-22px;background:var(--cream);padding-bottom:12px;margin-bottom:-12px;z-index:2}#stage.port.phone .mapnav{bottom:-14px;gap:8px}#stage.port.phone .mapnav .btn{padding:6px 8px;font-size:18px;min-height:58px}#stage.port.phone .mapnav small{font-size:13px}
+#stage.port .segrow.c4{grid-template-columns:1fr 1fr}#stage.port .passgrid,#stage.port .setgrid{grid-template-columns:minmax(0,1fr)}#stage.port .card.span2{grid-column:auto}
+#stage.port .collwrap{flex-direction:column}#stage.port .place{flex-direction:column;gap:8px}#stage.port .place p{min-width:0}#stage.port .heroes{flex-wrap:wrap}
+#stage.port .board{display:block;overflow-x:auto;font-size:18px}#stage.port .board th,#stage.port .board td{padding:6px 8px}#stage.port .trow{flex-wrap:wrap}
+#stage.port .trnums .bigno{font-size:46px}#stage.port .trstars{flex-wrap:wrap}
 </style>
 </head>
 <body>
-<div id="rotate" hidden><p>Halte dein Gerät quer – das Spiel ist schon gedreht.</p></div>
+
 <div id="stage">
   <canvas id="world" width="1280" height="800" aria-label="Spielwelt"></canvas>
   <canvas id="text" width="1280" height="800" aria-hidden="true"></canvas>
@@ -278,7 +319,8 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     for (let i = 0; i < body.length; i++) s = (s * 31 + B32.indexOf(body[i]) * (i + 3)) % 1024;
     return B32[s >> 5] + B32[s & 31];
   }
-  function exportShort(profile, worlds) {
+  function exportShort(profile, worlds, instr = "klavier") {
+    const skip = (instr === "gitarre" ? profile.skipG : profile.skip) || [];
     const bits = [];
     const push = (v, n) => {
       for (let i = n - 1; i >= 0; i--) bits.push(v >> i & 1);
@@ -292,8 +334,9 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       const sum = done.reduce((a, id) => a + (profile.levels[id].stars || 1), 0);
       push(Math.min(15, done.length), 4);
       push(done.length ? Math.max(1, Math.min(3, Math.round(sum / done.length))) : 0, 2);
-      push(Math.min(15, (profile.skip || [])[w] || 0), 4);
+      push(Math.min(15, skip[w] || 0), 4);
     }
+    push(instr === "gitarre" ? 1 : 0, 1);
     while (bits.length % 5) bits.push(0);
     let body = "";
     for (let i = 0; i < bits.length; i += 5) body += B32[bits.slice(i, i + 5).reduce((a, b) => a * 2 + b, 0)];
@@ -318,10 +361,15 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     if (take(2) !== 2) throw new Error("Dieser Kurzcode geh\xF6rt zu einer anderen Spielversion.");
     const p = newProfile("Spieler", take(3), take(1) ? "profi" : "abenteuer");
     p.unlockAll = !!take(1);
-    p.skip = [];
+    const guitar2 = bits[47] === 1 && !Array.isArray(worlds), skip = [];
+    if (guitar2) {
+      p.instr = "gitarre";
+      p.skipG = skip;
+    } else p.skip = skip;
+    if (!Array.isArray(worlds)) worlds = worlds[guitar2 ? "gitarre" : "klavier"];
     for (let w = 0; w < 4; w++) {
       const n = take(4), avg = take(2);
-      p.skip.push(take(4));
+      skip.push(take(4));
       (worlds[w] || []).slice(0, n).forEach((id) => {
         p.levels[id] = { stars: avg || 1 };
       });
@@ -392,7 +440,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       API_URL = "";
       CONFIG = {
         shop: typeof window !== "undefined" && !!window.NB_SHOP,
-        freeLevels: ["h1", "h2", "h3", "h4", "h5"],
+        freeLevels: ["h1", "h2", "h3", "h4", "h5", "ga1", "ga2", "ga3", "ga4", "ga5"],
         // in der Kauf-Variante ohne Schlüssel spielbar
         priceOnce: "12,99 \u20AC",
         priceAbo: "2,99 \u20AC im Monat",
@@ -472,6 +520,10 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     if (Array.isArray(a.skip) || Array.isArray(b.skip)) {
       const sa = a.skip || [], sb = b.skip || [];
       out.skip = Array.from({ length: Math.max(sa.length, sb.length) }, (_, i) => Math.max(num(sa[i]), num(sb[i])));
+    }
+    if (Array.isArray(a.skipG) || Array.isArray(b.skipG)) {
+      const sa = a.skipG || [], sb = b.skipG || [];
+      out.skipG = Array.from({ length: Math.max(sa.length, sb.length) }, (_, i) => Math.max(num(sa[i]), num(sb[i])));
     }
     out.seenIntro = !!(a.seenIntro || b.seenIntro);
     out.calibrated = !!(a.calibrated || b.calibrated);
@@ -676,11 +728,23 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     if (o <= -2) base = base[0].toUpperCase() + base.slice(1);
     return { base, sup: o >= 0 ? String(o + 1) : "" };
   }
+  function setNamer(fn) {
+    namer = fn || null;
+  }
+  function shownParts(n) {
+    if (namer) {
+      const r = namer(n);
+      return { base: r.base, sup: r.tag, word: true };
+    }
+    return nameParts(n);
+  }
   function nameStr(n) {
+    if (namer) return namer(n).full;
     const p = nameParts(n);
     return p.base + (p.sup ? SUP[+p.sup] : "");
   }
   function nameHtml(n) {
+    if (namer) return namer(n).full;
     const p = nameParts(n);
     return p.base + (p.sup ? `<sup>${p.sup}</sup>` : "");
   }
@@ -765,15 +829,444 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     if (((heardMidi - targetMidi) % 12 + 12) % 12 === 0) return heardMidi > targetMidi ? "octave-high" : "octave-low";
     return "wrong";
   }
-  var LETTERS, SEMI, SUP, SHARP, FLAT, CLEFS;
+  var LETTERS, SEMI, SUP, namer, SHARP, FLAT, CLEFS;
   var init_music = __esm({
     "src/music.js"() {
       LETTERS = ["c", "d", "e", "f", "g", "a", "h"];
       SEMI = [0, 2, 4, 5, 7, 9, 11];
       SUP = ["", "\xB9", "\xB2", "\xB3", "\u2074"];
+      namer = null;
       SHARP = [[0, 0], [0, 1], [1, 0], [1, 1], [2, 0], [3, 0], [3, 1], [4, 0], [4, 1], [5, 0], [6, -1], [6, 0]];
       FLAT = [[0, 0], [1, -1], [1, 0], [2, -1], [2, 0], [3, 0], [4, -1], [4, 0], [5, -1], [5, 0], [6, -1], [6, 0]];
       CLEFS = { treble: { bottom: 2 }, bass: { bottom: -10 }, grand: { bottom: -4 } };
+    }
+  });
+
+  // src/levels.js
+  function prevWorld(world) {
+    return WORLDS[world].after != null ? WORLDS[world].after : world - 1;
+  }
+  function prepare(worlds, levels, dedupe = false) {
+    levels.forEach((l) => {
+      l.clef = worlds[l.world].clef;
+      l.theme = worlds[l.world].theme;
+      [...l.notes, ...l.melody || []].forEach(N);
+    });
+    const earlier = /* @__PURE__ */ new Set();
+    const all = worlds.map((w, wi) => {
+      const seen = [];
+      levels.filter((l) => l.world === wi).forEach((l) => l.notes.forEach((k) => {
+        if (!seen.includes(k) && !((w.mix || dedupe) && earlier.has(k))) seen.push(k);
+      }));
+      seen.forEach((k) => earlier.add(k));
+      return seen;
+    });
+    return { worlds, levels, all };
+  }
+  function setLevelSet(id) {
+    const s = SETS[id] || SETS.klavier;
+    LEVEL_SET = SETS[id] ? id : "klavier";
+    WORLDS = s.worlds;
+    LEVELS = s.levels;
+    ALL_NOTES = s.all;
+    PLACEMENT = s.placement;
+    SKIP_KEY = s.skipKey;
+  }
+  function skipOf(profile) {
+    return profile[SKIP_KEY] || [];
+  }
+  function creatureTotal() {
+    return new Set(ALL_NOTES.flat()).size;
+  }
+  function levelsOf(world) {
+    return LEVELS.filter((l) => l.world === world);
+  }
+  function doneCount(profile, world) {
+    return levelsOf(world).filter((l) => profile.levels[l.id]).length;
+  }
+  function worldUnlocked(profile, world) {
+    return world === 0 || profile.unlockAll || skipOf(profile)[world] > 0 || doneCount(profile, prevWorld(world)) >= WORLDS[world].need;
+  }
+  function levelUnlocked(profile, level) {
+    if (profile.unlockAll) return true;
+    if (!worldUnlocked(profile, level.world)) return false;
+    const ls = levelsOf(level.world), i = ls.indexOf(level);
+    return i === 0 || i < (skipOf(profile)[level.world] || 0) || !!profile.levels[ls[i - 1].id];
+  }
+  function nextLevel(level) {
+    const i = LEVELS.indexOf(level);
+    return LEVELS[i + 1] || null;
+  }
+  function starsFor(ratio) {
+    return ratio >= 0.85 ? 3 : ratio >= 0.65 ? 2 : 1;
+  }
+  function totalStars(profile) {
+    return Object.values(profile.levels).reduce((a, l) => a + (l.stars || 0), 0) + Object.values(profile.train || {}).reduce((a, t) => a + (t.stars || 0), 0);
+  }
+  var PIANO_WORLDS, GUITAR_WORLDS, WORLDS, TYPE_LABEL, L, T1, T2, T3, T4, T5, B1, B2, B3, B4, B5, ENTCHEN, FREUDE, HAENSCHEN, JAKOB, TIEFSEE, JAKOB2, ELISE, PIANO_LEVELS, GS1, GS2, GH, GS3, GS4, GM, GS5, GS6, GT, GALL, G_HAENSCHEN, G_FREUDE, G_LAMM, G_JAKOB, G_ENTCHEN, G_TIEF, G_JAKOB_TIEF, G_LEITER, GUITAR_LEVELS, PIANO_PLACEMENT, GUITAR_PLACEMENT, SETS, ALL_LEVELS, LEVELS, ALL_NOTES, PLACEMENT, SKIP_KEY, LEVEL_SET, PLACEMENT_Q, PLACEMENT_PASS;
+  var init_levels = __esm({
+    "src/levels.js"() {
+      init_music();
+      PIANO_WORLDS = [
+        { id: "himmel", name: "Himmel der hohen T\xF6ne", short: "Himmel", clef: "treble", theme: "himmel", need: 0 },
+        { id: "tiefe", name: "Tiefen der tiefen T\xF6ne", short: "Tiefe", clef: "bass", theme: "tiefe", need: 8 },
+        { id: "zauber", name: "Land der Zauberzeichen", short: "Zauberzeichen", clef: "treble", theme: "zauber", need: 6 },
+        { id: "beide", name: "Die gro\xDFe Br\xFCcke", short: "Gro\xDFe Br\xFCcke", clef: "grand", theme: "abend", need: 6, after: 1, mix: true }
+      ];
+      GUITAR_WORLDS = [
+        { id: "g-hoch", name: "Die hohen Saiten", short: "Hohe Saiten", clef: "treble", theme: "himmel", need: 0 },
+        { id: "g-mitte", name: "Die mittleren Saiten", short: "Mittlere Saiten", clef: "treble", theme: "zauber", need: 7 },
+        { id: "g-tief", name: "Die tiefen Saiten", short: "Tiefe Saiten", clef: "treble", theme: "tiefe", need: 6 },
+        { id: "g-alle", name: "Die Sechs-Saiten-Br\xFCcke", short: "Alle Saiten", clef: "treble", theme: "abend", need: 6, mix: true }
+      ];
+      WORLDS = PIANO_WORLDS;
+      TYPE_LABEL = { jump: "Springen", regen: "Notenregen", bau: "Br\xFCckenbauer", boss: "Melodie" };
+      L = (id, world, type, title2, notes, fresh, extra = {}) => ({ id, world, type, title: title2, notes, fresh: fresh || [], len: 10, ...extra });
+      T1 = ["c1", "d1", "e1", "f1", "g1"];
+      T2 = [...T1, "a1", "h1"];
+      T3 = [...T2, "c2", "d2"];
+      T4 = [...T3, "e2", "f2"];
+      T5 = [...T4, "g2", "a2"];
+      B1 = ["c1", "f", "c", "g"];
+      B2 = [...B1, "a", "h"];
+      B3 = [...B2, "d", "e"];
+      B4 = [...B3, "G", "A", "H"];
+      B5 = [...B4, "C", "D", "E", "F"];
+      ENTCHEN = "c1 d1 e1 f1 g1 g1 a1 a1 a1 a1 g1 a1 a1 a1 a1 g1 f1 f1 f1 f1 e1 e1 d1 d1 d1 d1 c1".split(" ");
+      FREUDE = "e1 e1 f1 g1 g1 f1 e1 d1 c1 c1 d1 e1 e1 d1 d1 e1 e1 f1 g1 g1 f1 e1 d1 c1 c1 d1 e1 d1 c1 c1".split(" ");
+      HAENSCHEN = "g2 e2 e2 f2 d2 d2 c2 d2 e2 f2 g2 g2 g2 g2 e2 e2 f2 d2 d2 c2 e2 g2 g2 c2".split(" ");
+      JAKOB = "c d e c c d e c e f g e f g".split(" ");
+      TIEFSEE = "C E G c G E C F A c A F G H d G C".split(" ");
+      JAKOB2 = "c d e c c1 d1 e1 c1 e f g e1 f1 g1 g a g f e c g1 a1 g1 f1 e1 c1 c g c c1 g1 c1".split(" ");
+      ELISE = "e2 dis2 e2 dis2 e2 h1 d2 c2 a1 c1 e1 a1 h1 e1 gis1 h1 c2".split(" ");
+      PIANO_LEVELS = [
+        L("h1", 0, "jump", "Die ersten T\xF6ne", ["c1", "g1"], ["c1", "g1"], { len: 8 }),
+        L("h2", 0, "jump", "Die Dreiklang-Treppe", ["c1", "e1", "g1"], ["e1"]),
+        L("h3", 0, "regen", "Erster Notenregen", ["c1", "e1", "g1"]),
+        L("h4", 0, "jump", "F\xFCnf Freunde", T1, ["d1", "f1"]),
+        L("h5", 0, "bau", "Baue die Br\xFCcke", T1, [], { words: ["FEE"] }),
+        L("h6", 0, "jump", "H\xF6her hinaus", T2, ["a1", "h1"]),
+        L("h7", 0, "regen", "Wolkenbruch", T2),
+        L("h8", 0, "boss", "Alle meine Entchen", [...new Set(ENTCHEN)], [], { melody: ENTCHEN }),
+        L("h9", 0, "jump", "\xDCber die Mitte", T3, ["c2", "d2"]),
+        L("h10", 0, "bau", "W\xF6rter aus Noten", T3, [], { words: ["AFFE", "DACH", "CAFE", "HEFE", "ADE"] }),
+        L("h11", 0, "jump", "Bis zur obersten Linie", T4, ["e2", "f2"]),
+        L("h12", 0, "regen", "Sturm der Noten", T4),
+        L("h13", 0, "boss", "Freude sch\xF6ner G\xF6tterfunken", [...new Set(FREUDE)], [], { melody: FREUDE }),
+        L("h14", 0, "jump", "\xDCber den Wolken", T5, ["g2", "a2"], { len: 12 }),
+        L("h15", 0, "boss", "H\xE4nschen klein", [...new Set(HAENSCHEN)], [], { melody: HAENSCHEN }),
+        L("t1", 1, "jump", "Die Br\xFCcke am mittleren c", ["c1", "f"], ["f"], { len: 8 }),
+        L("t2", 1, "jump", "Abstieg in die Tiefe", B1, ["c", "g"]),
+        L("t3", 1, "regen", "Blubberblasen", B1),
+        L("t4", 1, "jump", "Die Leuchtgrotte", B2, ["a", "h"]),
+        L("t5", 1, "bau", "Br\xFCcken unter Wasser", B2, [], { words: ["ACH", "FACH"] }),
+        L("t6", 1, "jump", "Kristallstufen", B3, ["d", "e"]),
+        L("t7", 1, "regen", "Strudel", B3),
+        L("t8", 1, "boss", "Bruder Jakob", [...new Set(JAKOB)], [], { melody: JAKOB }),
+        L("t9", 1, "jump", "Die gro\xDFe Oktave", B4, ["G", "A", "H"]),
+        L("t10", 1, "bau", "Tiefbau", B4, [], { words: ["GAGE", "EHE", "CHEF"] }),
+        L("t11", 1, "jump", "Am Meeresgrund", B5, ["C", "D", "E", "F"], { len: 12 }),
+        L("t12", 1, "regen", "Tiefenrausch", B5),
+        L("t13", 1, "boss", "Lied der Tiefsee", [...new Set(TIEFSEE)], [], { melody: TIEFSEE }),
+        L("z1", 2, "jump", "Kreuz und b", ["f1", "fis1", "h1", "b1", "g1", "a1"], ["fis1", "b1"]),
+        L("z2", 2, "regen", "Zauberregen", ["f1", "fis1", "h1", "b1", "g1", "a1"]),
+        L("z3", 2, "jump", "Schwarze Tasten", ["fis1", "b1", "cis2", "es2", "c2", "e2", "d2"], ["cis2", "es2"]),
+        L("z4", 2, "bau", "Zeichen setzen", ["fis1", "b1", "cis2", "es2", "f1", "h1"], [], { accidentals: true }),
+        L("z5", 2, "jump", "Zwei Namen, eine Taste", ["gis1", "as1", "cis2", "des2", "fis1", "b1", "es2"], ["gis1", "as1", "des2"]),
+        L("z6", 2, "regen", "Funkensturm", ["fis1", "b1", "cis2", "es2", "gis1", "as1", "des2", "g1", "a1"]),
+        L("z7", 2, "boss", "F\xFCr Elise", [...new Set(ELISE)], ["dis2"], { melody: ELISE }),
+        L("b1", 3, "jump", "Zwei H\xE4nde, eine Br\xFCcke", ["c", "e", "g", "c1", "e1", "g1"]),
+        L("b2", 3, "regen", "Links und rechts", ["c", "d", "e", "f", "g", "c1", "d1", "e1", "f1", "g1"]),
+        L("b3", 3, "jump", "Rund um das mittlere c", ["f", "g", "a", "h", "c1", "d1", "e1", "f1", "g1"], [], { len: 12 }),
+        L("b4", 3, "bau", "Schreiben im gro\xDFen System", ["c", "e", "g", "a", "c1", "d1", "f1", "a1", "c2"], [], { words: ["FACH", "CAFE"] }),
+        L("b5", 3, "boss", "Bruder Jakob f\xFCr zwei H\xE4nde", [...new Set(JAKOB2)], [], { melody: JAKOB2 })
+      ];
+      GS1 = ["e2", "f2", "g2"];
+      GS2 = ["h1", "c2", "d2"];
+      GH = [...GS1, ...GS2];
+      GS3 = ["g1", "a1"];
+      GS4 = ["d1", "e1", "f1"];
+      GM = [...GS3, ...GS4];
+      GS5 = ["a", "h", "c1"];
+      GS6 = ["e", "f", "g"];
+      GT = [...GS5, ...GS6];
+      GALL = [...GH, ...GM, ...GT];
+      G_HAENSCHEN = HAENSCHEN;
+      G_FREUDE = "e2 e2 f2 g2 g2 f2 e2 d2 c2 c2 d2 e2 e2 d2 d2 e2 e2 f2 g2 g2 f2 e2 d2 c2 c2 d2 e2 d2 c2 c2".split(" ");
+      G_LAMM = "h1 a1 g1 a1 h1 h1 h1 a1 a1 a1 h1 d2 d2 h1 a1 g1 a1 h1 h1 h1 h1 a1 a1 h1 a1 g1".split(" ");
+      G_JAKOB = "g1 a1 h1 g1 g1 a1 h1 g1 h1 c2 d2 h1 c2 d2 d2 e2 d2 c2 h1 g1 d2 e2 d2 c2 h1 g1 g1 d1 g1 g1 d1 g1".split(" ");
+      G_ENTCHEN = ENTCHEN;
+      G_TIEF = "e g a a c1 h a g e f g a h c1 a e".split(" ");
+      G_JAKOB_TIEF = "c1 d1 e1 c1 c1 d1 e1 c1 e1 f1 g1 e1 f1 g1 g1 a1 g1 f1 e1 c1 g1 a1 g1 f1 e1 c1 c1 g c1 c1 g c1".split(" ");
+      G_LEITER = "e f g a h c1 d1 e1 f1 g1 a1 h1 c2 d2 e2 f2 g2 f2 e2 d2 c2 h1 a1 g1 f1 e1 d1 c1 h a g f e".split(" ");
+      GUITAR_LEVELS = [
+        L("ga1", 0, "jump", "Die hohe e-Saite", ["e2", "f2"], ["e2", "f2"], { len: 8 }),
+        L("ga2", 0, "jump", "Das hohe g", GS1, ["g2"]),
+        L("ga3", 0, "regen", "Erster Notenregen", GS1),
+        L("ga4", 0, "jump", "Die h-Saite", ["h1", "c2", "e2", "g2"], ["h1", "c2"]),
+        L("ga5", 0, "bau", "Baue die Br\xFCcke", ["e2", "f2", "g2", "h1", "c2"], [], { words: ["FEE", "CHEF"] }),
+        L("ga6", 0, "jump", "Das hohe d", GH, ["d2"]),
+        L("ga7", 0, "regen", "Wolkenbruch", GH),
+        L("ga8", 0, "boss", "H\xE4nschen klein", [...new Set(G_HAENSCHEN)], [], { melody: G_HAENSCHEN }),
+        L("ga9", 0, "jump", "Zwei Saiten im Wechsel", GH, [], { len: 12 }),
+        L("ga10", 0, "boss", "Freude sch\xF6ner G\xF6tterfunken", [...new Set(G_FREUDE)], [], { melody: G_FREUDE }),
+        L("gb1", 1, "jump", "Die g-Saite", ["g1", "a1", "h1"], ["g1", "a1"], { len: 8 }),
+        L("gb2", 1, "regen", "Zauberregen", ["g1", "a1", "h1", "c2", "d2"]),
+        L("gb3", 1, "boss", "Mary hatte ein kleines Lamm", [...new Set(G_LAMM)], [], { melody: G_LAMM }),
+        L("gb4", 1, "jump", "Die d-Saite", ["d1", "e1", "g1", "a1"], ["d1", "e1"]),
+        L("gb5", 1, "jump", "Das mittlere f", GM, ["f1"]),
+        L("gb6", 1, "bau", "W\xF6rter aus Noten", GM, [], { words: ["FADE", "ADE", "GAGE"] }),
+        L("gb7", 1, "regen", "Sturm der Noten", [...GM, ...GS2]),
+        L("gb8", 1, "boss", "Bruder Jakob", [...new Set(G_JAKOB)], [], { melody: G_JAKOB }),
+        L("gb9", 1, "jump", "Vier Saiten", [...GH, ...GM], [], { len: 12 }),
+        L("gc1", 2, "jump", "Die A-Saite", ["a", "h", "d1"], ["a", "h"], { len: 8 }),
+        L("gc2", 2, "jump", "Das tiefe c", ["a", "h", "c1", "d1", "e1"], ["c1"]),
+        L("gc3", 2, "regen", "Blubberblasen", ["a", "h", "c1", "d1", "e1"]),
+        L("gc4", 2, "boss", "Alle meine Entchen", [...new Set(G_ENTCHEN)], [], { melody: G_ENTCHEN }),
+        L("gc5", 2, "jump", "Die tiefe E-Saite", ["e", "f", "a", "h"], ["e", "f"]),
+        L("gc6", 2, "jump", "Das tiefe g", GT, ["g"]),
+        L("gc7", 2, "bau", "Tiefbau", GT, [], { words: ["ACH", "FACH", "AFFE", "CAFE"] }),
+        L("gc8", 2, "regen", "Tiefenrausch", GT),
+        L("gc9", 2, "boss", "Lied der tiefen Saiten", [...new Set(G_TIEF)], [], { melody: G_TIEF }),
+        L("gd1", 3, "jump", "Kreuz und quer \xFCber alle Saiten", GALL, [], { len: 12 }),
+        L("gd2", 3, "regen", "Der gro\xDFe Notenregen", GALL),
+        L("gd3", 3, "bau", "Schreiben von tief bis hoch", GALL, [], { words: ["HEFE", "DACH", "CHEF"] }),
+        L("gd4", 3, "boss", "Bruder Jakob auf den tiefen Saiten", [...new Set(G_JAKOB_TIEF)], [], { melody: G_JAKOB_TIEF }),
+        L("gd5", 3, "boss", "Die gro\xDFe Tonleiter", [...new Set(G_LEITER)], [], { melody: G_LEITER })
+      ];
+      PIANO_PLACEMENT = [
+        { name: "Violinschl\xFCssel: c\xB9 bis g\xB9", clef: "treble", notes: T1, skip: [6, 0, 0, 0] },
+        { name: "Violinschl\xFCssel: bis d\xB2", clef: "treble", notes: ["a1", "h1", "c2", "d2", "g1", "f1"], skip: [11, 0, 0, 0] },
+        { name: "Violinschl\xFCssel: bis a\xB2", clef: "treble", notes: ["e2", "f2", "g2", "a2", "d2", "h1"], skip: [15, 1, 0, 0] },
+        { name: "Bassschl\xFCssel: kleines c bis c\xB9", clef: "bass", notes: B3, skip: [15, 9, 0, 0] },
+        { name: "Bassschl\xFCssel: bis zum gro\xDFen C", clef: "bass", notes: ["G", "A", "H", "C", "D", "E", "F"], skip: [15, 13, 1, 1] },
+        { name: "Vorzeichen", clef: "treble", notes: ["fis1", "b1", "cis2", "es2", "gis1", "as1", "des2"], skip: [15, 13, 7, 1], acc: true }
+      ];
+      GUITAR_PLACEMENT = [
+        { name: "Hohe e-Saite: e, f und g", clef: "treble", notes: GS1, skip: [4, 0, 0, 0] },
+        { name: "Hohe Saiten: e-Saite und h-Saite", clef: "treble", notes: GH, skip: [10, 1, 0, 0] },
+        { name: "Mittlere Saiten: g-Saite und d-Saite", clef: "treble", notes: GM, skip: [10, 9, 1, 0] },
+        { name: "Tiefe Saiten: A-Saite und E-Saite", clef: "treble", notes: GT, skip: [10, 9, 9, 1] }
+      ];
+      SETS = { klavier: { ...prepare(PIANO_WORLDS, PIANO_LEVELS), placement: PIANO_PLACEMENT, skipKey: "skip", free: 5 }, gitarre: { ...prepare(GUITAR_WORLDS, GUITAR_LEVELS, true), placement: GUITAR_PLACEMENT, skipKey: "skipG", free: 5 } };
+      ALL_LEVELS = [...PIANO_LEVELS, ...GUITAR_LEVELS];
+      LEVELS = PIANO_LEVELS;
+      ALL_NOTES = SETS.klavier.all;
+      PLACEMENT = PIANO_PLACEMENT;
+      SKIP_KEY = "skip";
+      LEVEL_SET = "klavier";
+      PLACEMENT_Q = 5;
+      PLACEMENT_PASS = 4;
+    }
+  });
+
+  // src/story.js
+  function setStorySet(id) {
+    const g = id === "gitarre";
+    INTRO = g ? G_INTRO : P_INTRO;
+    WORLD_INTRO = g ? G_WORLD_INTRO : P_WORLD_INTRO;
+    WORLD_OUTRO = g ? G_WORLD_OUTRO : P_WORLD_OUTRO;
+  }
+  var P_INTRO, P_WORLD_INTRO, P_WORLD_OUTRO, G_INTRO, G_WORLD_INTRO, G_WORLD_OUTRO, INTRO, WORLD_INTRO, WORLD_OUTRO, LEVEL_STORY;
+  var init_story = __esm({
+    "src/story.js"() {
+      P_INTRO = [
+        "Im Klangreich hatte jeder Ton ein Zuhause: Hoch oben im Himmel wohnten die hellen T\xF6ne, tief unten im Meer die dunklen.",
+        "Dann kam der Graue Nebel. Er verschluckte jeden Klang, sperrte die Notenwesen ein und lie\xDF die Br\xFCcken zwischen den T\xF6nen zerfallen.",
+        "Seitdem ist es still. Nur f\xFCnf Linien ziehen sich noch durch die Welt \u2013 und auf ihnen warten die Notenwesen darauf, geh\xF6rt zu werden.",
+        "Der Nebel f\xFCrchtet nur eines: einen echten Ton. Lies die Note, spiel sie auf deinem Klavier \u2013 und die Br\xFCcke w\xE4chst unter deinen F\xFC\xDFen."
+      ];
+      P_WORLD_INTRO = [
+        ["Der Himmel der hohen T\xF6ne. Irgendwo dort oben, auf der schwebenden Insel, steht das Schloss der Kl\xE4nge \u2013 stumm und grau verhangen.", "Der Violinschl\xFCssel zeigt dir den Weg: Er ringelt sich um die Linie, auf der das g\xB9 wohnt."],
+        ["Unter der Br\xFCcke am mittleren c beginnt die Tiefe. Hier hat der Nebel die dunklen T\xF6ne versteckt.", "Der Bassschl\xFCssel ist dein Kompass: Seine zwei Punkte bewachen die Linie, auf der das kleine f wohnt."],
+        ["Hinter dem Meer liegt das Land der Zauberzeichen. Hier tr\xE4gt mancher Ton ein Zeichen: Das Kreuz hebt ihn einen halben Schritt, das b senkt ihn.", "Die schwarzen Tasten kennt der Nebel am wenigsten. Genau deshalb hat er sich hier verkrochen."],
+        ["Zwischen Himmel und Tiefe spannt sich die gr\xF6\xDFte aller Br\xFCcken: zwei Systeme \xFCbereinander, oben f\xFCr die rechte Hand, unten f\xFCr die linke.", "Genau in der Mitte, auf einer einzigen kleinen Linie, wohnt das mittlere c. Von dort aus erreichst du beide Welten."]
+      ];
+      P_WORLD_OUTRO = [
+        ["Das Schloss der Kl\xE4nge leuchtet wieder! Aus allen Fenstern klingt es \u2013 und die Notenwesen des Himmels tanzen auf den Linien.", "Doch aus der Tiefe steigt noch immer grauer Dunst. Unter dem mittleren c wartet der n\xE4chste Weg."],
+        ["Die Tiefe singt wieder. Vom h\xF6chsten Schloss bis zum Meeresgrund sind die Br\xFCcken zur\xFCck \u2013 und das mittlere c h\xE4lt beide Welten zusammen.", "Der Graue Nebel flieht dorthin, wo er sich am sichersten f\xFChlt: ins Land der Zauberzeichen."],
+        ["Mit dem letzten Ton zerrei\xDFt der Graue Nebel wie ein alter Vorhang. Dahinter: Farben, Stimmen, Musik.", "Das Klangreich ist frei. Und du kannst jetzt etwas, das dir niemand mehr nimmt: Du kannst Noten lesen.", "Die Notenwesen bleiben bei dir. Besuche sie in deiner Sammlung \u2013 und komm wieder, damit kein Ton je wieder verstummt."],
+        ["Beide H\xE4nde, beide Schl\xFCssel, eine Melodie: Die gro\xDFe Br\xFCcke tr\xE4gt. Wer hier hin\xFCberkommt, liest Klaviernoten so, wie sie wirklich im Heft stehen."]
+      ];
+      G_INTRO = [
+        P_INTRO[0],
+        P_INTRO[1],
+        P_INTRO[2],
+        "Der Nebel f\xFCrchtet nur eines: einen echten Ton. Lies die Note, spiel sie auf deiner Gitarre \u2013 und die Br\xFCcke w\xE4chst unter deinen F\xFC\xDFen."
+      ];
+      G_WORLD_INTRO = [
+        ["Der Himmel der hohen T\xF6ne. Irgendwo dort oben, auf der schwebenden Insel, steht das Schloss der Kl\xE4nge \u2013 stumm und grau verhangen.", "Deine zwei d\xFCnnsten Saiten zeigen dir den Weg: zuerst die hohe e-Saite, dann die h-Saite."],
+        ["Hinter dem Schloss liegt das Tal der mittleren T\xF6ne. Hier hat der Nebel die Lieder versteckt, die jeder kennt.", "Die g-Saite und die d-Saite holen sie zur\xFCck. Ihre Noten sitzen unten im System."],
+        ["Unter dem Tal beginnt die Tiefe. Hier brummen die dunklen T\xF6ne der beiden dicken Saiten.", "Ihre Noten wohnen unter dem System, auf kleinen Hilfslinien. Z\xE4hle sie in Ruhe ab."],
+        ["Von ganz unten bis ganz oben spannt sich die gr\xF6\xDFte aller Br\xFCcken: sechs Saiten, ein Weg.", "Jetzt kommen alle T\xF6ne durcheinander. Schau genau hin: hoch, mittel oder tief?"]
+      ];
+      G_WORLD_OUTRO = [
+        ["Das Schloss der Kl\xE4nge leuchtet wieder! Aus allen Fenstern klingt es \u2013 und die Notenwesen des Himmels tanzen auf den Linien.", "Doch im Tal dahinter h\xE4ngt noch grauer Dunst. Dort warten die mittleren Saiten."],
+        ["Das Tal singt wieder \u2013 mit Liedern, die jeder mitsummen kann.", "Der Graue Nebel flieht nach unten, in die Tiefe der dicken Saiten."],
+        ["Mit dem letzten tiefen Ton zerrei\xDFt der Graue Nebel wie ein alter Vorhang. Dahinter: Farben, Stimmen, Musik.", "Das Klangreich ist frei. Und du kannst jetzt etwas, das dir niemand mehr nimmt: Du kannst Noten lesen \u2013 auf allen sechs Saiten.", "Die Notenwesen bleiben bei dir. Besuche sie in deiner Sammlung \u2013 und komm wieder, damit kein Ton je wieder verstummt."],
+        ["Sechs Saiten, alle T\xF6ne, eine Melodie: Die gro\xDFe Br\xFCcke tr\xE4gt. Wer hier hin\xFCberkommt, liest Gitarrennoten so, wie sie wirklich im Heft stehen."]
+      ];
+      INTRO = P_INTRO;
+      WORLD_INTRO = P_WORLD_INTRO;
+      WORLD_OUTRO = P_WORLD_OUTRO;
+      LEVEL_STORY = {
+        h1: "Zwei Notenwesen rufen leise durch den Nebel: das mittlere c und das g auf der Schl\xFCssel-Linie. Hol sie zur\xFCck!",
+        h2: "Zwischen c und g fehlt eine Stufe. Mit dem e baust du die erste Treppe in den Himmel.",
+        h3: "Der Nebel wirbelt die Noten durcheinander. Erkenne sie, bevor sie im Tor verschwinden!",
+        h4: "F\xFCnf Freunde, f\xFCnf T\xF6ne nebeneinander. Erst wenn alle da sind, h\xE4lt die Br\xFCcke.",
+        h5: "Jetzt baust du selbst: Schreib die Noten an ihren Platz, dann tr\xE4gt die Br\xFCcke.",
+        h6: "Je h\xF6her du steigst, desto d\xFCnner wird der Nebel. Das a und das h zeigen dir den Weg.",
+        h7: "Ein Wolkenbruch aus Noten! Bleib ruhig und lies genau.",
+        h8: "Ein Nebelw\xE4chter versperrt den Weg. Er weicht nur einer ganzen Melodie \u2013 spiel sie ihm vor!",
+        h9: "\xDCber der mittleren Linie beginnt die zweite Etage des Himmels.",
+        h10: "Die Notenwesen fl\xFCstern dir W\xF6rter zu. Schreib sie mit Noten auf!",
+        h11: "Fast oben: Die oberste Linie ist schon zu sehen.",
+        h12: "Der Nebel wehrt sich mit einem Sturm. Zeig ihm, wie schnell du lesen kannst.",
+        h13: "Der zweite W\xE4chter liebt die Stille. Eine Melodie voller Freude vertreibt ihn.",
+        h14: "\xDCber dem System geht es weiter \u2013 auf kleinen Hilfslinien, hoch \xFCber den Wolken.",
+        h15: "Der letzte W\xE4chter des Himmels steht vor dem Schloss. Ein altes Lied \xF6ffnet das Tor.",
+        t1: "Das mittlere c ist die Br\xFCcke zwischen oben und unten. Von hier steigst du hinab zum kleinen f.",
+        t2: "Stufe f\xFCr Stufe in die Tiefe. Die T\xF6ne werden dunkler, die Noten rutschen nach unten.",
+        t3: "Blubberblasen tragen Noten nach oben. Lies sie, bevor sie zerplatzen!",
+        t4: "In der Leuchtgrotte schimmern das a und das h.",
+        t5: "Auch unter Wasser brauchen die Wege Br\xFCcken. Schreib die Noten an ihren Platz.",
+        t6: "Kristallstufen f\xFChren weiter hinab. Zwei neue T\xF6ne warten.",
+        t7: "Ein Strudel rei\xDFt die Noten mit. Halte den Blick auf den Linien.",
+        t8: "Der W\xE4chter der Grotte schl\xE4ft. Weck ihn mit einem Lied, das jeder kennt.",
+        t9: "Die gro\xDFe Oktave: Hier wohnen die T\xF6ne mit den gro\xDFen Buchstaben.",
+        t10: "Tief unten wird gebaut. Die Notenwesen diktieren, du schreibst.",
+        t11: "Der Meeresgrund. Tiefer geht es nur noch auf Hilfslinien.",
+        t12: "Tiefenrausch! Der Nebel schickt alles, was er hat.",
+        t13: "Der W\xE4chter der Tiefe ist riesig und stumm. Das Lied der Tiefsee bringt ihn zum Klingen.",
+        z1: "Zwei Zauberzeichen: Das Kreuz macht aus f ein fis. Das b macht aus h ein b.",
+        z2: "Es regnet Zauberzeichen. Achte genau darauf, was vor der Note steht!",
+        z3: "Die schwarzen Tasten sind Geheimg\xE4nge. Der Nebel kennt sie nicht \u2013 du schon.",
+        z4: "Setz die Zeichen selbst: erst die Note, dann Kreuz oder b.",
+        z5: "Ein R\xE4tsel: Zwei verschiedene Namen, aber dieselbe Taste. gis und as sind Zwillinge.",
+        z6: "Der Nebel spr\xFCht Funken. Sein letzter Trick!",
+        z7: "Im Herzen des Nebels wartet der letzte W\xE4chter. Nur eine ber\xFChmte Melodie kann ihn l\xF6sen.",
+        b1: "Unten die linke Hand, oben die rechte. Die Br\xFCcke w\xE4chst nur, wenn beide mitbauen.",
+        b2: "Noten aus beiden Systemen wirbeln durcheinander. Schau genau hin: oben oder unten?",
+        b3: "Rund um das mittlere c liegen die T\xF6ne dicht beieinander \u2013 mal im oberen, mal im unteren System.",
+        b4: "Jetzt schreibst du selbst ins gro\xDFe System. Achte darauf, in welches der beiden die Note geh\xF6rt.",
+        b5: "Der W\xE4chter der gro\xDFen Br\xFCcke l\xE4sst nur durch, wer mit beiden H\xE4nden spielt.",
+        ga1: "Zwei Notenwesen rufen leise durch den Nebel: das hohe e \u2013 deine d\xFCnnste Saite, ganz ohne Finger \u2013 und das hohe f im 1. Bund.",
+        ga2: "\xDCber dem System, gleich \xFCber der obersten Linie, wohnt das hohe g. Dein Ringfinger holt es im 3. Bund.",
+        ga3: "Der Nebel wirbelt die Noten durcheinander. Erkenne sie, bevor sie im Tor verschwinden!",
+        ga4: "Eine Saite weiter wartet die h-Saite: leer klingt das h, mit dem Zeigefinger das c.",
+        ga5: "Jetzt baust du selbst: Schreib die Noten an ihren Platz, dann tr\xE4gt die Br\xFCcke.",
+        ga6: "Im 3. Bund der h-Saite sitzt das hohe d. Damit hast du schon sechs T\xF6ne beisammen.",
+        ga7: "Ein Wolkenbruch aus Noten! Bleib ruhig und lies genau.",
+        ga8: "Ein Nebelw\xE4chter versperrt den Weg. Er weicht nur einer ganzen Melodie \u2013 spiel sie ihm vor!",
+        ga9: "Zwei Saiten, sechs T\xF6ne, immer im Wechsel. Je sicherer du springst, desto d\xFCnner wird der Nebel.",
+        ga10: "Der letzte W\xE4chter des Himmels steht vor dem Schloss. Eine Melodie voller Freude \xF6ffnet das Tor.",
+        gb1: "Die g-Saite klingt leer wie die Linie, um die sich der Violinschl\xFCssel ringelt. Im 2. Bund wartet das a.",
+        gb2: "Es regnet Noten von drei Saiten. Achte auf die H\xF6he: Linie oder Zwischenraum?",
+        gb3: "Der W\xE4chter des Tals schl\xE4ft. Weck ihn mit einem Lied, das jedes Kind kennt.",
+        gb4: "Die d-Saite: Ihr leeres d h\xE4ngt gleich unter dem System. Mit dem Mittelfinger greifst du das e.",
+        gb5: "Zwischen e und g fehlt noch ein Ton. Das mittlere f sitzt im ersten Zwischenraum.",
+        gb6: "Die Notenwesen fl\xFCstern dir W\xF6rter zu. Schreib sie mit Noten auf!",
+        gb7: "Der Nebel wehrt sich mit einem Sturm. Zeig ihm, wie schnell du lesen kannst.",
+        gb8: "Der zweite W\xE4chter liebt Kanons. Spiel ihm Bruder Jakob vor \u2013 vom mittleren g bis hinunter zum d.",
+        gb9: "Vier Saiten, elf T\xF6ne. Wer hier sicher springt, kommt \xFCberall hin.",
+        gc1: "Die A-Saite brummt schon tiefer. Ihre Noten h\xE4ngen an Hilfslinien unter dem System: das tiefe a und das tiefe h.",
+        gc2: "Das tiefe c sitzt auf einer einzigen Hilfslinie. Auf der Gitarre greifst du es im 3. Bund der A-Saite.",
+        gc3: "Blubberblasen tragen Noten nach oben. Lies sie, bevor sie zerplatzen!",
+        gc4: "Der W\xE4chter der Grotte kennt nur ein Lied. Spiel es ihm \u2013 vom tiefen c an aufw\xE4rts.",
+        gc5: "Die dickste Saite: das tiefe e, ganz ohne Finger. Tiefer geht es auf der Gitarre nicht.",
+        gc6: "Im 3. Bund der tiefen E-Saite wartet das letzte Notenwesen: das tiefe g.",
+        gc7: "Tief unten wird gebaut. Die Notenwesen diktieren, du schreibst.",
+        gc8: "Tiefenrausch! Der Nebel schickt alles, was er hat.",
+        gc9: "Der W\xE4chter der Tiefe ist riesig und stumm. Das Lied der tiefen Saiten bringt ihn zum Klingen.",
+        gd1: "Kreuz und quer \xFCber alle sechs Saiten. Vor jedem Sprung: hoch, mittel oder tief?",
+        gd2: "Alle Noten auf einmal. Wer jetzt ruhig bleibt, kann wirklich lesen.",
+        gd3: "Jetzt schreibst du selbst \u2013 von der tiefsten Hilfslinie bis \xFCber die oberste Linie.",
+        gd4: "Bruder Jakob einmal ganz tief: Der W\xE4chter staunt, wie warm die dicken Saiten klingen.",
+        gd5: "Die letzte Probe: alle T\xF6ne der Reihe nach, hinauf und wieder hinunter. Dann tr\xE4gt die Br\xFCcke."
+      };
+    }
+  });
+
+  // src/instrument.js
+  function grip(midi) {
+    for (let s = 5; s >= 0; s--) {
+      const f = midi - OPEN[s];
+      if (f >= 0 && f <= 4) return { string: s, fret: f };
+    }
+    return null;
+  }
+  function gripText(midi) {
+    const g = grip(midi);
+    if (!g) return "";
+    return g.fret === 0 ? `${STRING_NAME[g.string]}, leer (ohne Finger)` : `${STRING_NAME[g.string]}, ${g.fret}. Bund (${FINGER[g.fret]})`;
+  }
+  function register2(n) {
+    return n.step >= 8 ? "hoch" : n.step >= 1 ? "mittel" : "tief";
+  }
+  function guitarName(n) {
+    const base = letterName(n), tag = register2(n);
+    return { base, tag, full: `${ADJ[tag]} ${base}` };
+  }
+  function setInstr(id) {
+    INSTR = id === "gitarre" ? GITARRE : KLAVIER;
+    setNamer(INSTR === GITARRE ? guitarName : null);
+    setLevelSet(INSTR.id);
+    setStorySet(INSTR.id);
+    return INSTR;
+  }
+  var OPEN, FRETS, STRING_NAME, STRING_SHORT, FINGER, ADJ, KLAVIER, GITARRE, INSTR, INSTRUMENTS, isGuitar;
+  var init_instrument = __esm({
+    "src/instrument.js"() {
+      init_music();
+      init_levels();
+      init_story();
+      OPEN = [52, 57, 62, 67, 71, 76];
+      FRETS = 3;
+      STRING_NAME = ["tiefe E-Saite", "A-Saite", "d-Saite", "g-Saite", "h-Saite", "hohe e-Saite"];
+      STRING_SHORT = ["E", "A", "d", "g", "h", "e"];
+      FINGER = ["", "Zeigefinger", "Mittelfinger", "Ringfinger", "kleiner Finger"];
+      ADJ = { hoch: "hohes", mittel: "mittleres", tief: "tiefes" };
+      KLAVIER = {
+        id: "klavier",
+        name: "Klavier",
+        shift: 0,
+        on: "auf deinem Klavier",
+        onThe: "auf dem Klavier",
+        at: "am Klavier",
+        play: "Am Klavier spielen",
+        pad: "Bildschirm-Tasten",
+        padDesc: "Ohne Klavier spielen: Tasten antippen",
+        tapPad: "tippe die Tasten unten",
+        padWhere: "unten auf der Tastatur",
+        place: "Stell dein Ger\xE4t aufs Klavier.",
+        tuneKey: "c1",
+        tune: "Spiele dreimal das <b>mittlere c</b> (c<sup>1</sup>), jedes Mal kurz und deutlich.",
+        tuned: "Dein Klavier",
+        octave: "Die richtige Oktave z\xE4hlt!",
+        has: "Halte dein Klavier bereit."
+      };
+      GITARRE = {
+        id: "gitarre",
+        name: "Gitarre",
+        shift: 12,
+        on: "auf deiner Gitarre",
+        onThe: "auf der Gitarre",
+        at: "auf der Gitarre",
+        play: "Auf der Gitarre spielen",
+        pad: "Bildschirm-Griffbrett",
+        padDesc: "Ohne Gitarre spielen: Griffbrett antippen",
+        tapPad: "tippe unten auf das Griffbrett",
+        padWhere: "unten auf dem Griffbrett",
+        place: "Stell dein Ger\xE4t vor die Gitarre, nah am Schallloch.",
+        tuneKey: "a",
+        tune: "Zupfe dreimal die <b>leere A-Saite</b> (die zweittiefste Saite), jedes Mal einzeln und deutlich.",
+        tuned: "Deine Gitarre",
+        octave: "Die richtige Saite z\xE4hlt!",
+        has: "Halte deine Gitarre bereit."
+      };
+      INSTR = KLAVIER;
+      INSTRUMENTS = [KLAVIER, GITARRE];
+      isGuitar = () => INSTR === GITARRE;
     }
   });
 
@@ -834,6 +1327,8 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
           this.holdMs = opt.holdMs || 200;
           this.minClarity = opt.minClarity || 0.86;
           this.minRms = opt.minRms || 2e-3;
+          this.steadyN = opt.steadyN || 4;
+          this.steadyCents = opt.steadyCents || 22;
           this.a4 = opt.a4 || 440;
           this.reset();
         }
@@ -884,12 +1379,22 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
           this.cents.push((mf - m) * 100);
           const held = t - this.since;
           const changed = this.lastEmit !== null && m !== this.lastEmit && (res.rms >= 0.3 * this.emitRms || held >= 2.5 * this.holdMs);
-          if (held >= this.holdMs && (this.onset || changed)) {
+          const c = this.cents, k = c.length;
+          let steady = k >= this.steadyN;
+          if (steady) {
+            let lo = 1e9, hi = -1e9;
+            for (let i = k - this.steadyN; i < k; i++) {
+              if (c[i] < lo) lo = c[i];
+              if (c[i] > hi) hi = c[i];
+            }
+            steady = hi - lo <= this.steadyCents;
+          }
+          if (held >= this.holdMs && steady && (this.onset || changed)) {
             this.onset = false;
             this.lastEmit = m;
             this.lowRms = res.rms;
             this.emitRms = res.rms;
-            const s = this.cents.slice().sort((x, y) => x - y);
+            const s = this.cents.slice(-this.steadyN).sort((x, y) => x - y);
             return { midi: m, cents: s[s.length >> 1], freq: res.freq };
           }
           return null;
@@ -903,13 +1408,17 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     const m = /^([A-G])(#?)(\d)$/.exec(name);
     return 440 * Math.pow(2, (12 * (+m[3] + 1) + SEMI2[m[1]] + (m[2] ? 1 : 0) - 69) / 12);
   }
+  function refFor(peaks) {
+    const v = peaks.filter((x) => x > 0).sort((a, b) => a - b);
+    return v.length ? v[Math.floor(v.length / 2)] : 0;
+  }
   function gainFor(peaks) {
     const v = peaks.filter((x) => x > 0).sort((a, b) => a - b);
     if (!v.length) return 1;
     const med = v[Math.floor(v.length / 2)];
     return Math.max(1, Math.min(GAIN_MAX, Math.round(GAIN_TARGET / med * 10) / 10));
   }
-  var SFX, SEMI2, song, SONGS, SONG, GAIN_MAX, GAIN_TARGET, GAIN_PROBE, GameAudio;
+  var SFX, SEMI2, song, SONGS, SONG, GAIN_MAX, GAIN_TARGET, GAIN_PROBE, FLOOR_PART, GameAudio;
   var init_audio = __esm({
     "src/audio.js"() {
       init_pitch();
@@ -960,6 +1469,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       GAIN_MAX = 16;
       GAIN_TARGET = 0.04;
       GAIN_PROBE = 8;
+      FLOOR_PART = 0.1;
       GameAudio = class {
         constructor() {
           this.ctx = null;
@@ -975,6 +1485,21 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         /** Verstärkung für leise Mikrofone (pro Gerät eingestellt). Die Tonhöhen-Erkennung hängt nicht von der Lautstärke ab – nur die Schwellen für Stille und Anschlag. */
         setGain(g) {
           this.gain = Math.max(1, Math.min(GAIN_MAX, +g || 1));
+          this.applyFloor();
+        }
+        /** Bezugspegel: so laut kommt das Instrument auf diesem Gerät an (unverstärkt gemessen). Deutlich Leiseres – Stimmen im Raum, Nebengeräusche – wird überhört. 0 = unbekannt. */
+        setRef(peak) {
+          this.ref = +peak > 0 ? +peak : 0;
+          this.applyFloor();
+        }
+        applyFloor() {
+          this.tracker.minRms = this.probing || !this.ref ? 2e-3 : Math.max(2e-3, Math.min(0.03, FLOOR_PART * this.ref * this.gain));
+        }
+        /** Zum Einmessen: stark verstärkt und ohne Schwelle zuhören. */
+        probe(on) {
+          this.probing = !!on;
+          if (on) this.gain = GAIN_PROBE;
+          this.applyFloor();
         }
         ensure() {
           try {
@@ -1218,7 +1743,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         /** Klavierähnlicher Ton (für Brückenbauer und Sammlung). */
         playNote(midi) {
           if (this.muted || !this.ensure()) return;
-          const t = this.ctx.currentTime + 0.01, f = freqOfMidi(midi);
+          const t = this.ctx.currentTime + 0.01, f = freqOfMidi(midi - (this.shift || 0));
           try {
             this.tone(f, t, 0.9, "triangle", 0.16);
             this.tone(f * 2, t, 0.5, "sine", 0.05);
@@ -1798,136 +2323,6 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     }
   });
 
-  // src/levels.js
-  function prevWorld(world) {
-    return WORLDS[world].after != null ? WORLDS[world].after : world - 1;
-  }
-  function creatureTotal() {
-    return new Set(ALL_NOTES.flat()).size;
-  }
-  function levelsOf(world) {
-    return LEVELS.filter((l) => l.world === world);
-  }
-  function doneCount(profile, world) {
-    return levelsOf(world).filter((l) => profile.levels[l.id]).length;
-  }
-  function worldUnlocked(profile, world) {
-    return world === 0 || profile.unlockAll || (profile.skip || [])[world] > 0 || doneCount(profile, prevWorld(world)) >= WORLDS[world].need;
-  }
-  function levelUnlocked(profile, level) {
-    if (profile.unlockAll) return true;
-    if (!worldUnlocked(profile, level.world)) return false;
-    const ls = levelsOf(level.world), i = ls.indexOf(level);
-    return i === 0 || i < ((profile.skip || [])[level.world] || 0) || !!profile.levels[ls[i - 1].id];
-  }
-  function nextLevel(level) {
-    const i = LEVELS.indexOf(level);
-    return LEVELS[i + 1] || null;
-  }
-  function starsFor(ratio) {
-    return ratio >= 0.85 ? 3 : ratio >= 0.65 ? 2 : 1;
-  }
-  function totalStars(profile) {
-    return Object.values(profile.levels).reduce((a, l) => a + (l.stars || 0), 0) + Object.values(profile.train || {}).reduce((a, t) => a + (t.stars || 0), 0);
-  }
-  var WORLDS, TYPE_LABEL, L, T1, T2, T3, T4, T5, B1, B2, B3, B4, B5, ENTCHEN, FREUDE, HAENSCHEN, JAKOB, TIEFSEE, JAKOB2, ELISE, LEVELS, earlier, ALL_NOTES, PLACEMENT, PLACEMENT_Q, PLACEMENT_PASS;
-  var init_levels = __esm({
-    "src/levels.js"() {
-      init_music();
-      WORLDS = [
-        { id: "himmel", name: "Himmel der hohen T\xF6ne", short: "Himmel", clef: "treble", theme: "himmel", need: 0 },
-        { id: "tiefe", name: "Tiefen der tiefen T\xF6ne", short: "Tiefe", clef: "bass", theme: "tiefe", need: 8 },
-        { id: "zauber", name: "Land der Zauberzeichen", short: "Zauberzeichen", clef: "treble", theme: "zauber", need: 6 },
-        { id: "beide", name: "Die gro\xDFe Br\xFCcke", short: "Gro\xDFe Br\xFCcke", clef: "grand", theme: "abend", need: 6, after: 1 }
-      ];
-      TYPE_LABEL = { jump: "Springen", regen: "Notenregen", bau: "Br\xFCckenbauer", boss: "Melodie" };
-      L = (id, world, type, title2, notes, fresh, extra = {}) => ({ id, world, type, title: title2, notes, fresh: fresh || [], len: 10, ...extra });
-      T1 = ["c1", "d1", "e1", "f1", "g1"];
-      T2 = [...T1, "a1", "h1"];
-      T3 = [...T2, "c2", "d2"];
-      T4 = [...T3, "e2", "f2"];
-      T5 = [...T4, "g2", "a2"];
-      B1 = ["c1", "f", "c", "g"];
-      B2 = [...B1, "a", "h"];
-      B3 = [...B2, "d", "e"];
-      B4 = [...B3, "G", "A", "H"];
-      B5 = [...B4, "C", "D", "E", "F"];
-      ENTCHEN = "c1 d1 e1 f1 g1 g1 a1 a1 a1 a1 g1 a1 a1 a1 a1 g1 f1 f1 f1 f1 e1 e1 d1 d1 d1 d1 c1".split(" ");
-      FREUDE = "e1 e1 f1 g1 g1 f1 e1 d1 c1 c1 d1 e1 e1 d1 d1 e1 e1 f1 g1 g1 f1 e1 d1 c1 c1 d1 e1 d1 c1 c1".split(" ");
-      HAENSCHEN = "g2 e2 e2 f2 d2 d2 c2 d2 e2 f2 g2 g2 g2 g2 e2 e2 f2 d2 d2 c2 e2 g2 g2 c2".split(" ");
-      JAKOB = "c d e c c d e c e f g e f g".split(" ");
-      TIEFSEE = "C E G c G E C F A c A F G H d G C".split(" ");
-      JAKOB2 = "c d e c c1 d1 e1 c1 e f g e1 f1 g1 g a g f e c g1 a1 g1 f1 e1 c1 c g c c1 g1 c1".split(" ");
-      ELISE = "e2 dis2 e2 dis2 e2 h1 d2 c2 a1 c1 e1 a1 h1 e1 gis1 h1 c2".split(" ");
-      LEVELS = [
-        L("h1", 0, "jump", "Die ersten T\xF6ne", ["c1", "g1"], ["c1", "g1"], { len: 8 }),
-        L("h2", 0, "jump", "Die Dreiklang-Treppe", ["c1", "e1", "g1"], ["e1"]),
-        L("h3", 0, "regen", "Erster Notenregen", ["c1", "e1", "g1"]),
-        L("h4", 0, "jump", "F\xFCnf Freunde", T1, ["d1", "f1"]),
-        L("h5", 0, "bau", "Baue die Br\xFCcke", T1, [], { words: ["FEE"] }),
-        L("h6", 0, "jump", "H\xF6her hinaus", T2, ["a1", "h1"]),
-        L("h7", 0, "regen", "Wolkenbruch", T2),
-        L("h8", 0, "boss", "Alle meine Entchen", [...new Set(ENTCHEN)], [], { melody: ENTCHEN }),
-        L("h9", 0, "jump", "\xDCber die Mitte", T3, ["c2", "d2"]),
-        L("h10", 0, "bau", "W\xF6rter aus Noten", T3, [], { words: ["AFFE", "DACH", "CAFE", "HEFE", "ADE"] }),
-        L("h11", 0, "jump", "Bis zur obersten Linie", T4, ["e2", "f2"]),
-        L("h12", 0, "regen", "Sturm der Noten", T4),
-        L("h13", 0, "boss", "Freude sch\xF6ner G\xF6tterfunken", [...new Set(FREUDE)], [], { melody: FREUDE }),
-        L("h14", 0, "jump", "\xDCber den Wolken", T5, ["g2", "a2"], { len: 12 }),
-        L("h15", 0, "boss", "H\xE4nschen klein", [...new Set(HAENSCHEN)], [], { melody: HAENSCHEN }),
-        L("t1", 1, "jump", "Die Br\xFCcke am mittleren c", ["c1", "f"], ["f"], { len: 8 }),
-        L("t2", 1, "jump", "Abstieg in die Tiefe", B1, ["c", "g"]),
-        L("t3", 1, "regen", "Blubberblasen", B1),
-        L("t4", 1, "jump", "Die Leuchtgrotte", B2, ["a", "h"]),
-        L("t5", 1, "bau", "Br\xFCcken unter Wasser", B2, [], { words: ["ACH", "FACH"] }),
-        L("t6", 1, "jump", "Kristallstufen", B3, ["d", "e"]),
-        L("t7", 1, "regen", "Strudel", B3),
-        L("t8", 1, "boss", "Bruder Jakob", [...new Set(JAKOB)], [], { melody: JAKOB }),
-        L("t9", 1, "jump", "Die gro\xDFe Oktave", B4, ["G", "A", "H"]),
-        L("t10", 1, "bau", "Tiefbau", B4, [], { words: ["GAGE", "EHE", "CHEF"] }),
-        L("t11", 1, "jump", "Am Meeresgrund", B5, ["C", "D", "E", "F"], { len: 12 }),
-        L("t12", 1, "regen", "Tiefenrausch", B5),
-        L("t13", 1, "boss", "Lied der Tiefsee", [...new Set(TIEFSEE)], [], { melody: TIEFSEE }),
-        L("z1", 2, "jump", "Kreuz und b", ["f1", "fis1", "h1", "b1", "g1", "a1"], ["fis1", "b1"]),
-        L("z2", 2, "regen", "Zauberregen", ["f1", "fis1", "h1", "b1", "g1", "a1"]),
-        L("z3", 2, "jump", "Schwarze Tasten", ["fis1", "b1", "cis2", "es2", "c2", "e2", "d2"], ["cis2", "es2"]),
-        L("z4", 2, "bau", "Zeichen setzen", ["fis1", "b1", "cis2", "es2", "f1", "h1"], [], { accidentals: true }),
-        L("z5", 2, "jump", "Zwei Namen, eine Taste", ["gis1", "as1", "cis2", "des2", "fis1", "b1", "es2"], ["gis1", "as1", "des2"]),
-        L("z6", 2, "regen", "Funkensturm", ["fis1", "b1", "cis2", "es2", "gis1", "as1", "des2", "g1", "a1"]),
-        L("z7", 2, "boss", "F\xFCr Elise", [...new Set(ELISE)], ["dis2"], { melody: ELISE }),
-        L("b1", 3, "jump", "Zwei H\xE4nde, eine Br\xFCcke", ["c", "e", "g", "c1", "e1", "g1"]),
-        L("b2", 3, "regen", "Links und rechts", ["c", "d", "e", "f", "g", "c1", "d1", "e1", "f1", "g1"]),
-        L("b3", 3, "jump", "Rund um das mittlere c", ["f", "g", "a", "h", "c1", "d1", "e1", "f1", "g1"], [], { len: 12 }),
-        L("b4", 3, "bau", "Schreiben im gro\xDFen System", ["c", "e", "g", "a", "c1", "d1", "f1", "a1", "c2"], [], { words: ["FACH", "CAFE"] }),
-        L("b5", 3, "boss", "Bruder Jakob f\xFCr zwei H\xE4nde", [...new Set(JAKOB2)], [], { melody: JAKOB2 })
-      ];
-      LEVELS.forEach((l) => {
-        l.clef = WORLDS[l.world].clef;
-        l.theme = WORLDS[l.world].theme;
-        [...l.notes, ...l.melody || []].forEach(N);
-      });
-      earlier = /* @__PURE__ */ new Set();
-      ALL_NOTES = WORLDS.map((w, wi) => {
-        const seen = [];
-        LEVELS.filter((l) => l.world === wi).forEach((l) => l.notes.forEach((k) => {
-          if (!seen.includes(k) && !(w.clef === "grand" && earlier.has(k))) seen.push(k);
-        }));
-        seen.forEach((k) => earlier.add(k));
-        return seen;
-      });
-      PLACEMENT = [
-        { name: "Violinschl\xFCssel: c\xB9 bis g\xB9", clef: "treble", notes: T1, skip: [6, 0, 0, 0] },
-        { name: "Violinschl\xFCssel: bis d\xB2", clef: "treble", notes: ["a1", "h1", "c2", "d2", "g1", "f1"], skip: [11, 0, 0, 0] },
-        { name: "Violinschl\xFCssel: bis a\xB2", clef: "treble", notes: ["e2", "f2", "g2", "a2", "d2", "h1"], skip: [15, 1, 0, 0] },
-        { name: "Bassschl\xFCssel: kleines c bis c\xB9", clef: "bass", notes: B3, skip: [15, 9, 0, 0] },
-        { name: "Bassschl\xFCssel: bis zum gro\xDFen C", clef: "bass", notes: ["G", "A", "H", "C", "D", "E", "F"], skip: [15, 13, 1, 1] },
-        { name: "Vorzeichen", clef: "treble", notes: ["fis1", "b1", "cis2", "es2", "gis1", "as1", "des2"], skip: [15, 13, 7, 1] }
-      ];
-      PLACEMENT_Q = 5;
-      PLACEMENT_PASS = 4;
-    }
-  });
-
   // src/srs.js
   function newStat() {
     return { box: 0, seen: 0, ok: 0 };
@@ -1989,11 +2384,11 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     t.fillText(text, x * SC, y * SC);
   }
   function noteLabel(t, n, x, y, o = {}) {
-    const p = nameParts(n), size = o.size || 22, f = (s) => `700 ${s}px "Atkinson Hyperlegible", system-ui, sans-serif`;
+    const p = shownParts(n), size = o.size || 22, f = (s) => `700 ${s}px "Atkinson Hyperlegible", system-ui, sans-serif`;
     t.font = f(size);
     const w1 = t.measureText(p.base).width;
     t.font = f(size * 0.62);
-    const w2 = p.sup ? t.measureText(p.sup).width + 1 : 0;
+    const gap = p.word ? size * 0.18 : 1, w2 = p.sup ? t.measureText(p.sup).width + gap : 0;
     const x0 = x * SC - (w1 + w2) / 2;
     t.textAlign = "left";
     t.textBaseline = "middle";
@@ -2009,7 +2404,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       t.fillText(txt, xx, yy);
     };
     draw(p.base, x0, y * SC, size);
-    if (p.sup) draw(p.sup, x0 + w1 + 1, y * SC - size * 0.32, size * 0.62);
+    if (p.sup) draw(p.sup, x0 + w1 + gap, y * SC - size * (p.word ? 0.12 : 0.32), size * 0.62);
   }
   var SC;
   var init_text = __esm({
@@ -2024,17 +2419,18 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     const m = Math.floor(s / 60);
     return `${m}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
   }
-  var STRIDE, PW, HERO_SX, JUMP_S, JumpScene;
+  var STRIDE, PW, JUMP_S, heroSX, JumpScene;
   var init_jump = __esm({
     "src/jump.js"() {
       init_music();
       init_srs();
       init_gfx();
+      init_instrument();
       init_text();
       STRIDE = 84;
       PW = 46;
-      HERO_SX = 78;
       JUMP_S = 0.42;
+      heroSX = () => VIEW_W < 250 ? Math.round(VIEW_W * 0.3) : 78;
       JumpScene = class {
         constructor(app, level) {
           this.app = app;
@@ -2059,7 +2455,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
           this.started = false;
           this.freed = [];
           this.hero = { x: 70, y: yOfPos(startPos) };
-          this.camX = 70 - HERO_SX;
+          this.camX = 70 - heroSX();
           this.phase = "listen";
           this.oopsT = 0;
           this.landT = 0;
@@ -2097,13 +2493,17 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
           this.fresh = isNew;
           this.hint = isNew;
           app.panel.setHint(isNew ? midiOf(tg) : null);
-          app.panel.task(this.boss ? app.listening ? "Spiele die Melodie Ton f\xFCr Ton <b>auf deinem Klavier</b>." : "Spiele die Melodie Ton f\xFCr Ton \u2013 <b>tippe die Tasten unten</b>." : app.listening ? "Spiele die leuchtende Note <b>auf deinem Klavier</b>." : "Tippe die leuchtende Note <b>unten auf der Tastatur</b>.");
+          app.panel.task(this.boss ? app.listening ? `Spiele die Melodie Ton f\xFCr Ton <b>${INSTR.on}</b>.` : `Spiele die Melodie Ton f\xFCr Ton \u2013 <b>${INSTR.tapPad}</b>.` : app.listening ? `Spiele die leuchtende Note <b>${INSTR.on}</b>.` : `Tippe die leuchtende Note <b>${INSTR.padWhere}</b>.`);
+          {
+            const pos = staffPos(tg, this.clef), from = this.idx > 0 ? staffPos(this.targets[this.idx - 1], this.clef) : 0;
+            app.bubbleSide(pos <= -5 || from <= -5);
+          }
           app.hud.progress(this.idx, this.targets.length);
           app.hud.extra(app.profile.mode === "profi" ? `<span id="jTime">0:00</span>${this.combo > 1 ? ` &middot; <b>${this.combo}\xD7</b> Serie` : ""}` : "");
-          if (isNew) app.bubble(`Neu: <b>${nameHtml(tg)}</b> \u2013 ${describePos(staffPos(tg, this.clef), this.clef)}. Die Taste leuchtet.`, 0);
+          if (isNew) app.bubble(isGuitar() ? `Neu: <b>${nameHtml(tg)}</b> \u2013 ${describePos(staffPos(tg, this.clef), this.clef)}. Greife: ${gripText(midiOf(tg))}.` : `Neu: <b>${nameHtml(tg)}</b> \u2013 ${describePos(staffPos(tg, this.clef), this.clef)}. Die Taste leuchtet.`, 0);
           else if (first) app.bubble(this.boss ? `Spiele die Melodie: <b>${this.level.title}</b>` : "Welcher Ton baut die Br\xFCcke?", 4);
           else app.bubble(null);
-          if (first) app.panel.say(app.listening ? "Ich h\xF6re \u2026" : "Bildschirm-Tasten", app.listening ? "Ich h\xF6re noch nichts." : "");
+          if (first) app.panel.say(app.listening ? "Ich h\xF6re \u2026" : INSTR.pad, app.listening ? "Ich h\xF6re noch nichts." : "");
         }
         onNote(midi) {
           if (this.phase === "jump") {
@@ -2122,7 +2522,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
               this.firstTry++;
               this.combo++;
             } else this.combo = 0;
-            app.panel.say(app.listening ? "Ich h\xF6re \u2026" : "Bildschirm-Tasten", `Perfekt! <b>${nameHtml(tg)}</b> erkannt!`, "ok");
+            app.panel.say(app.listening ? "Ich h\xF6re \u2026" : INSTR.pad, `Perfekt! <b>${nameHtml(tg)}</b> erkannt!`, "ok");
             app.panel.flash(midi, "good");
             app.panel.setHint(null);
             app.bubble(null);
@@ -2147,12 +2547,12 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
             this.oopsT = 0.5;
             app.audio.sfx("oops");
             app.panel.flash(midi, "bad");
-            if (cls === "wrong") app.panel.say(app.listening ? "Ich h\xF6re \u2026" : "Bildschirm-Tasten", `Das war <b>${nameHtml(heard)}</b>. Versuch es noch einmal!`, "warn");
-            else app.panel.say(app.listening ? "Ich h\xF6re \u2026" : "Bildschirm-Tasten", `Das ist ein <b>${letterName(tg)}</b>, aber eine Oktave zu ${cls === "octave-high" ? "hoch" : "tief"}.`, "warn");
+            if (cls === "wrong") app.panel.say(app.listening ? "Ich h\xF6re \u2026" : INSTR.pad, `Das war <b>${nameHtml(heard)}</b>. Versuch es noch einmal!`, "warn");
+            else app.panel.say(app.listening ? "Ich h\xF6re \u2026" : INSTR.pad, `Das ist ein <b>${letterName(tg)}</b>, aber eine Oktave zu ${cls === "octave-high" ? "hoch" : "tief"}${isGuitar() ? " \u2013 eine andere Saite" : ""}.`, "warn");
             if (this.tries >= this.hintAfter && !this.hint) {
               this.hint = true;
               app.panel.setHint(tm);
-              app.bubble("Tipp: Die leuchtende Taste ist richtig.", 4);
+              app.bubble(isGuitar() ? `Tipp: ${gripText(tm)}.` : "Tipp: Die leuchtende Taste ist richtig.", isGuitar() ? 6 : 4);
             }
           }
         }
@@ -2215,7 +2615,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
               });
             }
           }
-          this.camX += (this.hero.x - HERO_SX - this.camX) * Math.min(1, dt * 6);
+          this.camX += (this.hero.x - heroSX() - this.camX) * Math.min(1, dt * 6);
         }
         draw(ctx, tx) {
           const cam = q(this.camX), T = this.theme, line = this.line, light = T !== "himmel";
@@ -2301,15 +2701,17 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 
   // src/training.js
   function normalize(c = {}) {
-    const cfg = { input: c.input === "name" ? "name" : "play", range: ["treble", "bass", "both"].includes(c.range) ? c.range : "treble", acc: !!c.acc, len: c.len === "count" ? "count" : "time", weak: !!c.weak };
-    if (cfg.range === "bass" || cfg.weak) cfg.acc = false;
+    const cfg = { input: c.input === "name" ? "name" : "play", range: RANGES[LEVEL_SET].includes(c.range) ? c.range : RANGES[LEVEL_SET][0], acc: !!c.acc, len: c.len === "count" ? "count" : "time", weak: !!c.weak };
+    if (cfg.range === "bass" || cfg.weak || guitar()) cfg.acc = false;
     return cfg;
   }
   function weakNotes(profile) {
+    if (guitar()) return GRANGE.gall.filter((k) => profile.notes && profile.notes[k] && profile.notes[k].seen >= 2 && !isMastered(profile.notes[k])).map((k) => ({ key: k, clef: "treble" }));
     return Object.keys(profile.notes || {}).filter((k) => safe(k) && profile.notes[k].seen >= 2 && !isMastered(profile.notes[k])).map((k) => ({ key: k, clef: TREBLE.includes(k) || ACC.includes(k) ? "treble" : BASS.includes(k) ? "bass" : N(k).step < 0 ? "bass" : "treble" }));
   }
   function pool(cfg, profile) {
     if (cfg.weak) return weakNotes(profile);
+    if (GRANGE[cfg.range]) return GRANGE[cfg.range].map((k) => ({ key: k, clef: "treble" }));
     const out = [];
     if (cfg.range !== "bass") {
       TREBLE.forEach((k) => out.push({ key: k, clef: "treble" }));
@@ -2322,8 +2724,8 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     return cfg.weak ? null : `${cfg.input}-${cfg.range}${cfg.acc ? "+v" : ""}-${cfg.len}`;
   }
   function discLabel(cfg) {
-    const r = cfg.weak ? "Meine Wackelnoten" : { treble: "Violinschl\xFCssel", bass: "Bassschl\xFCssel", both: "Beide Schl\xFCssel" }[cfg.range] + (cfg.acc ? " mit Vorzeichen" : "");
-    return `${r} \xB7 ${cfg.input === "play" ? "am Klavier" : "Namen antippen"} \xB7 ${cfg.len === "time" ? "60 Sekunden" : "20 Noten"}`;
+    const r = cfg.weak ? "Meine Wackelnoten" : RANGE_LABEL[cfg.range] + (cfg.acc ? " mit Vorzeichen" : ""), g = cfg.weak ? guitar() : !!GRANGE[cfg.range];
+    return `${r} \xB7 ${cfg.input === "play" ? g ? "auf der Gitarre" : "am Klavier" : "Namen antippen"} \xB7 ${cfg.len === "time" ? "60 Sekunden" : "20 Noten"}`;
   }
   function metrics(raw) {
     const ms = Math.max(1e3, raw.ms || 0);
@@ -2379,7 +2781,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   function sameSound(a, b) {
     return !!a && !!b && midiOf(N(a.key)) === midiOf(N(b.key));
   }
-  var TRAIN_SECS, TRAIN_COUNT, RECORD_MIN_ACC, RECORD_MIN_NOTES, STAR_MIN_ACC, WEAK_MIN, STAR_AT, SLOW_MS, safe, TREBLE, BASS, ACC, BOARD_DISC;
+  var TRAIN_SECS, TRAIN_COUNT, RECORD_MIN_ACC, RECORD_MIN_NOTES, STAR_MIN_ACC, WEAK_MIN, STAR_AT, SLOW_MS, safe, PA, TREBLE, BASS, ACC, GA, GRANGE, RANGES, RANGE_LABEL, guitar, rangeLabel;
   var init_training = __esm({
     "src/training.js"() {
       init_levels();
@@ -2401,10 +2803,16 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
           return null;
         }
       };
-      TREBLE = ALL_NOTES[0].filter((k) => N(k).alt === 0);
-      BASS = ALL_NOTES[1].filter((k) => N(k).alt === 0);
-      ACC = ALL_NOTES[2].filter((k) => N(k).alt !== 0);
-      BOARD_DISC = "play-treble-time";
+      PA = SETS.klavier.all;
+      TREBLE = PA[0].filter((k) => N(k).alt === 0);
+      BASS = PA[1].filter((k) => N(k).alt === 0);
+      ACC = PA[2].filter((k) => N(k).alt !== 0);
+      GA = SETS.gitarre.all;
+      GRANGE = { g0: GA[0], g1: GA[1], g2: GA[2], gall: GA.flat() };
+      RANGES = { klavier: ["treble", "bass", "both"], gitarre: ["g0", "g1", "g2", "gall"] };
+      RANGE_LABEL = { treble: "Violinschl\xFCssel", bass: "Bassschl\xFCssel", both: "Beide Schl\xFCssel", g0: "Hohe Saiten", g1: "Mittlere Saiten", g2: "Tiefe Saiten", gall: "Alle Saiten" };
+      guitar = () => LEVEL_SET === "gitarre";
+      rangeLabel = (r) => RANGE_LABEL[r] || r;
     }
   });
 
@@ -4190,73 +4598,6 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     }
   });
 
-  // src/story.js
-  var INTRO, WORLD_INTRO, WORLD_OUTRO, LEVEL_STORY;
-  var init_story = __esm({
-    "src/story.js"() {
-      INTRO = [
-        "Im Klangreich hatte jeder Ton ein Zuhause: Hoch oben im Himmel wohnten die hellen T\xF6ne, tief unten im Meer die dunklen.",
-        "Dann kam der Graue Nebel. Er verschluckte jeden Klang, sperrte die Notenwesen ein und lie\xDF die Br\xFCcken zwischen den T\xF6nen zerfallen.",
-        "Seitdem ist es still. Nur f\xFCnf Linien ziehen sich noch durch die Welt \u2013 und auf ihnen warten die Notenwesen darauf, geh\xF6rt zu werden.",
-        "Der Nebel f\xFCrchtet nur eines: einen echten Ton. Lies die Note, spiel sie auf deinem Klavier \u2013 und die Br\xFCcke w\xE4chst unter deinen F\xFC\xDFen."
-      ];
-      WORLD_INTRO = [
-        ["Der Himmel der hohen T\xF6ne. Irgendwo dort oben, auf der schwebenden Insel, steht das Schloss der Kl\xE4nge \u2013 stumm und grau verhangen.", "Der Violinschl\xFCssel zeigt dir den Weg: Er ringelt sich um die Linie, auf der das g\xB9 wohnt."],
-        ["Unter der Br\xFCcke am mittleren c beginnt die Tiefe. Hier hat der Nebel die dunklen T\xF6ne versteckt.", "Der Bassschl\xFCssel ist dein Kompass: Seine zwei Punkte bewachen die Linie, auf der das kleine f wohnt."],
-        ["Hinter dem Meer liegt das Land der Zauberzeichen. Hier tr\xE4gt mancher Ton ein Zeichen: Das Kreuz hebt ihn einen halben Schritt, das b senkt ihn.", "Die schwarzen Tasten kennt der Nebel am wenigsten. Genau deshalb hat er sich hier verkrochen."],
-        ["Zwischen Himmel und Tiefe spannt sich die gr\xF6\xDFte aller Br\xFCcken: zwei Systeme \xFCbereinander, oben f\xFCr die rechte Hand, unten f\xFCr die linke.", "Genau in der Mitte, auf einer einzigen kleinen Linie, wohnt das mittlere c. Von dort aus erreichst du beide Welten."]
-      ];
-      WORLD_OUTRO = [
-        ["Das Schloss der Kl\xE4nge leuchtet wieder! Aus allen Fenstern klingt es \u2013 und die Notenwesen des Himmels tanzen auf den Linien.", "Doch aus der Tiefe steigt noch immer grauer Dunst. Unter dem mittleren c wartet der n\xE4chste Weg."],
-        ["Die Tiefe singt wieder. Vom h\xF6chsten Schloss bis zum Meeresgrund sind die Br\xFCcken zur\xFCck \u2013 und das mittlere c h\xE4lt beide Welten zusammen.", "Der Graue Nebel flieht dorthin, wo er sich am sichersten f\xFChlt: ins Land der Zauberzeichen."],
-        ["Mit dem letzten Ton zerrei\xDFt der Graue Nebel wie ein alter Vorhang. Dahinter: Farben, Stimmen, Musik.", "Das Klangreich ist frei. Und du kannst jetzt etwas, das dir niemand mehr nimmt: Du kannst Noten lesen.", "Die Notenwesen bleiben bei dir. Besuche sie in deiner Sammlung \u2013 und komm wieder, damit kein Ton je wieder verstummt."],
-        ["Beide H\xE4nde, beide Schl\xFCssel, eine Melodie: Die gro\xDFe Br\xFCcke tr\xE4gt. Wer hier hin\xFCberkommt, liest Klaviernoten so, wie sie wirklich im Heft stehen."]
-      ];
-      LEVEL_STORY = {
-        h1: "Zwei Notenwesen rufen leise durch den Nebel: das mittlere c und das g auf der Schl\xFCssel-Linie. Hol sie zur\xFCck!",
-        h2: "Zwischen c und g fehlt eine Stufe. Mit dem e baust du die erste Treppe in den Himmel.",
-        h3: "Der Nebel wirbelt die Noten durcheinander. Erkenne sie, bevor sie im Tor verschwinden!",
-        h4: "F\xFCnf Freunde, f\xFCnf T\xF6ne nebeneinander. Erst wenn alle da sind, h\xE4lt die Br\xFCcke.",
-        h5: "Jetzt baust du selbst: Schreib die Noten an ihren Platz, dann tr\xE4gt die Br\xFCcke.",
-        h6: "Je h\xF6her du steigst, desto d\xFCnner wird der Nebel. Das a und das h zeigen dir den Weg.",
-        h7: "Ein Wolkenbruch aus Noten! Bleib ruhig und lies genau.",
-        h8: "Ein Nebelw\xE4chter versperrt den Weg. Er weicht nur einer ganzen Melodie \u2013 spiel sie ihm vor!",
-        h9: "\xDCber der mittleren Linie beginnt die zweite Etage des Himmels.",
-        h10: "Die Notenwesen fl\xFCstern dir W\xF6rter zu. Schreib sie mit Noten auf!",
-        h11: "Fast oben: Die oberste Linie ist schon zu sehen.",
-        h12: "Der Nebel wehrt sich mit einem Sturm. Zeig ihm, wie schnell du lesen kannst.",
-        h13: "Der zweite W\xE4chter liebt die Stille. Eine Melodie voller Freude vertreibt ihn.",
-        h14: "\xDCber dem System geht es weiter \u2013 auf kleinen Hilfslinien, hoch \xFCber den Wolken.",
-        h15: "Der letzte W\xE4chter des Himmels steht vor dem Schloss. Ein altes Lied \xF6ffnet das Tor.",
-        t1: "Das mittlere c ist die Br\xFCcke zwischen oben und unten. Von hier steigst du hinab zum kleinen f.",
-        t2: "Stufe f\xFCr Stufe in die Tiefe. Die T\xF6ne werden dunkler, die Noten rutschen nach unten.",
-        t3: "Blubberblasen tragen Noten nach oben. Lies sie, bevor sie zerplatzen!",
-        t4: "In der Leuchtgrotte schimmern das a und das h.",
-        t5: "Auch unter Wasser brauchen die Wege Br\xFCcken. Schreib die Noten an ihren Platz.",
-        t6: "Kristallstufen f\xFChren weiter hinab. Zwei neue T\xF6ne warten.",
-        t7: "Ein Strudel rei\xDFt die Noten mit. Halte den Blick auf den Linien.",
-        t8: "Der W\xE4chter der Grotte schl\xE4ft. Weck ihn mit einem Lied, das jeder kennt.",
-        t9: "Die gro\xDFe Oktave: Hier wohnen die T\xF6ne mit den gro\xDFen Buchstaben.",
-        t10: "Tief unten wird gebaut. Die Notenwesen diktieren, du schreibst.",
-        t11: "Der Meeresgrund. Tiefer geht es nur noch auf Hilfslinien.",
-        t12: "Tiefenrausch! Der Nebel schickt alles, was er hat.",
-        t13: "Der W\xE4chter der Tiefe ist riesig und stumm. Das Lied der Tiefsee bringt ihn zum Klingen.",
-        z1: "Zwei Zauberzeichen: Das Kreuz macht aus f ein fis. Das b macht aus h ein b.",
-        z2: "Es regnet Zauberzeichen. Achte genau darauf, was vor der Note steht!",
-        z3: "Die schwarzen Tasten sind Geheimg\xE4nge. Der Nebel kennt sie nicht \u2013 du schon.",
-        z4: "Setz die Zeichen selbst: erst die Note, dann Kreuz oder b.",
-        z5: "Ein R\xE4tsel: Zwei verschiedene Namen, aber dieselbe Taste. gis und as sind Zwillinge.",
-        z6: "Der Nebel spr\xFCht Funken. Sein letzter Trick!",
-        z7: "Im Herzen des Nebels wartet der letzte W\xE4chter. Nur eine ber\xFChmte Melodie kann ihn l\xF6sen.",
-        b1: "Unten die linke Hand, oben die rechte. Die Br\xFCcke w\xE4chst nur, wenn beide mitbauen.",
-        b2: "Noten aus beiden Systemen wirbeln durcheinander. Schau genau hin: oben oder unten?",
-        b3: "Rund um das mittlere c liegen die T\xF6ne dicht beieinander \u2013 mal im oberen, mal im unteren System.",
-        b4: "Jetzt schreibst du selbst ins gro\xDFe System. Achte darauf, in welches der beiden die Note geh\xF6rt.",
-        b5: "Der W\xE4chter der gro\xDFen Br\xFCcke l\xE4sst nur durch, wer mit beiden H\xE4nden spielt."
-      };
-    }
-  });
-
   // src/screens.js
   var screens_exports = {};
   __export(screens_exports, {
@@ -4352,8 +4693,9 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     });
   }
   function newProf(app) {
-    let hero = 0, mode = "abenteuer";
-    const render = () => app.screen(`<h2>Neues Profil</h2><label class="fld">Dein Name<input id="pname" maxlength="14" autocomplete="off" value="${esc(app._pn || "")}"></label>
+    let hero = 0, mode = "abenteuer", instr = "klavier";
+    const render = () => app.screen(`<h2>Neues Profil</h2><div class="fld">Mein Instrument<div class="row instr">${INSTRUMENTS.map((i) => `<button class="btn opt ${instr === i.id ? "sel" : ""}" data-act="instr" data-v="${i.id}" aria-pressed="${instr === i.id}"><b>${i.name}</b></button>`).join("")}</div></div>
+    <label class="fld">Dein Name<input id="pname" maxlength="14" autocomplete="off" value="${esc(app._pn || "")}"></label>
     <div class="fld">Deine Figur<div class="heroes">${HEROES.map((h, i) => `<button class="hpick ${i === hero ? "sel" : ""}" data-act="hero" data-i="${i}" aria-label="Figur ${h.name}"><span data-hero="${i}" data-size="60"></span></button>`).join("")}</div></div>
     <div class="fld">So m\xF6chte ich spielen<div class="row"><button class="btn opt ${mode === "abenteuer" ? "sel" : ""}" data-act="mode" data-m="abenteuer"><b>Abenteuer</b><small>Mit mehr Tipps und ohne Zeitdruck</small></button>
     <button class="btn opt ${mode === "profi" ? "sel" : ""}" data-act="mode" data-m="profi"><b>Profi</b><small>Mit Stoppuhr, Serien und weniger Tipps</small></button></div></div>
@@ -4368,6 +4710,11 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         mode = e.dataset.m;
         render();
       },
+      instr: (e) => {
+        keep();
+        instr = e.dataset.v;
+        render();
+      },
       back: () => profiles(app),
       ok: () => {
         const name = document.getElementById("pname").value.trim();
@@ -4376,6 +4723,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
           return;
         }
         const p = newProfile(name, hero, mode);
+        if (instr !== "klavier") p.instr = instr;
         app.state.profiles.push(p);
         app.state.current = p.id;
         app._pn = "";
@@ -4406,17 +4754,17 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
           if (link) p = await importPayload(link[1]);
           else if (/^NB1\./.test(raw)) p = importCode(raw);
           else {
-            p = importShort(raw, worldIds());
+            p = importShort(raw, { klavier: idsOf(SETS.klavier), gitarre: idsOf(SETS.gitarre) });
             const nm = document.getElementById("codeName").value.trim();
             if (!nm) throw new Error("Bitte gib noch deinen Namen ein.");
             p.name = nm.slice(0, 14);
-            LEVELS.forEach((l) => {
+            SETS[p.instr || "klavier"].levels.forEach((l) => {
               if (p.levels[l.id] && l.type !== "regen") l.notes.forEach((k) => {
                 if (!p.creatures.includes(k)) p.creatures.push(k);
                 p.notes[k] = p.notes[k] || { box: 2, seen: 1, ok: 1 };
               });
             });
-            p.seenWorld = { 0: 1, 1: 1, 2: 1, 3: 1 };
+            p.seenWorld = { 0: 1, 1: 1, 2: 1, 3: 1, g0: 1, g1: 1, g2: 1, g3: 1 };
             p.calibrated = false;
           }
           const i = app.state.profiles.findIndex((q2) => q2.id === p.id);
@@ -4433,7 +4781,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     });
   }
   function askLevel(app) {
-    app.screen(`<h2>Kennst du schon Noten?</h2><p>Wer schon Noten lesen kann, muss nicht ganz vorne anfangen. Ein kurzer Test findet den passenden Einstieg: erst Noten benennen, dann am Klavier spielen. Halte dein Klavier bereit.</p>
+    app.screen(`<h2>Kennst du schon Noten?</h2><p>Wer schon Noten lesen kann, muss nicht ganz vorne anfangen. Ein kurzer Test findet den passenden Einstieg: erst Noten benennen, dann ${INSTR.at} spielen. ${INSTR.has}</p>
     <div class="row"><button class="btn opt" data-act="new"><b>Ich fange neu an</b><small>Los geht es mit den ersten zwei T\xF6nen</small></button><button class="btn opt go" data-act="test"><b>Ich kann schon etwas</b><small>Kurzer Test f\xFCr den richtigen Einstieg</small></button></div>`, { new: () => map(app), test: () => startPlacement(app, () => map(app)) });
   }
   async function startPlacement(app, then) {
@@ -4461,14 +4809,14 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       app.calib = null;
       const done = reached;
       if (done) {
-        p.skip = done.skip.map((v, i) => Math.max(v, (p.skip || [])[i] || 0));
+        p[SKIP_KEY] = done.skip.map((v, i) => Math.max(v, (p[SKIP_KEY] || [])[i] || 0));
         p.seenWorld = p.seenWorld || {};
       }
       app.save();
       track("einstufung-" + (done ? PLACEMENT.indexOf(done) + 1 : 0));
       const w = done ? done.skip[2] ? 2 : done.skip[1] ? 1 : 0 : 0, start2 = done ? levelsOf(w)[Math.min(done.skip[w], levelsOf(w).length) - 1] : null;
       app.screen(`<h2>${done ? "Dein Einstieg steht fest" : "Du startest am Anfang"}</h2><p class="lead">${done ? `Sicher gelesen${mic ? " und gespielt" : ""}: <b>${esc(done.name)}</b>.` : "Das macht nichts: Im ersten Level lernst du die Noten Schritt f\xFCr Schritt."}</p>
-      ${start2 ? `<p>Du kannst jetzt direkt bei <b>${esc(start2.title)}</b> in \u201E${esc(WORLDS[w].name)}\u201C einsteigen. Alle Level davor sind offen, falls du sie trotzdem spielen m\xF6chtest.</p>` : ""}${mic ? "" : '<p class="note warn">Ohne Mikrofon wurde nur das Lesen getestet, nicht das Spielen am Klavier.</p>'}<div class="row">${done && PLACEMENT.indexOf(done) >= 2 ? '<button class="btn" data-act="train">Direkt ins Training</button>' : ""}<button class="btn go" data-act="ok">Zur Karte</button></div>${done && PLACEMENT.indexOf(done) >= 2 ? '<p class="muted">Im Training \xFCbst du Tempo und Treffsicherheit, ohne Level und Geschichte.</p>' : ""}`, { ok: () => {
+      ${start2 ? `<p>Du kannst jetzt direkt bei <b>${esc(start2.title)}</b> in \u201E${esc(WORLDS[w].name)}\u201C einsteigen. Alle Level davor sind offen, falls du sie trotzdem spielen m\xF6chtest.</p>` : ""}${mic ? "" : '<p class="note warn">Ohne Mikrofon wurde nur das Lesen getestet, nicht das Spielen ${INSTR.at}.</p>'}<div class="row">${done && PLACEMENT.indexOf(done) >= 2 ? '<button class="btn" data-act="train">Direkt ins Training</button>' : ""}<button class="btn go" data-act="ok">Zur Karte</button></div>${done && PLACEMENT.indexOf(done) >= 2 ? '<p class="muted">Im Training \xFCbst du Tempo und Treffsicherheit, ohne Level und Geschichte.</p>' : ""}`, { ok: () => {
         if (done) p.lastWorld = w;
         then();
       }, train: () => {
@@ -4500,18 +4848,18 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
           mode = "play";
           qi = 0;
           right = 0;
-          fb = "Gut gelesen! Jetzt am Klavier.";
+          fb = `Gut gelesen! Jetzt ${INSTR.at}.`;
         } else return passed();
       }
       pick();
       render();
     };
     const render = () => {
-      const st = PLACEMENT[si], names = [...new Set((si === 5 ? [...st.notes, "f1", "h1", "c2", "e2", "g1", "a1", "d2"] : ["c1", "d1", "e1", "f1", "g1", "a1", "h1"]).map((k) => letterName(N(k))))].sort((a, b) => order.indexOf(a) - order.indexOf(b)), play = mode === "play";
+      const st = PLACEMENT[si], names = [...new Set((st.acc ? [...st.notes, "f1", "h1", "c2", "e2", "g1", "a1", "d2"] : ["c1", "d1", "e1", "f1", "g1", "a1", "h1"]).map((k) => letterName(N(k))))].sort((a, b) => order.indexOf(a) - order.indexOf(b)), play = mode === "play";
       const total = play ? PLAY_Q : PLACEMENT_Q, dots = Array.from({ length: total }, (_, k) => `<i class="${k < qi ? "on" : k === qi ? "now" : ""}"></i>`).join("");
       app.screen(`<div class="maphead"><small class="kicker">Einstufung \xB7 Stufe ${si + 1} von ${PLACEMENT.length} \xB7 ${esc(st.name)}</small>${asking ? `<span class="row tight"><b>Test wirklich abbrechen?</b><button class="btn sm" data-act="no">Nein, weiter</button><button class="btn sm danger" data-act="yes">Ja, abbrechen</button></span>` : '<button class="btn quiet" data-act="stop">\u2715 Test abbrechen</button>'}</div>
-      <h2>${play ? "Spiele diese Note auf dem Klavier" : "Wie hei\xDFt diese Note?"}</h2><div class="place"><div id="plStaff"></div><div><div class="dots small" role="img" aria-label="Frage ${qi + 1} von ${total}">${dots}</div><p class="note ${/^(Richtig|Gut|Stufe)/.test(fb) ? "ok" : "warn"}" role="status">${fb}</p>
-      <p class="muted">${play ? "Spiele die Note einmal, z\xFCgig, aber ohne Hektik. Die richtige Oktave z\xE4hlt. Danach kommt von selbst die n\xE4chste." : "Tippe unten den Namen an, z\xFCgig, aber ohne Hektik. Danach kommt von selbst die n\xE4chste Note."}</p></div></div>
+      <h2>${play ? `Spiele diese Note ${INSTR.onThe}` : "Wie hei\xDFt diese Note?"}</h2><div class="place"><div id="plStaff"></div><div><div class="dots small" role="img" aria-label="Frage ${qi + 1} von ${total}">${dots}</div><p class="note ${/^(Richtig|Gut|Stufe)/.test(fb) ? "ok" : "warn"}" role="status">${fb}</p>
+      <p class="muted">${play ? `Spiele die Note einmal, z\xFCgig, aber ohne Hektik. ${INSTR.octave} Danach kommt von selbst die n\xE4chste.` : "Tippe unten den Namen an, z\xFCgig, aber ohne Hektik. Danach kommt von selbst die n\xE4chste Note."}</p></div></div>
       ${play ? "" : `<div class="answers small">${names.map((n) => `<button class="btn ans" data-act="a" data-n="${n}">${n}</button>`).join("")}</div>`}`, {
         stop: () => {
           asking = true;
@@ -4569,8 +4917,8 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     p.seenWorld = p.seenWorld || {};
     const W = WORLDS[world];
     app.backdrop(W.theme);
-    if (!p.seenWorld[world]) {
-      p.seenWorld[world] = 1;
+    if (!p.seenWorld[seenKey(world)]) {
+      p.seenWorld[seenKey(world)] = 1;
       app.save();
       return story(app, WORLD_INTRO[world], () => map(app, world), W.theme);
     }
@@ -4601,12 +4949,12 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   function levelCard(app, level) {
     if (app.locked(level)) return paywall(app, level);
     const p = app.profile, needsPiano = level.type === "jump" || level.type === "boss", mic = app.audio.micState, keys = app.keysOn;
-    const how = { jump: "Lies die leuchtende Note und spiele sie auf dem Klavier. Die richtige Oktave z\xE4hlt!", boss: "Spiele die Melodie Note f\xFCr Note auf dem Klavier.", regen: "Tippe den Namen der leuchtenden Note, bevor sie das Tor erreicht. 60 Sekunden!", bau: "Schiebe die Note an die richtige Stelle und tippe auf \u201ESetzen\u201C." }[level.type];
+    const how = { jump: `Lies die leuchtende Note und spiele sie ${INSTR.onThe}. ${INSTR.octave}`, boss: `Spiele die Melodie Note f\xFCr Note ${INSTR.onThe}.`, regen: "Tippe den Namen der leuchtenden Note, bevor sie das Tor erreicht. 60 Sekunden!", bau: "Schiebe die Note an die richtige Stelle und tippe auf \u201ESetzen\u201C." }[level.type];
     let micLine = "";
-    if (needsPiano) micLine = keys ? '<p class="note">Du spielst mit den Bildschirm-Tasten.</p>' : mic === "on" ? '<p class="note ok">Mikrofon ist an.</p>' : mic === "off" ? '<p class="note">Stell dein Tablet aufs Klavier. Das Spiel fragt gleich nach dem Mikrofon.</p>' : `<p class="note warn">${mic === "denied" ? "Das Mikrofon wurde nicht erlaubt." : "Hier gibt es kein Mikrofon."} \xD6ffne den Link direkt in Safari oder Chrome und erlaube dort das Mikrofon. Bis dahin kannst du mit den Bildschirm-Tasten spielen.</p>`;
+    if (needsPiano) micLine = keys ? `<p class="note">Du spielst mit: ${INSTR.pad}.</p>` : mic === "on" ? '<p class="note ok">Mikrofon ist an.</p>' : mic === "off" ? `<p class="note">${INSTR.place} Das Spiel fragt gleich nach dem Mikrofon.</p>` : `<p class="note warn">${mic === "denied" ? "Das Mikrofon wurde nicht erlaubt." : "Hier gibt es kein Mikrofon."} \xD6ffne den Link direkt in Safari oder Chrome und erlaube dort das Mikrofon. Bis dahin kannst du ohne Mikrofon spielen (${INSTR.pad}).</p>`;
     const blocked = needsPiano && !keys && (mic === "denied" || mic === "unsupported");
     app.screen(`<small class="kicker">${esc(WORLDS[level.world].name)} \xB7 ${TYPE_LABEL[level.type]}</small><h2>${esc(level.title)}</h2><p class="lead">${esc(LEVEL_STORY[level.id] || "")}</p><p>${how}</p>${micLine}
-    <div class="row"><button class="btn" data-act="back">Zur\xFCck</button><button class="btn" data-act="book">Was bisher geschah</button>${blocked ? '<button class="btn go" data-act="keys">Mit Bildschirm-Tasten</button><button class="btn" data-act="go">Mikrofon nochmal versuchen</button>' : '<button class="btn go" data-act="go">Los!</button>'}</div>`, {
+    <div class="row"><button class="btn" data-act="back">Zur\xFCck</button><button class="btn" data-act="book">Was bisher geschah</button>${blocked ? `<button class="btn go" data-act="keys">Ohne Mikrofon: ${INSTR.pad}</button><button class="btn" data-act="go">Mikrofon nochmal versuchen</button>` : '<button class="btn go" data-act="go">Los!</button>'}</div>`, {
       back: () => map(app),
       book: () => storyBook(app, level, () => levelCard(app, level)),
       keys: () => {
@@ -4630,12 +4978,15 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     const p = app.profile, cents = [], peaks = [], g0 = app.audio.gain;
     let last = "Ich h\xF6re noch nichts.", peak = 0;
     app.audio.setA4(440);
-    app.audio.setGain(GAIN_PROBE);
+    app.audio.probe(true);
     const finish = (skip) => {
       app.calib = null;
+      app.audio.probe(false);
       if (!skip) {
         p.a4 = a4FromCents(cents);
         app.state.micGain = gainFor(peaks);
+        app.state.micRef = refFor(peaks);
+        app.audio.setRef(app.state.micRef);
       }
       app.audio.setGain(skip ? g0 : app.state.micGain);
       p.calibrated = true;
@@ -4643,12 +4994,13 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       app.save();
       then();
     };
-    const render = () => app.screen(`<h2>Klavier einstimmen</h2><p>Spiele dreimal nacheinander das <b>c<sup>1</sup></b> \u2013 das mittlere c. So stellt sich das Spiel auf dein Klavier ein.</p>
+    const tune = N(INSTR.tuneKey), tuneMidi = midiOf(tune), want = isGuitar() ? "die leere A-Saite" : "das mittlere c";
+    const render = () => app.screen(`<h2>${INSTR.name} einstimmen</h2><p>${INSTR.tune} So stellt sich das Spiel auf dein Instrument und dein Mikrofon ein.</p>${isGuitar() ? '<p class="muted">Wichtig: Die Gitarre sollte vorher gestimmt sein (Stimmger\xE4t oder Stimm-App), sonst erkennt das Spiel falsche T\xF6ne.</p>' : ""}
     <div class="calib"><div class="dots">${[0, 1, 2].map((i) => `<i class="${i < cents.length ? "on" : ""}"></i>`).join("")}</div><p id="calMsg" role="status">${last}</p><div class="meter big" id="calMeter" aria-hidden="true">${"<i></i>".repeat(12)}</div></div>
     <div class="row"><button class="btn quiet" data-act="skip">Ohne Einstimmen weiter</button></div>`, { skip: () => finish(true) });
     app.calib = {
       onNote(midi, ev) {
-        const dev = (midi - 60) * 100 + (ev ? ev.cents : 0);
+        const dev = (midi - tuneMidi) * 100 + (ev ? ev.cents : 0);
         if (Math.abs(dev) <= 80) {
           cents.push(dev);
           peaks.push(peak);
@@ -4657,13 +5009,13 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
           app.audio.sfx("ok");
           if (cents.length >= 3) {
             const c = Math.round(cents.slice().sort((a, b) => a - b)[1]);
-            last = Math.abs(c) < 8 ? "Dein Klavier ist gut gestimmt." : `Dein Klavier klingt ${Math.abs(c)} Cent ${c > 0 ? "h\xF6her" : "tiefer"}. Das ist gespeichert.`;
+            last = Math.abs(c) < 8 ? `${INSTR.tuned} ist gut gestimmt.` : `${INSTR.tuned} klingt ${Math.abs(c)} Cent ${c > 0 ? "h\xF6her" : "tiefer"}. Das ist gespeichert.`;
             render();
             app.calib = null;
             setTimeout(() => finish(false), 1600);
             return;
           }
-        } else last = `Das war ${nameStr(noteOfMidi(midi))} \u2013 ich brauche das mittlere c.`;
+        } else last = `Das war ${nameStr(noteOfMidi(midi))} \u2013 ich brauche ${want}.`;
         render();
       },
       level(rms) {
@@ -4683,9 +5035,10 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     app.audio.stopMusic();
     const g0 = app.audio.gain, peaks = [];
     let peak = 0, msg = "Spiele dreimal einen Ton \u2013 egal welchen, so laut wie du sonst spielst.", done = false;
-    app.audio.setGain(GAIN_PROBE);
+    app.audio.probe(true);
     const close = (ok) => {
       app.calib = null;
+      app.audio.probe(false);
       app.audio.setGain(ok ? app.state.micGain : g0);
       then();
     };
@@ -4701,10 +5054,13 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
           done = true;
           const g = gainFor(peaks);
           app.state.micGain = g;
+          app.state.micRef = refFor(peaks);
+          app.audio.setRef(app.state.micRef);
           app.save();
           msg = g > 1.2 ? `Eingestellt: Das Spiel h\xF6rt jetzt ${String(g).replace(".", ",")}-mal so empfindlich hin.` : "Eingestellt: Dein Mikrofon ist laut genug.";
           render();
           app.calib = null;
+          app.audio.probe(false);
           app.audio.setGain(g);
           setTimeout(() => {
             if (done && !document.getElementById("screen").hidden && document.getElementById("calMeter")) close(true);
@@ -4840,17 +5196,17 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   function board(app) {
     const rows = app.state.profiles.map((p) => ({ p, s: totalStars(p) })).sort((a, b) => b.s - a.s || b.p.regenBest - a.p.regenBest);
     app.screen(`<div class="maphead"><h2>Bestenliste auf diesem Ger\xE4t</h2><button class="btn sm" data-act="back">Zur\xFCck</button></div>
-    <table class="board"><thead><tr><th>Platz</th><th>Name</th><th>Sterne</th><th>Notenwesen</th><th>Notenregen-Rekord</th><th>Training (Noten pro Minute)</th><th>Tage in Folge</th></tr></thead><tbody>${rows.map((r, i) => `<tr class="${r.p.id === app.profile.id ? "me" : ""}"><td>${i + 1}.</td><td>${esc(r.p.name)}</td><td>${r.s}</td><td>${r.p.creatures.length}</td><td>${r.p.regenBest || "\u2013"}</td><td>${r.p.train && r.p.train[BOARD_DISC] && r.p.train[BOARD_DISC].best || "\u2013"}</td><td>${streak(r.p)}</td></tr>`).join("")}</tbody></table>
-    <p class="muted">Die Liste zeigt alle Profile, die auf diesem Ger\xE4t spielen. Training: Violinschl\xFCssel am Klavier, 60 Sekunden.</p>`, { back: () => map(app) }, "wide");
+    <table class="board"><thead><tr><th>Platz</th><th>Name</th><th>Sterne</th><th>Notenwesen</th><th>Notenregen-Rekord</th><th>Training (Noten pro Minute)</th><th>Tage in Folge</th></tr></thead><tbody>${rows.map((r, i) => `<tr class="${r.p.id === app.profile.id ? "me" : ""}"><td>${i + 1}.</td><td>${esc(r.p.name)}</td><td>${r.s}</td><td>${r.p.creatures.length}</td><td>${r.p.regenBest || "\u2013"}</td><td>${r.p.train && Math.max((r.p.train["play-treble-time"] || {}).best || 0, (r.p.train["play-gall-time"] || {}).best || 0) || "\u2013"}</td><td>${streak(r.p)}</td></tr>`).join("")}</tbody></table>
+    <p class="muted">Die Liste zeigt alle Profile, die auf diesem Ger\xE4t spielen. Training: 60 Sekunden am Instrument (Klavier: Violinschl\xFCssel, Gitarre: alle Saiten).</p>`, { back: () => map(app) }, "wide");
   }
   function settings(app, msg = "") {
     const p = app.profile, mic = { on: "an", off: "noch nicht eingeschaltet", denied: "nicht erlaubt", unsupported: "hier nicht verf\xFCgbar" }[app.audio.micState];
     const tg = (act, on, label2, hint) => `<button class="toggle ${on ? "on" : ""}" role="switch" aria-checked="${on}" data-act="${act}"><i></i><span><b>${label2}</b><small>${hint}</small></span></button>`;
     app.screen(`<div class="maphead"><h2>Einstellungen</h2><button class="btn sm" data-act="back">Zur\xFCck</button></div><div class="setgrid">
-    <div class="card"><h3>Spielen</h3>${tg("mode", p.mode === "profi", "Profi-Spielart", "Stoppuhr, Serien und weniger Tipps")}${tg("keys", p.keys, "Bildschirm-Tasten", "Ohne Klavier spielen: Tasten antippen")}${tg("mute", !app.audio.muted, "Ton", "Alles an oder aus: Musik, Spielkl\xE4nge, Erfolgsmelodie")}${tg("music", p.music !== false, "Titelmusik", "L\xE4uft nur in den Men\xFCs, nie im Level")}<button class="btn sm" data-act="song">Titelmusik: ${(SONGS[app.state.song] || SONGS.tanz).name} (wechseln)</button> <button class="btn sm" data-act="goal">Tagesziel: ${p.goal || 5} Minuten (\xE4ndern)</button></div>
-    <div class="card"><h3>Mikrofon</h3><p>Mikrofon: <b>${mic}</b></p><p>Kammerton: <b>${Math.round(p.a4 * 10) / 10} Hz</b></p><button class="btn sm" data-act="cal">Mikrofon testen und Klavier einstimmen</button> <button class="btn sm" data-act="lvl">Nur Pegel anpassen</button><p class="muted">Pegel: ${(app.state.micGain || 1) > 1.2 ? `${String(app.state.micGain).replace(".", ",")}-fach verst\xE4rkt` : "normal"} (gilt f\xFCr dieses Ger\xE4t)</p><h3>Einstieg</h3><button class="btn sm" data-act="place">Einstufung machen</button> <button class="btn sm" data-act="info">Info und Datenschutz</button></div>
+    <div class="card"><h3>Spielen</h3>${tg("mode", p.mode === "profi", "Profi-Spielart", "Stoppuhr, Serien und weniger Tipps")}${tg("keys", p.keys, INSTR.pad, INSTR.padDesc)}${tg("mute", !app.audio.muted, "Ton", "Alles an oder aus: Musik, Spielkl\xE4nge, Erfolgsmelodie")}${tg("music", p.music !== false, "Titelmusik", "L\xE4uft nur in den Men\xFCs, nie im Level")}<button class="btn sm" data-act="song">Titelmusik: ${(SONGS[app.state.song] || SONGS.tanz).name} (wechseln)</button> <button class="btn sm" data-act="goal">Tagesziel: ${p.goal || 5} Minuten (\xE4ndern)</button> <button class="btn sm" data-act="instr">Instrument: ${INSTR.name} (wechseln)</button></div>
+    <div class="card"><h3>Mikrofon</h3><p>Mikrofon: <b>${mic}</b></p><p>Kammerton: <b>${Math.round(p.a4 * 10) / 10} Hz</b></p><button class="btn sm" data-act="cal">Mikrofon testen und ${INSTR.name} einstimmen</button> <button class="btn sm" data-act="lvl">Nur Pegel anpassen</button><p class="muted">Pegel: ${(app.state.micGain || 1) > 1.2 ? `${String(app.state.micGain).replace(".", ",")}-fach verst\xE4rkt` : "normal"} (gilt f\xFCr dieses Ger\xE4t)</p><h3>Einstieg</h3><button class="btn sm" data-act="place">Einstufung machen</button> <button class="btn sm" data-act="info">Info und Datenschutz</button></div>
     ${accountsOn() ? `<div class="card"><h3>Konto</h3>${p.acct ? `<p>Angemeldet als <b>${esc(p.acct.name)}</b>.</p><p class="muted">${p.acct.expired ? "Bitte neu anmelden." : p.acct.err ? "Noch nicht gesichert \u2013 das Spiel versucht es sp\xE4ter nochmal." : `Online gesichert ${ago(p.acct.at)}.`}</p>` : "<p>Sichere deinen Spielstand online und spiele auf jedem Ger\xE4t weiter.</p>"}<button class="btn sm ${p.acct ? "" : "go"}" data-act="acc">${p.acct ? "Konto verwalten" : "Konto anlegen oder anmelden"}</button></div>` : ""}
-    <div class="card"><h3>Spielstand mitnehmen</h3><p>Dein Kurzcode zum Aufschreiben:</p><p class="shortcode" aria-label="Kurzcode">${exportShort(p, worldIds())}</p><p class="muted">Der Kurzcode merkt sich, wie weit du bist. Alles (Name, Sterne, \xDCbungspass) steckt im QR-Code.</p><button class="btn sm" data-act="exp">QR-Code und Link</button> <button class="btn sm" data-act="imp">Code eingeben</button></div>
+    <div class="card"><h3>Spielstand mitnehmen</h3><p>Dein Kurzcode zum Aufschreiben:</p><p class="shortcode" aria-label="Kurzcode">${exportShort(p, worldIds(), LEVEL_SET)}</p><p class="muted">Der Kurzcode merkt sich, wie weit du bist. Alles (Name, Sterne, \xDCbungspass) steckt im QR-Code.</p><button class="btn sm" data-act="exp">QR-Code und Link</button> <button class="btn sm" data-act="imp">Code eingeben</button></div>
     <div class="card"><h3>F\xFCr Lehrkr\xE4fte</h3>${tg("unlock", p.unlockAll, "Alle Level freischalten", "Zum gezielten \xDCben einzelner Noten")}<button class="btn sm ${app._del ? "danger" : ""}" data-act="del">${app._del ? "Wirklich l\xF6schen? Nochmal tippen" : "Dieses Profil l\xF6schen"}</button>${CONFIG.shop ? `<h3>Vollversion</h3><p>${app.licensed ? app.license.until ? `Abo aktiv bis ${app.license.until.toLocaleDateString("de-DE")}` : "Freigeschaltet (Einmalkauf)" : "Noch nicht freigeschaltet"}</p>${app.licensed ? "" : '<button class="btn sm" data-act="buy">Vollversion ansehen</button>'}` : ""}</div></div><p class="note" role="status">${msg}</p>`, {
       back: () => {
         app._del = false;
@@ -4869,6 +5225,15 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       mute: () => {
         app.setMuted(!app.audio.muted);
         settings(app);
+      },
+      instr: () => {
+        if (isGuitar()) delete p.instr;
+        else p.instr = "gitarre";
+        p.calibrated = false;
+        p.lastWorld = 0;
+        app.save();
+        app.applyProfile();
+        settings(app, `Instrument: ${INSTR.name}. Dein Fortschritt f\xFCr jedes Instrument bleibt getrennt erhalten.`);
       },
       song: () => {
         const ks = Object.keys(SONGS);
@@ -5020,7 +5385,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   }
   function about(app, back) {
     app.screen(`<div class="maphead"><h2>Info und Datenschutz</h2><button class="btn sm" data-act="back">Zur\xFCck</button></div><div class="book">
-    <h3>Die Notenbr\xFCcke</h3><p>Ein Lernspiel zum Notenlesen am Klavier. Version ${VERSION}${CONFIG.shop ? " \xB7 Kauf-Fassung" : " \xB7 Test-Fassung"}.</p>
+    <h3>Die Notenbr\xFCcke</h3><p>Ein Lernspiel zum Notenlesen am Klavier und auf der Gitarre. Version ${VERSION}${CONFIG.shop ? " \xB7 Kauf-Fassung" : " \xB7 Test-Fassung"}.</p>
     <h3>Datenschutz in K\xFCrze</h3><p><b>Mikrofon:</b> Das Spiel wertet den Ton direkt auf diesem Ger\xE4t aus, um die gespielte Note zu erkennen. Es wird nichts aufgenommen, gespeichert oder \xFCbertragen.</p>
     <p><b>Spielst\xE4nde ohne Konto:</b> Name, Fortschritt und \xDCbungszeiten liegen nur im Browser dieses Ger\xE4ts. Sie verlassen das Ger\xE4t nur, wenn du selbst einen Code, QR-Code oder Link weitergibst.</p>
     ${CONFIG.apiUrl ? `<p><b>Mit Konto (freiwillig):</b> Gespeichert werden Benutzername, Passwort (nur verschl\xFCsselt, als nicht umkehrbarer Hash), auf Wunsch eine E-Mail-Adresse sowie der Spielstand (Fortschritt, \xDCbungszeiten, Einstellungen). Die Daten liegen in einer Datenbank beim Dienst Cloudflare und sind nur f\xFCr die Lehrkraft einsehbar, die das Spiel betreibt. Sie werden nicht weitergegeben. Das Konto kann jederzeit \xFCber die Lehrkraft gel\xF6scht werden. Es werden keine Cookies verwendet.</p>
@@ -5029,7 +5394,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     <h3>Verantwortlich</h3><p>Die Angaben zum Anbieter werden vor der allgemeinen Ver\xF6ffentlichung erg\xE4nzt. Fragen bitte an die Lehrkraft, von der du den Link bekommen hast.</p>
     <h3>Quellen</h3><p>Schriften: Atkinson Hyperlegible und Press Start 2P (SIL Open Font License). Notenschl\xFCssel aus Noto Music (SIL Open Font License). QR-Code: qrcode-generator (MIT-Lizenz). Musik und Grafik entstanden eigens f\xFCr dieses Spiel. Die Melodien in den Leveln sind \xFCberlieferte Lieder sowie Werke von Beethoven.</p></div>`, { back }, "wide");
   }
-  var worldIds, esc, stars, safeN, VERSION;
+  var idsOf, worldIds, seenKey, esc, stars, safeN, VERSION;
   var init_screens = __esm({
     "src/screens.js"() {
       init_music();
@@ -5043,6 +5408,8 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       init_accountui();
       init_account();
       init_training();
+      init_instrument();
+      init_levels();
       init_stats();
       init_music();
       init_levels();
@@ -5051,7 +5418,9 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       init_pitch();
       init_story();
       init_jump();
-      worldIds = () => WORLDS.map((w, i) => levelsOf(i).map((l) => l.id));
+      idsOf = (set) => set.worlds.map((w, i) => set.levels.filter((l) => l.world === i).map((l) => l.id));
+      worldIds = () => idsOf(SETS[LEVEL_SET]);
+      seenKey = (world) => (isGuitar() ? "g" : "") + world;
       esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
       stars = (n, cls = "") => `<span class="stars ${cls}" role="img" aria-label="${n} von 3 Sternen">${[0, 1, 2].map((i) => `<i class="${i < n ? "on" : ""}"></i>`).join("")}</span>`;
       safeN = (k) => {
@@ -5061,7 +5430,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
           return null;
         }
       };
-      VERSION = "2.7 \xB7 23.11.2026";
+      VERSION = "2.8 \xB7 26.11.2026";
     }
   });
 
@@ -5081,9 +5450,9 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     app.backdrop("himmel");
     const p = app.profile, full = !(CONFIG.shop && !app.licensed), weakN = weakNotes(p).length;
     let cfg = normalize({ ...p.trainCfg || {}, ...preset || {} });
-    const fix = () => {
+    const R0 = RANGES[INSTR.id][0], fix = () => {
       if (!full) {
-        cfg.range = "treble";
+        cfg.range = R0;
         cfg.acc = false;
         cfg.weak = false;
       }
@@ -5110,15 +5479,16 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     const seg = (act, v, on, title2, sub, o = {}) => `<button class="btn opt seg ${on ? "sel" : ""}" data-act="${act}" data-v="${v}" ${o.dis ? "disabled" : ""} aria-pressed="${on}"><b>${title2}</b><small>${o.lock ? "Nur in der Vollversion" : sub}</small></button>`;
     const render = () => {
       const mic = app.audio.micState, keys = app.keysOn, play = cfg.input === "play", blocked = play && !keys && (mic === "denied" || mic === "unsupported"), d = disc(cfg), t = d && p.train && p.train[d], accOff = cfg.range === "bass" || cfg.weak;
-      const micLine = !play ? "" : keys ? '<p class="note">Du spielst mit den Bildschirm-Tasten.</p>' : mic === "on" ? '<p class="note ok">Mikrofon ist an.</p>' : mic === "off" ? '<p class="note">Stell dein Ger\xE4t aufs Klavier. Das Spiel fragt gleich nach dem Mikrofon.</p>' : `<p class="note warn">${mic === "denied" ? "Das Mikrofon wurde nicht erlaubt." : "Hier gibt es kein Mikrofon."} Du kannst mit den Bildschirm-Tasten spielen oder \u201ENamen antippen\u201C w\xE4hlen.</p>`;
+      const micLine = !play ? "" : keys ? `<p class="note">Du spielst mit: ${INSTR.pad}.</p>` : mic === "on" ? '<p class="note ok">Mikrofon ist an.</p>' : mic === "off" ? `<p class="note">${INSTR.place} Das Spiel fragt gleich nach dem Mikrofon.</p>` : `<p class="note warn">${mic === "denied" ? "Das Mikrofon wurde nicht erlaubt." : "Hier gibt es kein Mikrofon."} Du kannst ohne Mikrofon spielen (${INSTR.pad}) oder \u201ENamen antippen\u201C w\xE4hlen.</p>`;
       const rec = cfg.weak ? "Hier geht es nur ums \xDCben: Wackelnoten-Runden z\xE4hlen nicht als Rekord." : t && t.best ? `Dein Rekord hier: <b>${t.best}</b> Noten pro Minute.` : "Hier hast du noch keinen Rekord.";
       app.screen(`<div class="maphead"><div><small class="kicker">Tempo und Treffsicherheit</small><h2>Training</h2></div><button class="btn sm" data-act="back">Zur\xFCck</button></div>
-      <h3 class="segq">1. Wie antwortest du?</h3><div class="segrow c2">${seg("in", "play", play, "Am Klavier spielen", "Mit Mikrofon \u2013 die richtige Oktave z\xE4hlt")}${seg("in", "name", !play, "Namen antippen", "Ohne Klavier, nur lesen")}</div>
-      <h3 class="segq">2. Welche Noten?</h3><div class="segrow c4">${seg("range", "treble", !cfg.weak && cfg.range === "treble", "Violinschl\xFCssel", "c<sup>1</sup> bis a<sup>2</sup>")}${seg("range", "bass", !cfg.weak && cfg.range === "bass", "Bassschl\xFCssel", "C bis c<sup>1</sup>", { lock: !full })}${seg("range", "both", !cfg.weak && cfg.range === "both", "Beide Schl\xFCssel", "Die Schl\xFCssel wechseln", { lock: !full })}${seg("range", "weak", cfg.weak, "Meine Wackelnoten", weakN >= WEAK_MIN ? `${weakN} Noten, die noch nicht sitzen` : "Erst ab 3 unsicheren Noten", { dis: full && weakN < WEAK_MIN, lock: !full })}</div>
-      <button class="toggle ${cfg.acc ? "on" : ""}" data-act="acc" role="switch" aria-checked="${cfg.acc}" ${accOff ? "disabled" : ""}><i></i><span><b>Mit Vorzeichen (\u266F und \u266D)</b><small>${!full ? "Nur in der Vollversion" : accOff ? "Gibt es bisher nur im Violinschl\xFCssel" : "Kreuze und Bes aus dem Land der Zauberzeichen"}</small></span></button>
+      <h3 class="segq">1. Wie antwortest du?</h3><div class="segrow c2">${seg("in", "play", play, INSTR.play, isGuitar() ? "Mit Mikrofon \u2013 die richtige Saite z\xE4hlt" : "Mit Mikrofon \u2013 die richtige Oktave z\xE4hlt")}${seg("in", "name", !play, "Namen antippen", "Ohne Klavier, nur lesen")}</div>
+      <h3 class="segq">2. Welche Noten?</h3>${isGuitar() ? `<div class="segrow c4">${[["g0", "e-Saite und h-Saite"], ["g1", "g-Saite und d-Saite"], ["g2", "A-Saite und E-Saite"], ["gall", "Alle 17 T\xF6ne"]].map(([v, sub], i) => seg("range", v, !cfg.weak && cfg.range === v, rangeLabel(v), sub, { lock: !full && i > 0 })).join("")}</div>
+      <button class="toggle ${cfg.weak ? "on" : ""}" data-act="range" data-v="${cfg.weak ? cfg.range : "weak"}" role="switch" aria-checked="${cfg.weak}" ${full && weakN < WEAK_MIN ? "disabled" : ""}><i></i><span><b>Nur meine Wackelnoten</b><small>${!full ? "Nur in der Vollversion" : weakN >= WEAK_MIN ? `${weakN} Noten, die noch nicht sitzen` : "Erst ab 3 unsicheren Noten"}</small></span></button>` : `<div class="segrow c4">${seg("range", "treble", !cfg.weak && cfg.range === "treble", "Violinschl\xFCssel", "c<sup>1</sup> bis a<sup>2</sup>")}${seg("range", "bass", !cfg.weak && cfg.range === "bass", "Bassschl\xFCssel", "C bis c<sup>1</sup>", { lock: !full })}${seg("range", "both", !cfg.weak && cfg.range === "both", "Beide Schl\xFCssel", "Die Schl\xFCssel wechseln", { lock: !full })}${seg("range", "weak", cfg.weak, "Meine Wackelnoten", weakN >= WEAK_MIN ? `${weakN} Noten, die noch nicht sitzen` : "Erst ab 3 unsicheren Noten", { dis: full && weakN < WEAK_MIN, lock: !full })}</div>
+      <button class="toggle ${cfg.acc ? "on" : ""}" data-act="acc" role="switch" aria-checked="${cfg.acc}" ${accOff ? "disabled" : ""}><i></i><span><b>Mit Vorzeichen (\u266F und \u266D)</b><small>${!full ? "Nur in der Vollversion" : accOff ? "Gibt es bisher nur im Violinschl\xFCssel" : "Kreuze und Bes aus dem Land der Zauberzeichen"}</small></span></button>`}
       <h3 class="segq">3. Wie lange?</h3><div class="segrow c2">${seg("len", "time", cfg.len === "time", "60 Sekunden", "So viele Noten wie m\xF6glich")}${seg("len", "count", cfg.len === "count", "20 Noten", "In Ruhe \u2013 die Uhr l\xE4uft nur mit")}</div>
       <p class="note" id="trainRec">${rec}</p>${micLine}
-      <div class="row stick">${blocked ? '<button class="btn go" data-act="keys">Mit Bildschirm-Tasten</button><button class="btn" data-act="go">Mikrofon nochmal versuchen</button>' : '<button class="btn go big" data-act="go">Los!</button>'}</div>`, {
+      <div class="row stick">${blocked ? `<button class="btn go" data-act="keys">Ohne Mikrofon: ${INSTR.pad}</button><button class="btn" data-act="go">Mikrofon nochmal versuchen</button>` : '<button class="btn go big" data-act="go">Los!</button>'}</div>`, {
         back,
         go: () => go(false),
         keys: () => go(true),
@@ -5134,7 +5504,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         },
         range: (e) => {
           const v = e.dataset.v;
-          if (!full && v !== "treble") return paywall(app, null);
+          if (!full && v !== R0) return paywall(app, null);
           if (v === "weak") cfg.weak = true;
           else {
             cfg.weak = false;
@@ -5192,7 +5562,8 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       init_config();
       init_music();
       init_training();
-      THEME = { treble: "himmel", bass: "tiefe", both: "abend" };
+      init_instrument();
+      THEME = { treble: "himmel", bass: "tiefe", both: "abend", g0: "himmel", g1: "zauber", g2: "tiefe", gall: "abend" };
       sec = (ms) => (ms / 1e3).toFixed(1).replace(".", ",");
     }
   });
@@ -5229,10 +5600,13 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   // src/main.js
   init_stats();
   init_account();
+  init_instrument();
+  init_music();
   init_audio();
 
   // src/panel.js
   init_music();
+  init_instrument();
   var WHITE = [0, 2, 4, 5, 7, 9, 11];
   var BLACK_AFTER = [0, 1, 3, 4, 5];
   var Panel = class {
@@ -5283,7 +5657,43 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       this.keys.clear();
       this.heard = this.hint = null;
     }
+    /** Griffbrett wie im Gitarrenheft: Sattel oben, Saiten von links (tiefe E-Saite) nach rechts (hohe e-Saite), darunter der 1. bis 3. Bund. */
+    fretboard() {
+      this.clear();
+      const fb = document.createElement("div");
+      fb.className = "fb";
+      fb.setAttribute("role", "group");
+      fb.setAttribute("aria-label", "Griffbrett");
+      const add = (cls, html) => {
+        const e = document.createElement("span");
+        e.className = cls;
+        e.innerHTML = html;
+        fb.appendChild(e);
+        return e;
+      };
+      add("fn", "");
+      STRING_SHORT.forEach((s) => add("sn", s));
+      for (let f = 0; f <= FRETS; f++) {
+        add("fn", f ? f + "." : "leer");
+        for (let s = 0; s < 6; s++) {
+          const midi = OPEN[s] + f, k = document.createElement("button");
+          k.className = "fc" + (f ? "" : " open");
+          k.style.setProperty("--sw", [6, 5, 4, 3, 2, 2][s] + "px");
+          k.innerHTML = `<i>${f || ""}</i>`;
+          k.setAttribute("aria-label", `${STRING_SHORT[s]}-Saite, ${f ? f + ". Bund" : "leer"}`);
+          k.tabIndex = -1;
+          k.addEventListener("pointerdown", (e) => {
+            e.preventDefault();
+            this.app.keyTap(midi);
+          });
+          this.keys.set(midi, k);
+          fb.appendChild(k);
+        }
+      }
+      this.right.appendChild(fb);
+    }
     keyboard(clef) {
+      if (isGuitar()) return this.fretboard();
       this.clear();
       const base = clef === "bass" ? 36 : clef === "grand" ? 48 : 60;
       const kb = document.createElement("div");
@@ -5468,6 +5878,10 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       }
       this.hudUpdate();
     }
+    /** Schmaler Bildschirm (hochkant): Der Weg bis zum Tor ist kürzer – die Noten fliegen entsprechend langsamer, damit gleich viel Zeit zum Lesen bleibt. */
+    narrow() {
+      return Math.max(0.45, Math.min(1, (VIEW_W - GATE) / 268));
+    }
     update(dt) {
       this.t += dt;
       this.parts.update(dt);
@@ -5495,7 +5909,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         }
         return;
       }
-      for (const n of this.notes) n.x -= this.speed * dt;
+      for (const n of this.notes) n.x -= this.speed * this.narrow() * dt;
       const a = this.active;
       if (a && a.x <= GATE) {
         a.x = GATE;
@@ -5550,7 +5964,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       this.line = THEMES[level.theme].line;
       const ps = level.notes.map((k) => staffPos(N(k), this.clef));
       const g = this.clef === "grand";
-      this.minPos = Math.max(g ? -8 : -4, Math.min(...ps) - 2);
+      this.minPos = Math.max(g ? -8 : Math.min(-4, Math.min(...ps) - 1), Math.min(...ps) - 2);
       this.maxPos = Math.min(g ? 16 : 12, Math.max(...ps) + 2);
       this.tasks = this.buildTasks();
       this.ti = 0;
@@ -5690,6 +6104,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   init_srs();
   init_training();
   init_gfx();
+  init_instrument();
   init_text();
   var COUNTDOWN = 3;
   var NOTE_X = 150;
@@ -5712,6 +6127,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       this.theme = level.theme;
       this.bg = app.background(level.theme);
       this.line = THEMES[level.theme].line;
+      app.bubbleSide(this.pool.some((e) => staffPos(N(e.key), e.clef) <= -5));
       this.t = 0;
       this.count = COUNTDOWN;
       this.elapsed = 0;
@@ -5736,12 +6152,12 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         const names = [...new Set(this.pool.map((e) => letterName(N(e.key))))].sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
         app.panel.answers(names, (l, btn) => this.answer(l, btn));
       }
-      app.panel.task(cfg.input === "name" ? "Tippe <b>unten den Namen</b> jeder Note \u2013 so schnell du kannst." : app.listening ? "Spiele jede Note <b>auf deinem Klavier</b> \u2013 so schnell du kannst." : "Tippe jede Note <b>unten auf der Tastatur</b> \u2013 so schnell du kannst.");
+      app.panel.task(cfg.input === "name" ? "Tippe <b>unten den Namen</b> jeder Note \u2013 so schnell du kannst." : app.listening ? `Spiele jede Note <b>${INSTR.on}</b> \u2013 so schnell du kannst.` : `Tippe jede Note <b>${INSTR.padWhere}</b> \u2013 so schnell du kannst.`);
       app.hud.show(level.title, true);
       app.hud.progress(0, cfg.len === "count" ? TRAIN_COUNT : 0);
       this.advance();
       this.hudUpdate();
-      if (cfg.input === "play") app.panel.say(app.listening ? "Ich h\xF6re \u2026" : "Bildschirm-Tasten", "Gleich geht es los.");
+      if (cfg.input === "play") app.panel.say(app.listening ? "Ich h\xF6re \u2026" : INSTR.pad, "Gleich geht es los.");
       app.bubble(cfg.input === "play" ? "Spiele jede Note einmal \u2013 so viele wie m\xF6glich!" : "Tippe den Namen jeder Note \u2013 so viele wie m\xF6glich!", COUNTDOWN);
     }
     /** Nächste Note: unsichere kommen öfter; nie dieselbe (oder gleich klingende) zweimal hintereinander. */
@@ -5795,7 +6211,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       this.hop = 1;
       if (cfg.input === "play") {
         app.panel.flash(midi, "good");
-        app.panel.say(app.listening ? "Ich h\xF6re \u2026" : "Bildschirm-Tasten", `<b>${nameHtml(c.n)}</b> \u2013 richtig!`, "ok");
+        app.panel.say(app.listening ? "Ich h\xF6re \u2026" : INSTR.pad, `<b>${nameHtml(c.n)}</b> \u2013 richtig!`, "ok");
       }
       if (cfg.len === "count" && this.correct >= TRAIN_COUNT) {
         this.hudUpdate();
@@ -5829,7 +6245,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       const heard = noteOfMidi(midi, c.n.alt < 0);
       this.miss(heard.key);
       app.panel.flash(midi, "bad");
-      app.panel.say(app.listening ? "Ich h\xF6re \u2026" : "Bildschirm-Tasten", cls === "wrong" ? `Das war <b>${nameHtml(heard)}</b>.` : `Eine Oktave zu ${cls === "octave-high" ? "hoch" : "tief"}.`, "warn");
+      app.panel.say(app.listening ? "Ich h\xF6re \u2026" : INSTR.pad, cls === "wrong" ? `Das war <b>${nameHtml(heard)}</b>.` : `Eine Oktave zu ${cls === "octave-high" ? "hoch" : "tief"}.`, "warn");
     }
     /** Antwortknopf (Namen antippen). */
     answer(l, btn) {
@@ -5856,7 +6272,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         this.count -= dt;
         if (this.count <= 0) {
           this.noteStart = 0;
-          if (this.cfg.input === "play") this.app.panel.say(this.app.listening ? "Ich h\xF6re \u2026" : "Bildschirm-Tasten", "Los!");
+          if (this.cfg.input === "play") this.app.panel.say(this.app.listening ? "Ich h\xF6re \u2026" : INSTR.pad, "Los!");
         }
         return;
       }
@@ -5916,7 +6332,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       drawBackground(ctx, this.bg, this.t * 7, this.t);
       const H = this.app.heroFrames;
       if (!H) return;
-      const cyc = this.t % 24, walking = cyc < 9 || cyc >= 12 && cyc < 21, back = cyc >= 12, x = cyc < 9 ? 30 + cyc * 22 : cyc < 12 ? 228 : cyc < 21 ? 228 - (cyc - 12) * 22 : 30;
+      const cyc = this.t % 24, walking = cyc < 9 || cyc >= 12 && cyc < 21, back = cyc >= 12, far = Math.max(60, Math.min(228, VIEW_W - 92)), v = (far - 30) / 9, x = cyc < 9 ? 30 + cyc * v : cyc < 12 ? far : cyc < 21 ? far - (cyc - 12) * v : 30;
       const f = walking ? Math.floor(this.t * 7) % 2 ? H.run1 : H.run0 : cyc < 12 ? Math.floor(this.t * 4) % 2 ? H.wave0 : H.wave1 : Math.floor(this.t * 1.6) % 2 ? H.idle1 : H.idle0;
       this.app.drawBuddy(ctx, this, back && walking ? x + 30 : x - 12, 108, this.t, walking ? 0 : Math.abs(Math.sin(this.t * 4)) * 3);
       if (back && walking) {
@@ -6019,8 +6435,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         if (!this.scene || !this.scene.pointer || this.paused) return;
         const r = this.world.getBoundingClientRect();
         const u = (e.clientX - r.left) / r.width, v = (e.clientY - r.top) / r.height;
-        if (this.rot) this.scene.pointer(v * VIEW_W, (1 - u) * this.H / 4);
-        else this.scene.pointer(u * VIEW_W, v * this.H / 4);
+        this.scene.pointer(u * VIEW_W, (v * this.H - this.top) / 4);
       };
       $("stage").addEventListener("pointerdown", (e) => {
         if (e.target.closest("#panel,#screen,#hud")) return;
@@ -6062,22 +6477,24 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         }
       });
       const fit = () => {
-        const w = window.innerWidth, h = window.innerHeight, rot = w < h, lw = rot ? h : w, lh = rot ? w : h, a = lw / lh;
-        const W = a >= 1.6 ? Math.round(Math.min(1920, Math.max(1280, 800 * a)) / 4) * 4 : 1280, H = a >= 1.6 ? 800 : Math.min(1e3, Math.round(1280 / a));
-        if (W !== this.W || H !== this.H) this.resizeStage(W, H);
-        const s = Math.min(lw / W, lh / H);
-        const was = this.rot;
-        this.rot = rot;
-        $("stage").classList.toggle("phone", s < 0.62);
-        $("stage").style.transform = `translate(-50%,-50%) ${rot ? "rotate(90deg) " : ""}scale(${s})`;
-        const el = $("rotate");
-        if (rot && !was) {
-          el.hidden = false;
-          clearTimeout(this._rotT);
-          this._rotT = setTimeout(() => {
-            el.hidden = true;
-          }, 6e3);
-        } else if (!rot) el.hidden = true;
+        const w = window.innerWidth, h = window.innerHeight, port = w < h, st = $("stage");
+        let W, H, top = 0;
+        if (port) {
+          const a = h / w;
+          W = Math.round(Math.min(960, Math.max(720, 1170 / a)) / 4) * 4;
+          top = W >= 860 ? 84 : 152;
+          H = Math.max(top + 840, Math.min(1720, Math.round(W * a)));
+        } else {
+          const a = w / h;
+          W = a >= 1.6 ? Math.round(Math.min(1920, Math.max(1280, 800 * a)) / 4) * 4 : 1280;
+          H = a >= 1.6 ? 800 : Math.min(1e3, Math.round(1280 / a));
+        }
+        if (W !== this.W || H !== this.H || top !== this.top) this.resizeStage(W, H, top, port);
+        const s = Math.min(w / W, h / H);
+        this.rot = false;
+        this.port = port;
+        st.classList.toggle("phone", s < 0.62);
+        st.style.transform = `translate(-50%,-50%) scale(${s})`;
       };
       window.addEventListener("orientationchange", () => setTimeout(fit, 250));
       window.addEventListener("resize", fit);
@@ -6184,12 +6601,19 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         this.buddySure = st === 2;
       }
     }
-    resizeStage(W, H) {
+    resizeStage(W, H, top = 0, port = false) {
       this.W = W;
       this.H = H;
-      const st = this.$("stage");
+      this.top = top;
+      const st = this.$("stage"), ph = H - 600 - top;
       st.style.width = W + "px";
       st.style.height = H + "px";
+      st.style.setProperty("--wy", top + "px");
+      st.style.setProperty("--H", H);
+      st.style.setProperty("--ksy", Math.max(1, Math.min(2.8, (ph - 290) / 150)).toFixed(2));
+      st.classList.toggle("port", port);
+      st.classList.toggle("pbig", port && ph >= 700);
+      st.classList.toggle("hud2", port && top > 100);
       for (const c of [this.world, this.$("text")]) {
         c.width = W;
         c.height = H;
@@ -6199,13 +6623,17 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       this.ctx.setTransform(4, 0, 0, 4, 0, 0);
       this.ctx.imageSmoothingEnabled = false;
       setViewW(W / 4);
-      this.$("panel").style.height = H - 600 + "px";
-      st.classList.toggle("tall", H - 600 >= 300);
+      this.$("panel").style.top = 600 + top + "px";
+      this.$("panel").style.height = ph + "px";
+      st.classList.toggle("tall", !port && ph >= 300);
     }
     applyProfile() {
       const p = this.profile;
+      setInstr(p ? p.instr : "klavier");
+      this.audio.shift = INSTR.shift;
       this.refreshLook();
       this.audio.muted = !!this.state.muted;
+      this.audio.setRef(this.state.micRef || (this.state.micGain ? GAIN_TARGET / this.state.micGain : 0));
       this.audio.setGain(this.state.micGain || 1);
       this.audio.song = this.state.song || "tanz";
       if (p) {
@@ -6324,12 +6752,17 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       }, 2400);
       this.hudCr();
     }
+    /** Hinweis-Blase oben statt unten zeigen (wenn unten tiefe Noten stehen, z. B. auf den tiefen Gitarrensaiten). */
+    bubbleSide(top) {
+      this.$("bubble").classList.toggle("top", !!top);
+    }
     runLevel(level) {
       this.closeScreen();
       this.paused = false;
       this.calib = null;
       this.bubble(null);
       this.hud.extra("");
+      this.bubbleSide((level.notes || []).some((k) => staffPos(N(k), level.clef === "grand" ? "treble" : level.clef) <= -5));
       this.audio.keepAwake(true);
       this.audio.stopMusic();
       track("levelstart/" + level.id);
@@ -6381,12 +6814,12 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       const sc = this.scene;
       if (!this.paused || this.calib) {
         const ev = this.audio.poll(ts), sink = this.calib || (this.$("screen").hidden ? sc : null);
-        if (ev && sink && sink.onNote && (this.calib || this.listening)) sink.onNote(ev.midi, ev);
+        if (ev && sink && sink.onNote && (this.calib || this.listening)) sink.onNote(ev.midi + INSTR.shift, ev);
         if (this.calib) this.calib.level(this.audio.level);
         else if (sc && sc.isLevel && sc.onNote) {
           const h = this.listening ? this.audio.heard : null;
           this.panel.setLevel(this.listening ? this.audio.level : 0);
-          this.panel.setHeard(h ? h.midi : null);
+          this.panel.setHeard(h ? h.midi + INSTR.shift : null);
         }
         if (sc && !this.paused) {
           sc.update(dt);
@@ -6400,7 +6833,20 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         this.ctx.fillStyle = (THEMES[sc.theme] || THEMES.himmel).hill[4];
         this.ctx.fillRect(0, 0, VIEW_W, this.H / 4);
         this.tx.clearRect(0, 0, this.W, this.H);
+        const ty = this.top / 4;
+        if (ty) {
+          this.ctx.fillStyle = (THEMES[sc.theme] || THEMES.himmel).bands[0];
+          this.ctx.fillRect(0, 0, VIEW_W, ty);
+          this.ctx.save();
+          this.ctx.translate(0, ty);
+          this.tx.save();
+          this.tx.translate(0, this.top);
+        }
         sc.draw(this.ctx, this.tx);
+        if (ty) {
+          this.ctx.restore();
+          this.tx.restore();
+        }
       }
       requestAnimationFrame((t) => this.loop(t));
     }
@@ -6412,6 +6858,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     window.__config = CONFIG;
     window.__train = trainui_exports;
     window.__acc = account_exports;
+    window.__setInstr = setInstr;
     window.__flushStats = flushStats;
   };
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(start, start);

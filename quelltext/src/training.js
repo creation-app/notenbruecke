@@ -1,5 +1,5 @@
 // Freies Training: Regeln ohne Bildschirm – welche Noten, welche Disziplin, wie gerechnet und gewertet wird.
-import { ALL_NOTES } from './levels.js';
+import { SETS, LEVEL_SET } from './levels.js';
 import { N, midiOf } from './music.js';
 import { isMastered } from './srs.js';
 import { dayKey } from './save.js';
@@ -10,20 +10,27 @@ export const STAR_AT = { play: [15, 25, 40], name: [25, 40, 55] };
 /** Richtig, aber langsamer als das: zählt als "noch nicht flüssig". */
 export const SLOW_MS = { play: 7000, name: 5000 };
 const safe = k => { try { return N(k); } catch (e) { return null; } };
-const TREBLE = ALL_NOTES[0].filter(k => N(k).alt === 0), BASS = ALL_NOTES[1].filter(k => N(k).alt === 0), ACC = ALL_NOTES[2].filter(k => N(k).alt !== 0);
+const PA = SETS.klavier.all, TREBLE = PA[0].filter(k => N(k).alt === 0), BASS = PA[1].filter(k => N(k).alt === 0), ACC = PA[2].filter(k => N(k).alt !== 0);
+// Gitarre: Bereiche nach Saiten (alles im Violinschlüssel notiert)
+const GA = SETS.gitarre.all, GRANGE = { g0: GA[0], g1: GA[1], g2: GA[2], gall: GA.flat() };
+export const RANGES = { klavier: ['treble', 'bass', 'both'], gitarre: ['g0', 'g1', 'g2', 'gall'] };
+const RANGE_LABEL = { treble: 'Violinschlüssel', bass: 'Bassschlüssel', both: 'Beide Schlüssel', g0: 'Hohe Saiten', g1: 'Mittlere Saiten', g2: 'Tiefe Saiten', gall: 'Alle Saiten' };
+const guitar = () => LEVEL_SET === 'gitarre';
 
 export function normalize(c = {}) {
-  const cfg = { input: c.input === 'name' ? 'name' : 'play', range: ['treble', 'bass', 'both'].includes(c.range) ? c.range : 'treble', acc: !!c.acc, len: c.len === 'count' ? 'count' : 'time', weak: !!c.weak };
-  if (cfg.range === 'bass' || cfg.weak) cfg.acc = false; return cfg;
+  const cfg = { input: c.input === 'name' ? 'name' : 'play', range: RANGES[LEVEL_SET].includes(c.range) ? c.range : RANGES[LEVEL_SET][0], acc: !!c.acc, len: c.len === 'count' ? 'count' : 'time', weak: !!c.weak };
+  if (cfg.range === 'bass' || cfg.weak || guitar()) cfg.acc = false; return cfg;
 }
 /** Noten, die schon vorkamen, aber noch nicht sicher sitzen – mit dem Schlüssel, in dem sie gezeigt werden. */
 export function weakNotes(profile) {
+  if (guitar()) return GRANGE.gall.filter(k => profile.notes && profile.notes[k] && profile.notes[k].seen >= 2 && !isMastered(profile.notes[k])).map(k => ({ key: k, clef: 'treble' }));
   return Object.keys(profile.notes || {}).filter(k => safe(k) && profile.notes[k].seen >= 2 && !isMastered(profile.notes[k]))
     .map(k => ({ key: k, clef: TREBLE.includes(k) || ACC.includes(k) ? 'treble' : BASS.includes(k) ? 'bass' : N(k).step < 0 ? 'bass' : 'treble' }));
 }
 /** Die Noten einer Runde: [{ key, clef }]. Bei "beide" steht das mittlere c in beiden Schlüsseln. */
 export function pool(cfg, profile) {
   if (cfg.weak) return weakNotes(profile);
+  if (GRANGE[cfg.range]) return GRANGE[cfg.range].map(k => ({ key: k, clef: 'treble' }));
   const out = [];
   if (cfg.range !== 'bass') { TREBLE.forEach(k => out.push({ key: k, clef: 'treble' })); if (cfg.acc) ACC.forEach(k => out.push({ key: k, clef: 'treble' })); }
   if (cfg.range !== 'treble') BASS.forEach(k => out.push({ key: k, clef: 'bass' }));
@@ -32,11 +39,13 @@ export function pool(cfg, profile) {
 /** Kennung der Disziplin (für Rekorde). Wackelnoten-Runden haben keine: Die Noten wechseln ja. */
 export function disc(cfg) { return cfg.weak ? null : `${cfg.input}-${cfg.range}${cfg.acc ? '+v' : ''}-${cfg.len}`; }
 export function discLabel(cfg) {
-  const r = cfg.weak ? 'Meine Wackelnoten' : { treble: 'Violinschlüssel', bass: 'Bassschlüssel', both: 'Beide Schlüssel' }[cfg.range] + (cfg.acc ? ' mit Vorzeichen' : '');
-  return `${r} · ${cfg.input === 'play' ? 'am Klavier' : 'Namen antippen'} · ${cfg.len === 'time' ? '60 Sekunden' : '20 Noten'}`;
+  const r = cfg.weak ? 'Meine Wackelnoten' : RANGE_LABEL[cfg.range] + (cfg.acc ? ' mit Vorzeichen' : ''), g = cfg.weak ? guitar() : !!GRANGE[cfg.range];
+  return `${r} · ${cfg.input === 'play' ? (g ? 'auf der Gitarre' : 'am Klavier') : 'Namen antippen'} · ${cfg.len === 'time' ? '60 Sekunden' : '20 Noten'}`;
 }
 /** Die gemeinsame Disziplin für die Bestenliste. */
-export const BOARD_DISC = 'play-treble-time';
+export const BOARD_DISC = 'play-treble-time', BOARD_DISC_G = 'play-gall-time';
+export const boardDisc = () => (guitar() ? BOARD_DISC_G : BOARD_DISC);
+export const rangeLabel = r => RANGE_LABEL[r] || r;
 /** raw: { correct, first, tried, ms } -> Noten pro Minute und Trefferquote (beim ersten Versuch richtig). */
 export function metrics(raw) {
   const ms = Math.max(1000, raw.ms || 0); return { npm: Math.round(raw.correct * 60000 / ms), acc: raw.tried ? Math.round(100 * raw.first / raw.tried) : 0 };

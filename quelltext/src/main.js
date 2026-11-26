@@ -4,7 +4,9 @@ import { CONFIG } from './config.js';
 import { verifyKey, isActive } from './license.js';
 import { track, flushStats } from './stats.js';
 import * as ACC from './account.js';
-import { GameAudio } from './audio.js';
+import { setInstr, INSTR } from './instrument.js';
+import { N as NN, staffPos as SP } from './music.js';
+import { GameAudio , GAIN_TARGET } from './audio.js';
 import { Panel } from './panel.js';
 import * as G from './gfx.js';
 import { starsFor, LEVELS, totalStars } from './levels.js';
@@ -21,7 +23,7 @@ class Backdrop {
   constructor(app, theme) { this.app = app; this.theme = theme; this.bg = app.background(theme); this.t = 0; }
   update(dt) { this.t += dt; }
   draw(ctx) { G.drawBackground(ctx, this.bg, this.t * 7, this.t); const H = this.app.heroFrames; if (!H) return;
-    const cyc = this.t % 24, walking = cyc < 9 || (cyc >= 12 && cyc < 21), back = cyc >= 12, x = cyc < 9 ? 30 + cyc * 22 : cyc < 12 ? 228 : cyc < 21 ? 228 - (cyc - 12) * 22 : 30;
+    const cyc = this.t % 24, walking = cyc < 9 || (cyc >= 12 && cyc < 21), back = cyc >= 12, far = Math.max(60, Math.min(228, G.VIEW_W - 92)), v = (far - 30) / 9, x = cyc < 9 ? 30 + cyc * v : cyc < 12 ? far : cyc < 21 ? far - (cyc - 12) * v : 30;
     const f = walking ? (Math.floor(this.t * 7) % 2 ? H.run1 : H.run0) : cyc < 12 ? (Math.floor(this.t * 4) % 2 ? H.wave0 : H.wave1) : (Math.floor(this.t * 1.6) % 2 ? H.idle1 : H.idle0);
     this.app.drawBuddy(ctx, this, back && walking ? x + 30 : x - 12, 108, this.t, walking ? 0 : Math.abs(Math.sin(this.t * 4)) * 3);
     if (back && walking) { ctx.save(); ctx.translate(G.q(x) + 18, 113); ctx.scale(-1, 1); ctx.drawImage(f, 0, 0); ctx.restore(); } else ctx.drawImage(f, G.q(x), 113); }
@@ -43,7 +45,7 @@ class App {
     window.addEventListener('pagehide', quiet); window.addEventListener('freeze', quiet); this.quiet = quiet;
     $('panel').addEventListener('click', e => { if (e.target.closest('#lvlBtn') && this.scene && this.scene.isLevel && !this.paused) { this.paused = true; S.levelCheck(this, () => { this.paused = false; this.closeScreen(); }); } });
     $('pauseBtn').addEventListener('click', () => { if (this.scene && this.scene.isLevel) S.pause(this); });
-    const pt = e => { if (!this.scene || !this.scene.pointer || this.paused) return; const r = this.world.getBoundingClientRect(); const u = (e.clientX - r.left) / r.width, v = (e.clientY - r.top) / r.height; if (this.rot) this.scene.pointer(v * G.VIEW_W, (1 - u) * this.H / 4); else this.scene.pointer(u * G.VIEW_W, v * this.H / 4); };
+    const pt = e => { if (!this.scene || !this.scene.pointer || this.paused) return; const r = this.world.getBoundingClientRect(); const u = (e.clientX - r.left) / r.width, v = (e.clientY - r.top) / r.height; this.scene.pointer(u * G.VIEW_W, (v * this.H - this.top) / 4); };
     $('stage').addEventListener('pointerdown', e => { if (e.target.closest('#panel,#screen,#hud')) return; pt(e); }); $('stage').addEventListener('pointermove', e => { if (e.buttons && !e.target.closest('#panel,#screen,#hud')) pt(e); });
     document.addEventListener('keydown', e => { const sc = this.scene; if (!sc || !sc.isLevel || this.paused || !$('screen').hidden) return;
       if (e.key === 'Escape') S.pause(this); else if (sc.move && e.key === 'ArrowUp') { sc.move(1); e.preventDefault(); } else if (sc.move && e.key === 'ArrowDown') { sc.move(-1); e.preventDefault(); } else if (sc.place && e.key === 'Enter') sc.place(); });
@@ -52,10 +54,13 @@ class App {
     window.addEventListener('error', () => { if (!this._err) { this._err = true; this.toast('Etwas ist schiefgegangen. Bitte lade die Seite neu – dein Spielstand bleibt erhalten.'); } });
     // Hochkant (z. B. Handy mit Drehsperre): Das Spiel wird um 90° gedreht und füllt den Bildschirm, statt den Weg zu versperren.
     // Bühne passt sich dem Seitenverhältnis an: breite Bildschirme bekommen mehr Welt, hohe (iPad) ein höheres Bedienfeld – der Bildschirm ist immer ganz gefüllt.
-    const fit = () => { const w = window.innerWidth, h = window.innerHeight, rot = w < h, lw = rot ? h : w, lh = rot ? w : h, a = lw / lh;
-      const W = a >= 1.6 ? Math.round(Math.min(1920, Math.max(1280, 800 * a)) / 4) * 4 : 1280, H = a >= 1.6 ? 800 : Math.min(1000, Math.round(1280 / a)); if (W !== this.W || H !== this.H) this.resizeStage(W, H);
-      const s = Math.min(lw / W, lh / H); const was = this.rot; this.rot = rot; $('stage').classList.toggle('phone', s < 0.62);
-      $('stage').style.transform = `translate(-50%,-50%) ${rot ? 'rotate(90deg) ' : ''}scale(${s})`; const el = $('rotate'); if (rot && !was) { el.hidden = false; clearTimeout(this._rotT); this._rotT = setTimeout(() => { el.hidden = true; }, 6000); } else if (!rot) el.hidden = true; };
+    // Bühne passt sich dem Bildschirm an. Quer: breite Bildschirme bekommen mehr Welt, hohe (iPad) ein höheres Bedienfeld.
+    // Hochkant: oben ein Streifen für die Anzeigen, darunter die Welt, darunter ein großes Bedienfeld – nichts wird gedreht.
+    const fit = () => { const w = window.innerWidth, h = window.innerHeight, port = w < h, st = $('stage'); let W, H, top = 0;
+      if (port) { const a = h / w; W = Math.round(Math.min(960, Math.max(720, 1170 / a)) / 4) * 4; top = W >= 860 ? 84 : 152; H = Math.max(top + 840, Math.min(1720, Math.round(W * a))); }
+      else { const a = w / h; W = a >= 1.6 ? Math.round(Math.min(1920, Math.max(1280, 800 * a)) / 4) * 4 : 1280; H = a >= 1.6 ? 800 : Math.min(1000, Math.round(1280 / a)); }
+      if (W !== this.W || H !== this.H || top !== this.top) this.resizeStage(W, H, top, port);
+      const s = Math.min(w / W, h / H); this.rot = false; this.port = port; st.classList.toggle('phone', s < 0.62); st.style.transform = `translate(-50%,-50%) scale(${s})`; };
     window.addEventListener('orientationchange', () => setTimeout(fit, 250)); window.addEventListener('resize', fit); fit();
     this.applyProfile(); this.hud.hide(); S.title(this); this.last = performance.now(); requestAnimationFrame(t => this.loop(t)); track('start'); track('geraet/' + (/iPad|Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1 ? 'tablet' : /Mobi|Android|iPhone/.test(navigator.userAgent) ? (Math.min(screen.width, screen.height) >= 600 ? 'tablet' : 'handy') : 'computer')); if (this.profile) ACC.pull(this, this.profile); this.ready = this.boot();
   }
@@ -81,10 +86,11 @@ class App {
   /** Figur (mit Hut) und Begleiter (mit Stufe) neu zeichnen – nach Profilwechsel und immer, wenn die Karte erscheint. */
   refreshLook() { const p = this.profile; this.heroFrames = G.makeHero(p ? p.hero : 0, p ? G.hatOf(p, totalStars(p)) : 0); this.buddy = null; this.buddySure = false;
     if (p && p.buddy && p.creatures.includes(p.buddy)) { const n = N(p.buddy), st = G.buddyStage(p.notes[p.buddy]); this.buddy = G.makeBuddy(((n.step % 7) + 7) % 7, n.alt, st); this.buddySure = st === 2; } }
-  resizeStage(W, H) { this.W = W; this.H = H; const st = this.$('stage'); st.style.width = W + 'px'; st.style.height = H + 'px';
+  resizeStage(W, H, top = 0, port = false) { this.W = W; this.H = H; this.top = top; const st = this.$('stage'), ph = H - 600 - top; st.style.width = W + 'px'; st.style.height = H + 'px';
+    st.style.setProperty('--wy', top + 'px'); st.style.setProperty('--H', H); st.style.setProperty('--ksy', Math.max(1, Math.min(2.8, (ph - 290) / 150)).toFixed(2)); st.classList.toggle('port', port); st.classList.toggle('pbig', port && ph >= 700); st.classList.toggle('hud2', port && top > 100);
     for (const c of [this.world, this.$('text')]) { c.width = W; c.height = H; c.style.width = W + 'px'; c.style.height = H + 'px'; }
-    this.ctx.setTransform(4, 0, 0, 4, 0, 0); this.ctx.imageSmoothingEnabled = false; G.setViewW(W / 4); this.$('panel').style.height = (H - 600) + 'px'; st.classList.toggle('tall', H - 600 >= 300); }
-  applyProfile() { const p = this.profile; this.refreshLook(); this.audio.muted = !!this.state.muted; this.audio.setGain(this.state.micGain || 1); this.audio.song = this.state.song || 'tanz'; if (p) { this.audio.setA4(p.a4); this.audio.musicOff = p.music === false; } if (this.audio.muted || this.audio.musicOff) this.audio.stopMusic(); if (this.paintSound) this.paintSound(); }
+    this.ctx.setTransform(4, 0, 0, 4, 0, 0); this.ctx.imageSmoothingEnabled = false; G.setViewW(W / 4); this.$('panel').style.top = (600 + top) + 'px'; this.$('panel').style.height = ph + 'px'; st.classList.toggle('tall', !port && ph >= 300); }
+  applyProfile() { const p = this.profile; setInstr(p ? p.instr : 'klavier'); this.audio.shift = INSTR.shift; this.refreshLook(); this.audio.muted = !!this.state.muted; this.audio.setRef(this.state.micRef || (this.state.micGain ? GAIN_TARGET / this.state.micGain : 0)); /* ältere Einstellungen ohne Bezugspegel: aus der Verstärkung zurückrechnen */ this.audio.setGain(this.state.micGain || 1); this.audio.song = this.state.song || 'tanz'; if (p) { this.audio.setA4(p.a4); this.audio.musicOff = p.music === false; } if (this.audio.muted || this.audio.musicOff) this.audio.stopMusic(); if (this.paintSound) this.paintSound(); }
   /** Ton für das ganze Gerät an oder aus (Musik, Spielklänge, Erfolgsmelodie). */
   setMuted(m) { this.state.muted = !!m; this.audio.muted = !!m; this.save(); if (m) { this.audio.stopMusic(); if (this.audio.bus) this.audio.bus.gain.value = 0; } else { this.audio.ensure(); if (this.musicReady && this.scene instanceof Backdrop && !this.calib) this.audio.startMusic(); } this.paintSound(); }
   save() { const ok = persist(this.store, this.state); if (!this._quiet) ACC.touch(this); return ok; }
@@ -110,8 +116,11 @@ class App {
   bubble(html, secs = 0) { const b = this.$('bubble'); clearTimeout(this._bt); if (!html) { b.hidden = true; return; } b.innerHTML = html; b.hidden = false; if (secs) this._bt = setTimeout(() => { b.hidden = true; }, secs * 1000); }
   toast(html, note) { const t = this.$('toast'); t.innerHTML = `<span>${html}</span>`; if (note) { const c = G.makeCreature(((note.step % 7) + 7) % 7, note.alt); c.className = 'pix'; t.prepend(c); } t.hidden = false; clearTimeout(this._tt); this._tt = setTimeout(() => { t.hidden = true; }, 2400); this.hudCr(); }
 
+  /** Hinweis-Blase oben statt unten zeigen (wenn unten tiefe Noten stehen, z. B. auf den tiefen Gitarrensaiten). */
+  bubbleSide(top) { this.$('bubble').classList.toggle('top', !!top); }
   runLevel(level) {
     this.closeScreen(); this.paused = false; this.calib = null; this.bubble(null); this.hud.extra('');
+    this.bubbleSide((level.notes || []).some(k => SP(NN(k), level.clef === 'grand' ? 'treble' : level.clef) <= -5));
     this.audio.keepAwake(true); this.audio.stopMusic();
     track('levelstart/' + level.id);
     const Cls = { jump: JumpScene, boss: JumpScene, regen: RegenScene, bau: BauScene, train: TrainScene }[level.type]; this.scene = new Cls(this, level); this.scene.enter();
@@ -132,14 +141,16 @@ class App {
     const dt = Math.min(0.05, (ts - this.last) / 1000); this.last = ts; const sc = this.scene;
     if (!this.paused || this.calib) {
       const ev = this.audio.poll(ts), sink = this.calib || (this.$('screen').hidden ? sc : null);
-      if (ev && sink && sink.onNote && (this.calib || this.listening)) sink.onNote(ev.midi, ev);
+      if (ev && sink && sink.onNote && (this.calib || this.listening)) sink.onNote(ev.midi + INSTR.shift, ev); // Gitarre klingt eine Oktave tiefer als notiert
       if (this.calib) this.calib.level(this.audio.level);
-      else if (sc && sc.isLevel && sc.onNote) { const h = this.listening ? this.audio.heard : null; this.panel.setLevel(this.listening ? this.audio.level : 0); this.panel.setHeard(h ? h.midi : null); }
+      else if (sc && sc.isLevel && sc.onNote) { const h = this.listening ? this.audio.heard : null; this.panel.setLevel(this.listening ? this.audio.level : 0); this.panel.setHeard(h ? h.midi + INSTR.shift : null); }
       if (sc && !this.paused) { sc.update(dt); if (sc.isLevel) { this.sec += dt; if (this.sec > 20) this.flush(); } }
     }
-    if (sc) { this.ctx.fillStyle = (G.THEMES[sc.theme] || G.THEMES.himmel).hill[4]; this.ctx.fillRect(0, 0, G.VIEW_W, this.H / 4); this.tx.clearRect(0, 0, this.W, this.H); sc.draw(this.ctx, this.tx); }
+    if (sc) { this.ctx.fillStyle = (G.THEMES[sc.theme] || G.THEMES.himmel).hill[4]; this.ctx.fillRect(0, 0, G.VIEW_W, this.H / 4); this.tx.clearRect(0, 0, this.W, this.H);
+      const ty = this.top / 4; if (ty) { this.ctx.fillStyle = (G.THEMES[sc.theme] || G.THEMES.himmel).bands[0]; this.ctx.fillRect(0, 0, G.VIEW_W, ty); this.ctx.save(); this.ctx.translate(0, ty); this.tx.save(); this.tx.translate(0, this.top); } // hochkant: Welt beginnt unter dem Anzeigen-Streifen
+      sc.draw(this.ctx, this.tx); if (ty) { this.ctx.restore(); this.tx.restore(); } }
     requestAnimationFrame(t => this.loop(t));
   }
 }
-const start = () => { window.__nb = new App(); window.__levels = LEVELS; window.__screens = S; window.__config = CONFIG; window.__train = TU; window.__acc = ACC; window.__flushStats = flushStats; };
+const start = () => { window.__nb = new App(); window.__levels = LEVELS; window.__screens = S; window.__config = CONFIG; window.__train = TU; window.__acc = ACC; window.__setInstr = setInstr; window.__flushStats = flushStats; };
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(start, start); else start();

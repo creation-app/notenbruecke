@@ -8,7 +8,7 @@ for (const name of list) {
   page.on('pageerror', e => err('pageerror ' + e.message)); page.on('console', m => { if (m.type() === 'error') err('console ' + m.text()); });
   const tap = a => page.tap(`#screen [data-act="${a}"]`); const wait = ms => page.waitForTimeout(ms); const shown = () => page.evaluate(() => !document.getElementById('screen').hidden);
   await page.goto('file://' + path.resolve('dist/notenbruecke.html')); await wait(400);
-  const portrait = d.viewport.width < d.viewport.height; if (await page.evaluate(() => !!__nb.rot) !== portrait) err('Drehung falsch erkannt');
+  const portrait = d.viewport.width < d.viewport.height; if (await page.evaluate(() => !!__nb.port) !== portrait) err('Hochkant falsch erkannt'); if (await page.evaluate(() => /rotate/.test(document.getElementById('stage').style.transform))) err('Bühne wird gedreht');
   // Die Bühne füllt den Bildschirm und ragt nirgends hinaus
   const r = await page.evaluate(() => { const b = document.getElementById('stage').getBoundingClientRect(); return { l: b.left, t: b.top, r: b.right, b: b.bottom, w: innerWidth, h: innerHeight }; });
   if (r.l < -1 || r.t < -1 || r.r > r.w + 1 || r.b > r.h + 1) err('Bühne ragt hinaus ' + JSON.stringify(r)); if ((r.r - r.l) < r.w * 0.98 && (r.b - r.t) < r.h * 0.98) err('Bühne füllt nicht ' + JSON.stringify(r));
@@ -24,8 +24,8 @@ for (const name of list) {
   if (name === 'iPhone 15') await page.screenshot({ path: 'shots/g-iPhone15-ergebnis.png' });
   // Brückenbauer: Fingertipp auf die Notenlinien muss an der richtigen Stelle ankommen (auch gedreht)
   await tap('map'); await wait(150); await page.tap('[data-id="h5"]'); await tap('go'); await wait(500);
-  const probe = await page.evaluate(() => { const s = __nb.scene; const got = []; const orig = s.pointer.bind(s); s.pointer = (x, y) => { got.push([x, y]); orig(x, y); }; window.__got = got; const b = __nb.world.getBoundingClientRect(); const fx = 0.5, fy = 0.3; return __nb.rot ? { x: b.left + (1 - fy) * b.width, y: b.top + fx * b.height } : { x: b.left + fx * b.width, y: b.top + fy * b.height }; });
-  await page.touchscreen.tap(probe.x, probe.y); await wait(100); const got = await page.evaluate(() => window.__got[0]); const want = await page.evaluate(() => [__nb.W / 4 * 0.5, __nb.H / 4 * 0.3]);
+  const probe = await page.evaluate(() => { const s = __nb.scene; const got = []; const orig = s.pointer.bind(s); s.pointer = (x, y) => { got.push([x, y]); orig(x, y); }; window.__got = got; const b = __nb.world.getBoundingClientRect(); return { x: b.left + 0.5 * b.width, y: b.top + (__nb.top + 0.3 * 600) / __nb.H * b.height }; });
+  await page.touchscreen.tap(probe.x, probe.y); await wait(100); const got = await page.evaluate(() => window.__got[0]); const want = await page.evaluate(() => [__nb.W / 4 * 0.5, 45]);
   if (!got || Math.abs(got[0] - want[0]) > 3 || Math.abs(got[1] - want[1]) > 3) err('Fingertipp landet falsch: ' + JSON.stringify(got));
   if (name === 'iPhone 15') await page.screenshot({ path: 'shots/g-iPhone15-bau.png' });
   await ctx.close();

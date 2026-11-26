@@ -8,7 +8,7 @@ export class BauScene {
   constructor(app, level) { this.app = app; this.level = level; this.isLevel = true; }
   enter() {
     const { app, level } = this; this.clef = level.clef; this.theme = level.theme; this.bg = app.background(level.theme); this.line = G.THEMES[level.theme].line;
-    const ps = level.notes.map(k => staffPos(N(k), this.clef)); const g = this.clef === 'grand'; this.minPos = Math.max(g ? -8 : -4, Math.min(...ps) - 2); this.maxPos = Math.min(g ? 16 : 12, Math.max(...ps) + 2);
+    const ps = level.notes.map(k => staffPos(N(k), this.clef)); const g = this.clef === 'grand'; this.minPos = Math.max(g ? -8 : Math.min(-4, Math.min(...ps) - 1), Math.min(...ps) - 2); this.maxPos = Math.min(g ? 16 : 12, Math.max(...ps) + 2);
     this.tasks = this.buildTasks(); this.ti = 0; this.firstTry = 0; this.t = 0; this.parts = new G.Particles(); this.freed = [];
     app.panel.showMic(false); app.panel.bau(!!level.accidentals, { move: d => this.move(d), acc: a => this.setAcc(this.alt === a ? 0 : a), place: () => this.place() });
     app.hud.show(level.title, true); app.panel.task('Schiebe die Note mit <b>▲ ▼</b> an die richtige Stelle und tippe <b>Setzen</b>.'); this.startTask();

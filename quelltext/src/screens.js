@@ -5,16 +5,20 @@ import { letterName } from './music.js';
 import { HEROES, HATS, hatOf, buddyStage, BUDDY_STAGE, makeHero, makeCreature, cv, drawStaff, drawClef, drawNote, drawLedgers, yOfPos, C } from './gfx.js';
 import { newProfile, importCode, exportShort, importShort, exportPayload, importPayload, streak, dayKey } from './save.js';
 import { CONFIG } from './config.js';
-import { SONGS, gainFor, GAIN_PROBE } from './audio.js';
+import { SONGS, gainFor, refFor } from './audio.js';
 import { trainSetup, trainCard } from './trainui.js';
 import { accountScreen, loginForm } from './accountui.js';
 import { accountsOn, ago, pull } from './account.js';
-import { weakNotes, WEAK_MIN, BOARD_DISC } from './training.js';
+import { weakNotes, WEAK_MIN, boardDisc } from './training.js';
+import { INSTR, INSTRUMENTS, isGuitar } from './instrument.js';
+import { SETS, LEVEL_SET, SKIP_KEY } from './levels.js';
 import { track } from './stats.js';
 import { classify } from './music.js';
 import { prevWorld } from './levels.js';
 import qrcode from 'qrcode-generator';
-const worldIds = () => WORLDS.map((w, i) => levelsOf(i).map(l => l.id));
+const idsOf = set => set.worlds.map((w, i) => set.levels.filter(l => l.world === i).map(l => l.id));
+const worldIds = () => idsOf(SETS[LEVEL_SET]);
+const seenKey = world => (isGuitar() ? 'g' : '') + world;
 import { isMastered, topConfusions } from './srs.js';
 import { a4FromCents } from './pitch.js';
 import { INTRO, WORLD_INTRO, WORLD_OUTRO, LEVEL_STORY } from './story.js';
@@ -41,15 +45,16 @@ export function profiles(app, to) {
     pick: e => { app.state.current = e.dataset.id; app.save(); app.applyProfile(); pull(app, app.profile); to === 'train' ? trainSetup(app) : map(app); }, new: () => newProf(app), code: () => importScreen(app), acc: () => loginForm(app, () => profiles(app, to)) });
 }
 function newProf(app) {
-  let hero = 0, mode = 'abenteuer';
-  const render = () => app.screen(`<h2>Neues Profil</h2><label class="fld">Dein Name<input id="pname" maxlength="14" autocomplete="off" value="${esc(app._pn || '')}"></label>
+  let hero = 0, mode = 'abenteuer', instr = 'klavier';
+  const render = () => app.screen(`<h2>Neues Profil</h2><div class="fld">Mein Instrument<div class="row instr">${INSTRUMENTS.map(i => `<button class="btn opt ${instr === i.id ? 'sel' : ''}" data-act="instr" data-v="${i.id}" aria-pressed="${instr === i.id}"><b>${i.name}</b></button>`).join('')}</div></div>
+    <label class="fld">Dein Name<input id="pname" maxlength="14" autocomplete="off" value="${esc(app._pn || '')}"></label>
     <div class="fld">Deine Figur<div class="heroes">${HEROES.map((h, i) => `<button class="hpick ${i === hero ? 'sel' : ''}" data-act="hero" data-i="${i}" aria-label="Figur ${h.name}"><span data-hero="${i}" data-size="60"></span></button>`).join('')}</div></div>
     <div class="fld">So möchte ich spielen<div class="row"><button class="btn opt ${mode === 'abenteuer' ? 'sel' : ''}" data-act="mode" data-m="abenteuer"><b>Abenteuer</b><small>Mit mehr Tipps und ohne Zeitdruck</small></button>
     <button class="btn opt ${mode === 'profi' ? 'sel' : ''}" data-act="mode" data-m="profi"><b>Profi</b><small>Mit Stoppuhr, Serien und weniger Tipps</small></button></div></div>
     <p class="err" id="perr" role="alert"></p><div class="row">${app.state.profiles.length ? '<button class="btn" data-act="back">Zurück</button>' : ''}<button class="btn go" data-act="ok">Los geht’s</button></div>`, {
-    hero: e => { keep(); hero = +e.dataset.i; render(); }, mode: e => { keep(); mode = e.dataset.m; render(); }, back: () => profiles(app),
+    hero: e => { keep(); hero = +e.dataset.i; render(); }, mode: e => { keep(); mode = e.dataset.m; render(); }, instr: e => { keep(); instr = e.dataset.v; render(); }, back: () => profiles(app),
     ok: () => { const name = document.getElementById('pname').value.trim(); if (!name) { document.getElementById('perr').textContent = 'Bitte gib einen Namen ein.'; return; }
-      const p = newProfile(name, hero, mode); app.state.profiles.push(p); app.state.current = p.id; app._pn = ''; app.save(); app.applyProfile(); story(app, INTRO, () => { p.seenIntro = true; app.save(); askLevel(app); }); } });
+      const p = newProfile(name, hero, mode); if (instr !== 'klavier') p.instr = instr; app.state.profiles.push(p); app.state.current = p.id; app._pn = ''; app.save(); app.applyProfile(); story(app, INTRO, () => { p.seenIntro = true; app.save(); askLevel(app); }); } });
   const keep = () => { app._pn = document.getElementById('pname').value; };
   render();
 }
@@ -58,14 +63,14 @@ function importScreen(app, back) {
     <label class="fld">Dein Name (nur beim Kurzcode nötig)<input id="codeName" maxlength="14" autocomplete="off"></label><p class="err" id="cerr" role="alert"></p>
     <div class="row"><button class="btn" data-act="back">Zurück</button><button class="btn go" data-act="ok">Laden</button></div>`, { back: () => (back || profiles)(app),
     ok: async () => { try { const raw = document.getElementById('codeIn').value.trim(); let p; const link = /#s=([A-Za-z0-9_-]+)/.exec(raw);
-      if (link) p = await importPayload(link[1]); else if (/^NB1\./.test(raw)) p = importCode(raw); else { p = importShort(raw, worldIds()); const nm = document.getElementById('codeName').value.trim(); if (!nm) throw new Error('Bitte gib noch deinen Namen ein.'); p.name = nm.slice(0, 14);
-        LEVELS.forEach(l => { if (p.levels[l.id] && l.type !== 'regen') l.notes.forEach(k => { if (!p.creatures.includes(k)) p.creatures.push(k); p.notes[k] = p.notes[k] || { box: 2, seen: 1, ok: 1 }; }); }); p.seenWorld = { 0: 1, 1: 1, 2: 1, 3: 1 }; p.calibrated = false; }
+      if (link) p = await importPayload(link[1]); else if (/^NB1\./.test(raw)) p = importCode(raw); else { p = importShort(raw, { klavier: idsOf(SETS.klavier), gitarre: idsOf(SETS.gitarre) }); const nm = document.getElementById('codeName').value.trim(); if (!nm) throw new Error('Bitte gib noch deinen Namen ein.'); p.name = nm.slice(0, 14);
+        SETS[p.instr || 'klavier'].levels.forEach(l => { if (p.levels[l.id] && l.type !== 'regen') l.notes.forEach(k => { if (!p.creatures.includes(k)) p.creatures.push(k); p.notes[k] = p.notes[k] || { box: 2, seen: 1, ok: 1 }; }); }); p.seenWorld = { 0: 1, 1: 1, 2: 1, 3: 1, g0: 1, g1: 1, g2: 1, g3: 1 }; p.calibrated = false; }
       const i = app.state.profiles.findIndex(q => q.id === p.id); if (i >= 0) app.state.profiles[i] = p; else app.state.profiles.push(p);
       app.state.current = p.id; app.save(); app.applyProfile(); map(app); } catch (e) { document.getElementById('cerr').textContent = e.message; } } });
 }
 
 function askLevel(app) {
-  app.screen(`<h2>Kennst du schon Noten?</h2><p>Wer schon Noten lesen kann, muss nicht ganz vorne anfangen. Ein kurzer Test findet den passenden Einstieg: erst Noten benennen, dann am Klavier spielen. Halte dein Klavier bereit.</p>
+  app.screen(`<h2>Kennst du schon Noten?</h2><p>Wer schon Noten lesen kann, muss nicht ganz vorne anfangen. Ein kurzer Test findet den passenden Einstieg: erst Noten benennen, dann ${INSTR.at} spielen. ${INSTR.has}</p>
     <div class="row"><button class="btn opt" data-act="new"><b>Ich fange neu an</b><small>Los geht es mit den ersten zwei Tönen</small></button><button class="btn opt go" data-act="test"><b>Ich kann schon etwas</b><small>Kurzer Test für den richtigen Einstieg</small></button></div>`, { new: () => map(app), test: () => startPlacement(app, () => map(app)) });
 }
 /** Mikrofon einschalten (für den Spiel-Teil), bei Bedarf einstimmen, dann testen. Ohne Mikrofon wird nur das Lesen getestet. */
@@ -75,19 +80,19 @@ export function placement(app, then) {
   app.audio.stopMusic(); const p = app.profile, mic = app.audio.micState === 'on'; let si = 0, qi = 0, right = 0, cur = null, last = null, reached = null, fb = '', mode = 'read', busy = false, asking = false, t0 = 0;
   const order = ['c', 'cis', 'des', 'd', 'es', 'e', 'f', 'fis', 'g', 'gis', 'as', 'a', 'b', 'h'], PLAY_Q = 3, PLAY_PASS = 2, READ_MS = 6000, PLAY_MS = 9000;
   const pick = () => { const st = PLACEMENT[si]; let k; do { k = st.notes[Math.floor(Math.random() * st.notes.length)]; } while (k === last && st.notes.length > 1); last = k; cur = N(k); t0 = performance.now(); };
-  const finish = () => { app.calib = null; const done = reached; if (done) { p.skip = done.skip.map((v, i) => Math.max(v, (p.skip || [])[i] || 0)); p.seenWorld = p.seenWorld || {}; } app.save(); track('einstufung-' + (done ? PLACEMENT.indexOf(done) + 1 : 0));
+  const finish = () => { app.calib = null; const done = reached; if (done) { p[SKIP_KEY] = done.skip.map((v, i) => Math.max(v, (p[SKIP_KEY] || [])[i] || 0)); p.seenWorld = p.seenWorld || {}; } app.save(); track('einstufung-' + (done ? PLACEMENT.indexOf(done) + 1 : 0));
     const w = done ? (done.skip[2] ? 2 : done.skip[1] ? 1 : 0) : 0, start = done ? levelsOf(w)[Math.min(done.skip[w], levelsOf(w).length) - 1] : null;
     app.screen(`<h2>${done ? 'Dein Einstieg steht fest' : 'Du startest am Anfang'}</h2><p class="lead">${done ? `Sicher gelesen${mic ? ' und gespielt' : ''}: <b>${esc(done.name)}</b>.` : 'Das macht nichts: Im ersten Level lernst du die Noten Schritt für Schritt.'}</p>
-      ${start ? `<p>Du kannst jetzt direkt bei <b>${esc(start.title)}</b> in „${esc(WORLDS[w].name)}“ einsteigen. Alle Level davor sind offen, falls du sie trotzdem spielen möchtest.</p>` : ''}${mic ? '' : '<p class="note warn">Ohne Mikrofon wurde nur das Lesen getestet, nicht das Spielen am Klavier.</p>'}<div class="row">${done && PLACEMENT.indexOf(done) >= 2 ? '<button class="btn" data-act="train">Direkt ins Training</button>' : ''}<button class="btn go" data-act="ok">Zur Karte</button></div>${done && PLACEMENT.indexOf(done) >= 2 ? '<p class="muted">Im Training übst du Tempo und Treffsicherheit, ohne Level und Geschichte.</p>' : ''}`, { ok: () => { if (done) p.lastWorld = w; then(); }, train: () => { p.lastWorld = w; app.save(); trainSetup(app); } }); };
+      ${start ? `<p>Du kannst jetzt direkt bei <b>${esc(start.title)}</b> in „${esc(WORLDS[w].name)}“ einsteigen. Alle Level davor sind offen, falls du sie trotzdem spielen möchtest.</p>` : ''}${mic ? '' : '<p class="note warn">Ohne Mikrofon wurde nur das Lesen getestet, nicht das Spielen ${INSTR.at}.</p>'}<div class="row">${done && PLACEMENT.indexOf(done) >= 2 ? '<button class="btn" data-act="train">Direkt ins Training</button>' : ''}<button class="btn go" data-act="ok">Zur Karte</button></div>${done && PLACEMENT.indexOf(done) >= 2 ? '<p class="muted">Im Training übst du Tempo und Treffsicherheit, ohne Level und Geschichte.</p>' : ''}`, { ok: () => { if (done) p.lastWorld = w; then(); }, train: () => { p.lastWorld = w; app.save(); trainSetup(app); } }); };
   const passed = () => { reached = PLACEMENT[si]; si++; qi = 0; right = 0; mode = 'read'; fb = 'Stufe geschafft! Weiter geht es.'; if (si >= PLACEMENT.length) return finish(); pick(); render(); };
   const judge = ok => { const slow = performance.now() - t0 > (mode === 'read' ? READ_MS : PLAY_MS); if (ok && !slow) right++; else if (ok) fb = 'Richtig – aber noch nicht flüssig. Das üben wir.'; qi++; const st = PLACEMENT[si], total = mode === 'read' ? PLACEMENT_Q : PLAY_Q, need = mode === 'read' ? PLACEMENT_PASS : PLAY_PASS;
-    if (qi >= total) { if (right < need) return finish(); if (mode === 'read' && mic) { mode = 'play'; qi = 0; right = 0; fb = 'Gut gelesen! Jetzt am Klavier.'; } else return passed(); }
+    if (qi >= total) { if (right < need) return finish(); if (mode === 'read' && mic) { mode = 'play'; qi = 0; right = 0; fb = `Gut gelesen! Jetzt ${INSTR.at}.`; } else return passed(); }
     pick(); render(); };
-  const render = () => { const st = PLACEMENT[si], names = [...new Set((si === 5 ? [...st.notes, 'f1', 'h1', 'c2', 'e2', 'g1', 'a1', 'd2'] : ['c1', 'd1', 'e1', 'f1', 'g1', 'a1', 'h1']).map(k => letterName(N(k))))].sort((a, b) => order.indexOf(a) - order.indexOf(b)), play = mode === 'play';
+  const render = () => { const st = PLACEMENT[si], names = [...new Set((st.acc ? [...st.notes, 'f1', 'h1', 'c2', 'e2', 'g1', 'a1', 'd2'] : ['c1', 'd1', 'e1', 'f1', 'g1', 'a1', 'h1']).map(k => letterName(N(k))))].sort((a, b) => order.indexOf(a) - order.indexOf(b)), play = mode === 'play';
     const total = play ? PLAY_Q : PLACEMENT_Q, dots = Array.from({ length: total }, (_, k) => `<i class="${k < qi ? 'on' : k === qi ? 'now' : ''}"></i>`).join('');
     app.screen(`<div class="maphead"><small class="kicker">Einstufung · Stufe ${si + 1} von ${PLACEMENT.length} · ${esc(st.name)}</small>${asking ? `<span class="row tight"><b>Test wirklich abbrechen?</b><button class="btn sm" data-act="no">Nein, weiter</button><button class="btn sm danger" data-act="yes">Ja, abbrechen</button></span>` : '<button class="btn quiet" data-act="stop">✕ Test abbrechen</button>'}</div>
-      <h2>${play ? 'Spiele diese Note auf dem Klavier' : 'Wie heißt diese Note?'}</h2><div class="place"><div id="plStaff"></div><div><div class="dots small" role="img" aria-label="Frage ${qi + 1} von ${total}">${dots}</div><p class="note ${/^(Richtig|Gut|Stufe)/.test(fb) ? 'ok' : 'warn'}" role="status">${fb}</p>
-      <p class="muted">${play ? 'Spiele die Note einmal, zügig, aber ohne Hektik. Die richtige Oktave zählt. Danach kommt von selbst die nächste.' : 'Tippe unten den Namen an, zügig, aber ohne Hektik. Danach kommt von selbst die nächste Note.'}</p></div></div>
+      <h2>${play ? `Spiele diese Note ${INSTR.onThe}` : 'Wie heißt diese Note?'}</h2><div class="place"><div id="plStaff"></div><div><div class="dots small" role="img" aria-label="Frage ${qi + 1} von ${total}">${dots}</div><p class="note ${/^(Richtig|Gut|Stufe)/.test(fb) ? 'ok' : 'warn'}" role="status">${fb}</p>
+      <p class="muted">${play ? `Spiele die Note einmal, zügig, aber ohne Hektik. ${INSTR.octave} Danach kommt von selbst die nächste.` : 'Tippe unten den Namen an, zügig, aber ohne Hektik. Danach kommt von selbst die nächste Note.'}</p></div></div>
       ${play ? '' : `<div class="answers small">${names.map(n => `<button class="btn ans" data-act="a" data-n="${n}">${n}</button>`).join('')}</div>`}`, {
       stop: () => { asking = true; render(); }, no: () => { asking = false; render(); }, yes: () => finish(), a: e => { const ok = letterName(cur) === e.dataset.n; fb = ok ? 'Richtig!' : `Das war ${nameStr(cur)}.`; app.audio.sfx(ok ? 'ok' : 'miss'); judge(ok); } }, 'wide');
     document.getElementById('plStaff').appendChild(staffCanvas(cur, st.clef));
@@ -109,7 +114,7 @@ export function map(app, world) {
   app.refreshLook();
   const p = app.profile; if (world == null) world = p.lastWorld || 0; if (!worldUnlocked(p, world)) world = 0; p.lastWorld = world; p.seenWorld = p.seenWorld || {};
   const W = WORLDS[world]; app.backdrop(W.theme);
-  if (!p.seenWorld[world]) { p.seenWorld[world] = 1; app.save(); return story(app, WORLD_INTRO[world], () => map(app, world), W.theme); }
+  if (!p.seenWorld[seenKey(world)]) { p.seenWorld[seenKey(world)] = 1; app.save(); return story(app, WORLD_INTRO[world], () => map(app, world), W.theme); }
   const ls = levelsOf(world), goal = p.goal || 5, today = Math.floor((p.days[dayKey()] || 0) / 60);
   app.screen(`<div class="maphead"><button class="chip" data-act="prof" aria-label="Profil wechseln"><span data-hero="${p.hero}" data-hat="${hatOf(p, totalStars(p))}" data-size="36"></span><b>${esc(p.name)}</b></button>
     <div class="row tight"><span class="pill goal ${today >= goal ? 'ok' : ''}" role="img" aria-label="Tagesziel: ${today} von ${goal} Minuten">Heute geübt: ${Math.min(today, goal)} von ${goal} Minuten<i style="width:${Math.min(100, 100 * today / goal)}%"></i></span><span class="pill">${totalStars(p)} Sterne</span></div></div>
@@ -124,39 +129,40 @@ export function map(app, world) {
 export function levelCard(app, level) {
   if (app.locked(level)) return paywall(app, level);
   const p = app.profile, needsPiano = level.type === 'jump' || level.type === 'boss', mic = app.audio.micState, keys = app.keysOn;
-  const how = { jump: 'Lies die leuchtende Note und spiele sie auf dem Klavier. Die richtige Oktave zählt!', boss: 'Spiele die Melodie Note für Note auf dem Klavier.', regen: 'Tippe den Namen der leuchtenden Note, bevor sie das Tor erreicht. 60 Sekunden!', bau: 'Schiebe die Note an die richtige Stelle und tippe auf „Setzen“.' }[level.type];
+  const how = { jump: `Lies die leuchtende Note und spiele sie ${INSTR.onThe}. ${INSTR.octave}`, boss: `Spiele die Melodie Note für Note ${INSTR.onThe}.`, regen: 'Tippe den Namen der leuchtenden Note, bevor sie das Tor erreicht. 60 Sekunden!', bau: 'Schiebe die Note an die richtige Stelle und tippe auf „Setzen“.' }[level.type];
   let micLine = '';
-  if (needsPiano) micLine = keys ? '<p class="note">Du spielst mit den Bildschirm-Tasten.</p>' : mic === 'on' ? '<p class="note ok">Mikrofon ist an.</p>' : mic === 'off' ? '<p class="note">Stell dein Tablet aufs Klavier. Das Spiel fragt gleich nach dem Mikrofon.</p>' : `<p class="note warn">${mic === 'denied' ? 'Das Mikrofon wurde nicht erlaubt.' : 'Hier gibt es kein Mikrofon.'} Öffne den Link direkt in Safari oder Chrome und erlaube dort das Mikrofon. Bis dahin kannst du mit den Bildschirm-Tasten spielen.</p>`;
+  if (needsPiano) micLine = keys ? `<p class="note">Du spielst mit: ${INSTR.pad}.</p>` : mic === 'on' ? '<p class="note ok">Mikrofon ist an.</p>' : mic === 'off' ? `<p class="note">${INSTR.place} Das Spiel fragt gleich nach dem Mikrofon.</p>` : `<p class="note warn">${mic === 'denied' ? 'Das Mikrofon wurde nicht erlaubt.' : 'Hier gibt es kein Mikrofon.'} Öffne den Link direkt in Safari oder Chrome und erlaube dort das Mikrofon. Bis dahin kannst du ohne Mikrofon spielen (${INSTR.pad}).</p>`;
   const blocked = needsPiano && !keys && (mic === 'denied' || mic === 'unsupported');
   app.screen(`<small class="kicker">${esc(WORLDS[level.world].name)} · ${TYPE_LABEL[level.type]}</small><h2>${esc(level.title)}</h2><p class="lead">${esc(LEVEL_STORY[level.id] || '')}</p><p>${how}</p>${micLine}
-    <div class="row"><button class="btn" data-act="back">Zurück</button><button class="btn" data-act="book">Was bisher geschah</button>${blocked ? '<button class="btn go" data-act="keys">Mit Bildschirm-Tasten</button><button class="btn" data-act="go">Mikrofon nochmal versuchen</button>' : '<button class="btn go" data-act="go">Los!</button>'}</div>`, {
+    <div class="row"><button class="btn" data-act="back">Zurück</button><button class="btn" data-act="book">Was bisher geschah</button>${blocked ? `<button class="btn go" data-act="keys">Ohne Mikrofon: ${INSTR.pad}</button><button class="btn" data-act="go">Mikrofon nochmal versuchen</button>` : '<button class="btn go" data-act="go">Los!</button>'}</div>`, {
     back: () => map(app), book: () => storyBook(app, level, () => levelCard(app, level)), keys: () => { app.keysSession = true; app.runLevel(level); },
     go: async () => { app.audio.ensure(); if (needsPiano && !keys) { app.audio.micState = app.audio.micState === 'on' ? 'on' : 'off'; const r = await app.audio.startMic(); if (r !== 'on') return levelCard(app, level);
       if (!p.calibrated) return calibrate(app, () => app.runLevel(level)); } app.runLevel(level); } });
 }
 
 export function calibrate(app, then) {
-  app.audio.stopMusic(); const p = app.profile, cents = [], peaks = [], g0 = app.audio.gain; let last = 'Ich höre noch nichts.', peak = 0; app.audio.setA4(440); app.audio.setGain(GAIN_PROBE); // zum Messen stark verstärkt hören
-  const finish = (skip) => { app.calib = null; if (!skip) { p.a4 = a4FromCents(cents); app.state.micGain = gainFor(peaks); } app.audio.setGain(skip ? g0 : app.state.micGain); p.calibrated = true; app.audio.setA4(p.a4); app.save(); then(); };
-  const render = () => app.screen(`<h2>Klavier einstimmen</h2><p>Spiele dreimal nacheinander das <b>c<sup>1</sup></b> – das mittlere c. So stellt sich das Spiel auf dein Klavier ein.</p>
+  app.audio.stopMusic(); const p = app.profile, cents = [], peaks = [], g0 = app.audio.gain; let last = 'Ich höre noch nichts.', peak = 0; app.audio.setA4(440); app.audio.probe(true); // zum Messen stark verstärkt hören
+  const finish = (skip) => { app.calib = null; app.audio.probe(false); if (!skip) { p.a4 = a4FromCents(cents); app.state.micGain = gainFor(peaks); app.state.micRef = refFor(peaks); app.audio.setRef(app.state.micRef); } app.audio.setGain(skip ? g0 : app.state.micGain); p.calibrated = true; app.audio.setA4(p.a4); app.save(); then(); };
+  const tune = N(INSTR.tuneKey), tuneMidi = midiOf(tune), want = isGuitar() ? 'die leere A-Saite' : 'das mittlere c';
+  const render = () => app.screen(`<h2>${INSTR.name} einstimmen</h2><p>${INSTR.tune} So stellt sich das Spiel auf dein Instrument und dein Mikrofon ein.</p>${isGuitar() ? '<p class="muted">Wichtig: Die Gitarre sollte vorher gestimmt sein (Stimmgerät oder Stimm-App), sonst erkennt das Spiel falsche Töne.</p>' : ''}
     <div class="calib"><div class="dots">${[0, 1, 2].map(i => `<i class="${i < cents.length ? 'on' : ''}"></i>`).join('')}</div><p id="calMsg" role="status">${last}</p><div class="meter big" id="calMeter" aria-hidden="true">${'<i></i>'.repeat(12)}</div></div>
     <div class="row"><button class="btn quiet" data-act="skip">Ohne Einstimmen weiter</button></div>`, { skip: () => finish(true) });
-  app.calib = { onNote(midi, ev) { const dev = (midi - 60) * 100 + (ev ? ev.cents : 0);
+  app.calib = { onNote(midi, ev) { const dev = (midi - tuneMidi) * 100 + (ev ? ev.cents : 0);
       if (Math.abs(dev) <= 80) { cents.push(dev); peaks.push(peak); peak = 0; last = `Gut! Noch ${3 - cents.length}×`; app.audio.sfx('ok'); if (cents.length >= 3) { const c = Math.round(cents.slice().sort((a, b) => a - b)[1]);
-        last = Math.abs(c) < 8 ? 'Dein Klavier ist gut gestimmt.' : `Dein Klavier klingt ${Math.abs(c)} Cent ${c > 0 ? 'höher' : 'tiefer'}. Das ist gespeichert.`; render(); app.calib = null; setTimeout(() => finish(false), 1600); return; } }
-      else last = `Das war ${nameStr(noteOfMidi(midi))} – ich brauche das mittlere c.`; render(); },
+        last = Math.abs(c) < 8 ? `${INSTR.tuned} ist gut gestimmt.` : `${INSTR.tuned} klingt ${Math.abs(c)} Cent ${c > 0 ? 'höher' : 'tiefer'}. Das ist gespeichert.`; render(); app.calib = null; setTimeout(() => finish(false), 1600); return; } }
+      else last = `Das war ${nameStr(noteOfMidi(midi))} – ich brauche ${want}.`; render(); },
     level(rms) { peak = Math.max(peak, rms / app.audio.gain); const m = document.getElementById('calMeter'); if (!m) return; rms = rms / app.audio.gain * gainFor([peak || 1]); const n = rms > 0 ? Math.max(0, Math.min(12, Math.round((Math.log10(rms) + 2.6) * 6))) : 0; [...m.children].forEach((b, i) => { b.className = i < n ? 'on' : ''; }); } };
   render();
 }
 
 /** Mikrofon-Pegel neu einstellen (Gerät oder Instrument gewechselt): drei beliebige Töne genügen. */
 export function levelCheck(app, then) {
-  app.audio.stopMusic(); const g0 = app.audio.gain, peaks = []; let peak = 0, msg = 'Spiele dreimal einen Ton – egal welchen, so laut wie du sonst spielst.', done = false; app.audio.setGain(GAIN_PROBE);
-  const close = ok => { app.calib = null; app.audio.setGain(ok ? app.state.micGain : g0); then(); };
+  app.audio.stopMusic(); const g0 = app.audio.gain, peaks = []; let peak = 0, msg = 'Spiele dreimal einen Ton – egal welchen, so laut wie du sonst spielst.', done = false; app.audio.probe(true);
+  const close = ok => { app.calib = null; app.audio.probe(false); app.audio.setGain(ok ? app.state.micGain : g0); then(); };
   const render = () => app.screen(`<h2>Mikrofon-Pegel</h2><p>${msg}</p><div class="calib"><div class="dots">${[0, 1, 2].map(i => `<i class="${i < peaks.length ? 'on' : ''}"></i>`).join('')}</div><div class="meter big" id="calMeter" aria-hidden="true">${'<i></i>'.repeat(12)}</div></div>
     <div class="row"><button class="btn quiet" data-act="x">${done ? 'Fertig' : 'Abbrechen'}</button></div>`, { x: () => close(done) });
   app.calib = { onNote() { if (done) return; peaks.push(peak); peak = 0; app.audio.sfx('ok');
-      if (peaks.length >= 3) { done = true; const g = gainFor(peaks); app.state.micGain = g; app.save(); msg = g > 1.2 ? `Eingestellt: Das Spiel hört jetzt ${String(g).replace('.', ',')}-mal so empfindlich hin.` : 'Eingestellt: Dein Mikrofon ist laut genug.'; render(); app.calib = null; app.audio.setGain(g); setTimeout(() => { if (done && !document.getElementById('screen').hidden && document.getElementById('calMeter')) close(true); }, 1800); return; }
+      if (peaks.length >= 3) { done = true; const g = gainFor(peaks); app.state.micGain = g; app.state.micRef = refFor(peaks); app.audio.setRef(app.state.micRef); app.save(); msg = g > 1.2 ? `Eingestellt: Das Spiel hört jetzt ${String(g).replace('.', ',')}-mal so empfindlich hin.` : 'Eingestellt: Dein Mikrofon ist laut genug.'; render(); app.calib = null; app.audio.probe(false); app.audio.setGain(g); setTimeout(() => { if (done && !document.getElementById('screen').hidden && document.getElementById('calMeter')) close(true); }, 1800); return; }
       msg = `Gut! Noch ${3 - peaks.length}×`; render(); },
     level(rms) { peak = Math.max(peak, rms / app.audio.gain); const m = document.getElementById('calMeter'); if (!m) return; const n = rms > 0 ? Math.max(0, Math.min(12, Math.round((Math.log10(rms / app.audio.gain * gainFor([peak || 1])) + 2.6) * 6))) : 0; [...m.children].forEach((b, i) => { b.className = i < n ? 'on' : ''; }); } };
   render();
@@ -207,20 +213,21 @@ export function pass(app) {
 export function board(app) {
   const rows = app.state.profiles.map(p => ({ p, s: totalStars(p) })).sort((a, b) => b.s - a.s || b.p.regenBest - a.p.regenBest);
   app.screen(`<div class="maphead"><h2>Bestenliste auf diesem Gerät</h2><button class="btn sm" data-act="back">Zurück</button></div>
-    <table class="board"><thead><tr><th>Platz</th><th>Name</th><th>Sterne</th><th>Notenwesen</th><th>Notenregen-Rekord</th><th>Training (Noten pro Minute)</th><th>Tage in Folge</th></tr></thead><tbody>${rows.map((r, i) => `<tr class="${r.p.id === app.profile.id ? 'me' : ''}"><td>${i + 1}.</td><td>${esc(r.p.name)}</td><td>${r.s}</td><td>${r.p.creatures.length}</td><td>${r.p.regenBest || '–'}</td><td>${(r.p.train && r.p.train[BOARD_DISC] && r.p.train[BOARD_DISC].best) || '–'}</td><td>${streak(r.p)}</td></tr>`).join('')}</tbody></table>
-    <p class="muted">Die Liste zeigt alle Profile, die auf diesem Gerät spielen. Training: Violinschlüssel am Klavier, 60 Sekunden.</p>`, { back: () => map(app) }, 'wide');
+    <table class="board"><thead><tr><th>Platz</th><th>Name</th><th>Sterne</th><th>Notenwesen</th><th>Notenregen-Rekord</th><th>Training (Noten pro Minute)</th><th>Tage in Folge</th></tr></thead><tbody>${rows.map((r, i) => `<tr class="${r.p.id === app.profile.id ? 'me' : ''}"><td>${i + 1}.</td><td>${esc(r.p.name)}</td><td>${r.s}</td><td>${r.p.creatures.length}</td><td>${r.p.regenBest || '–'}</td><td>${(r.p.train && Math.max((r.p.train['play-treble-time'] || {}).best || 0, (r.p.train['play-gall-time'] || {}).best || 0)) || '–'}</td><td>${streak(r.p)}</td></tr>`).join('')}</tbody></table>
+    <p class="muted">Die Liste zeigt alle Profile, die auf diesem Gerät spielen. Training: 60 Sekunden am Instrument (Klavier: Violinschlüssel, Gitarre: alle Saiten).</p>`, { back: () => map(app) }, 'wide');
 }
 export function settings(app, msg = '') {
   const p = app.profile, mic = { on: 'an', off: 'noch nicht eingeschaltet', denied: 'nicht erlaubt', unsupported: 'hier nicht verfügbar' }[app.audio.micState];
   const tg = (act, on, label, hint) => `<button class="toggle ${on ? 'on' : ''}" role="switch" aria-checked="${on}" data-act="${act}"><i></i><span><b>${label}</b><small>${hint}</small></span></button>`;
   app.screen(`<div class="maphead"><h2>Einstellungen</h2><button class="btn sm" data-act="back">Zurück</button></div><div class="setgrid">
-    <div class="card"><h3>Spielen</h3>${tg('mode', p.mode === 'profi', 'Profi-Spielart', 'Stoppuhr, Serien und weniger Tipps')}${tg('keys', p.keys, 'Bildschirm-Tasten', 'Ohne Klavier spielen: Tasten antippen')}${tg('mute', !app.audio.muted, 'Ton', 'Alles an oder aus: Musik, Spielklänge, Erfolgsmelodie')}${tg('music', p.music !== false, 'Titelmusik', 'Läuft nur in den Menüs, nie im Level')}<button class="btn sm" data-act="song">Titelmusik: ${(SONGS[app.state.song] || SONGS.tanz).name} (wechseln)</button> <button class="btn sm" data-act="goal">Tagesziel: ${p.goal || 5} Minuten (ändern)</button></div>
-    <div class="card"><h3>Mikrofon</h3><p>Mikrofon: <b>${mic}</b></p><p>Kammerton: <b>${Math.round(p.a4 * 10) / 10} Hz</b></p><button class="btn sm" data-act="cal">Mikrofon testen und Klavier einstimmen</button> <button class="btn sm" data-act="lvl">Nur Pegel anpassen</button><p class="muted">Pegel: ${(app.state.micGain || 1) > 1.2 ? `${String(app.state.micGain).replace('.', ',')}-fach verstärkt` : 'normal'} (gilt für dieses Gerät)</p><h3>Einstieg</h3><button class="btn sm" data-act="place">Einstufung machen</button> <button class="btn sm" data-act="info">Info und Datenschutz</button></div>
+    <div class="card"><h3>Spielen</h3>${tg('mode', p.mode === 'profi', 'Profi-Spielart', 'Stoppuhr, Serien und weniger Tipps')}${tg('keys', p.keys, INSTR.pad, INSTR.padDesc)}${tg('mute', !app.audio.muted, 'Ton', 'Alles an oder aus: Musik, Spielklänge, Erfolgsmelodie')}${tg('music', p.music !== false, 'Titelmusik', 'Läuft nur in den Menüs, nie im Level')}<button class="btn sm" data-act="song">Titelmusik: ${(SONGS[app.state.song] || SONGS.tanz).name} (wechseln)</button> <button class="btn sm" data-act="goal">Tagesziel: ${p.goal || 5} Minuten (ändern)</button> <button class="btn sm" data-act="instr">Instrument: ${INSTR.name} (wechseln)</button></div>
+    <div class="card"><h3>Mikrofon</h3><p>Mikrofon: <b>${mic}</b></p><p>Kammerton: <b>${Math.round(p.a4 * 10) / 10} Hz</b></p><button class="btn sm" data-act="cal">Mikrofon testen und ${INSTR.name} einstimmen</button> <button class="btn sm" data-act="lvl">Nur Pegel anpassen</button><p class="muted">Pegel: ${(app.state.micGain || 1) > 1.2 ? `${String(app.state.micGain).replace('.', ',')}-fach verstärkt` : 'normal'} (gilt für dieses Gerät)</p><h3>Einstieg</h3><button class="btn sm" data-act="place">Einstufung machen</button> <button class="btn sm" data-act="info">Info und Datenschutz</button></div>
     ${accountsOn() ? `<div class="card"><h3>Konto</h3>${p.acct ? `<p>Angemeldet als <b>${esc(p.acct.name)}</b>.</p><p class="muted">${p.acct.expired ? 'Bitte neu anmelden.' : p.acct.err ? 'Noch nicht gesichert – das Spiel versucht es später nochmal.' : `Online gesichert ${ago(p.acct.at)}.`}</p>` : '<p>Sichere deinen Spielstand online und spiele auf jedem Gerät weiter.</p>'}<button class="btn sm ${p.acct ? '' : 'go'}" data-act="acc">${p.acct ? 'Konto verwalten' : 'Konto anlegen oder anmelden'}</button></div>` : ''}
-    <div class="card"><h3>Spielstand mitnehmen</h3><p>Dein Kurzcode zum Aufschreiben:</p><p class="shortcode" aria-label="Kurzcode">${exportShort(p, worldIds())}</p><p class="muted">Der Kurzcode merkt sich, wie weit du bist. Alles (Name, Sterne, Übungspass) steckt im QR-Code.</p><button class="btn sm" data-act="exp">QR-Code und Link</button> <button class="btn sm" data-act="imp">Code eingeben</button></div>
+    <div class="card"><h3>Spielstand mitnehmen</h3><p>Dein Kurzcode zum Aufschreiben:</p><p class="shortcode" aria-label="Kurzcode">${exportShort(p, worldIds(), LEVEL_SET)}</p><p class="muted">Der Kurzcode merkt sich, wie weit du bist. Alles (Name, Sterne, Übungspass) steckt im QR-Code.</p><button class="btn sm" data-act="exp">QR-Code und Link</button> <button class="btn sm" data-act="imp">Code eingeben</button></div>
     <div class="card"><h3>Für Lehrkräfte</h3>${tg('unlock', p.unlockAll, 'Alle Level freischalten', 'Zum gezielten Üben einzelner Noten')}<button class="btn sm ${app._del ? 'danger' : ''}" data-act="del">${app._del ? 'Wirklich löschen? Nochmal tippen' : 'Dieses Profil löschen'}</button>${CONFIG.shop ? `<h3>Vollversion</h3><p>${app.licensed ? (app.license.until ? `Abo aktiv bis ${app.license.until.toLocaleDateString('de-DE')}` : 'Freigeschaltet (Einmalkauf)') : 'Noch nicht freigeschaltet'}</p>${app.licensed ? '' : '<button class="btn sm" data-act="buy">Vollversion ansehen</button>'}` : ''}</div></div><p class="note" role="status">${msg}</p>`, {
     back: () => { app._del = false; map(app); }, mode: () => { p.mode = p.mode === 'profi' ? 'abenteuer' : 'profi'; app.save(); settings(app); }, keys: () => { p.keys = !p.keys; app.save(); settings(app); },
     mute: () => { app.setMuted(!app.audio.muted); settings(app); },
+    instr: () => { if (isGuitar()) delete p.instr; else p.instr = 'gitarre'; p.calibrated = false; p.lastWorld = 0; app.save(); app.applyProfile(); settings(app, `Instrument: ${INSTR.name}. Dein Fortschritt für jedes Instrument bleibt getrennt erhalten.`); },
     song: () => { const ks = Object.keys(SONGS); app.state.song = ks[(ks.indexOf(app.state.song || 'tanz') + 1) % ks.length]; app.save(); app.audio.stopMusic(); app.applyProfile(); setTimeout(() => app.audio.startMusic(), 320); settings(app); },
     music: () => { p.music = p.music === false; app.save(); app.applyProfile(); if (p.music) app.audio.startMusic(); settings(app); }, info: () => about(app, () => settings(app)), unlock: () => { p.unlockAll = !p.unlockAll; app.save(); settings(app); },
     lvl: async () => { app.audio.ensure(); const r = await app.audio.startMic(); if (r !== 'on') return settings(app, 'Das Mikrofon ist nicht verfügbar.'); levelCheck(app, () => settings(app, 'Gespeichert.')); },
@@ -278,11 +285,11 @@ export async function shareSave(app) {
   document.getElementById('qrHere').appendChild(qrCanvas(link));
 }
 
-export const VERSION = '2.7 · 23.11.2026';
+export const VERSION = '2.8 · 26.11.2026';
 /** Info, Datenschutz und Quellen. */
 export function about(app, back) {
   app.screen(`<div class="maphead"><h2>Info und Datenschutz</h2><button class="btn sm" data-act="back">Zurück</button></div><div class="book">
-    <h3>Die Notenbrücke</h3><p>Ein Lernspiel zum Notenlesen am Klavier. Version ${VERSION}${CONFIG.shop ? ' · Kauf-Fassung' : ' · Test-Fassung'}.</p>
+    <h3>Die Notenbrücke</h3><p>Ein Lernspiel zum Notenlesen am Klavier und auf der Gitarre. Version ${VERSION}${CONFIG.shop ? ' · Kauf-Fassung' : ' · Test-Fassung'}.</p>
     <h3>Datenschutz in Kürze</h3><p><b>Mikrofon:</b> Das Spiel wertet den Ton direkt auf diesem Gerät aus, um die gespielte Note zu erkennen. Es wird nichts aufgenommen, gespeichert oder übertragen.</p>
     <p><b>Spielstände ohne Konto:</b> Name, Fortschritt und Übungszeiten liegen nur im Browser dieses Geräts. Sie verlassen das Gerät nur, wenn du selbst einen Code, QR-Code oder Link weitergibst.</p>
     ${CONFIG.apiUrl ? `<p><b>Mit Konto (freiwillig):</b> Gespeichert werden Benutzername, Passwort (nur verschlüsselt, als nicht umkehrbarer Hash), auf Wunsch eine E-Mail-Adresse sowie der Spielstand (Fortschritt, Übungszeiten, Einstellungen). Die Daten liegen in einer Datenbank beim Dienst Cloudflare und sind nur für die Lehrkraft einsehbar, die das Spiel betreibt. Sie werden nicht weitergegeben. Das Konto kann jederzeit über die Lehrkraft gelöscht werden. Es werden keine Cookies verwendet.</p>

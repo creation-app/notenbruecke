@@ -1,10 +1,11 @@
 // Lehrer-Seite: Anmeldung mit dem Lehrer-Passwort, Übersicht über Konten und anonyme Nutzung, Passwort zurücksetzen, Konto löschen.
-import { LEVELS, WORLDS } from './levels.js';
+import { ALL_LEVELS as LEVELS, SETS } from './levels.js';
 const API = (window.NB_API || '').replace(/\/+$/, ''), $ = id => document.getElementById(id), app = $('app');
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const LV = Object.fromEntries(LEVELS.map((l, i) => [l.id, { ...l, i, worldName: (WORLDS[l.world] || {}).short || l.world }]));
+const SET_OF = l => (SETS.gitarre.levels.includes(l) ? SETS.gitarre : SETS.klavier);
+const LV = Object.fromEntries(LEVELS.map((l, i) => [l.id, { ...l, i, worldName: (SET_OF(l) === SETS.gitarre ? 'Gitarre · ' : '') + ((SET_OF(l).worlds[l.world] || {}).short || l.world) }]));
 const TYPE = { jump: 'Springen (Klavier)', boss: 'Melodie (Klavier)', melodie: 'Melodie (Klavier)', regen: 'Notenregen (Antippen)', bau: 'Brückenbauer', train: 'Training', menue: 'Menüs, Karte, Geschichte' };
-const DISC = d => { const m = /^(play|name)-(treble|bass|both)(\+v)?-(time|count)$/.exec(d); return m ? `${{ treble: 'Violinschlüssel', bass: 'Bassschlüssel', both: 'Beide Schlüssel' }[m[2]]}${m[3] ? ' mit Vorzeichen' : ''} · ${m[1] === 'play' ? 'Klavier' : 'Antippen'} · ${m[4] === 'time' ? '60 s' : '20 Noten'}` : d === 'wackelnoten' ? 'Wackelnoten' : d; };
+const DISC = d => { const m = /^(play|name)-(treble|bass|both|g0|g1|g2|gall)(\+v)?-(time|count)$/.exec(d); return m ? `${{ treble: 'Violinschlüssel', bass: 'Bassschlüssel', both: 'Beide Schlüssel', g0: 'Gitarre: hohe Saiten', g1: 'Gitarre: mittlere Saiten', g2: 'Gitarre: tiefe Saiten', gall: 'Gitarre: alle Saiten' }[m[2]]}${m[3] ? ' mit Vorzeichen' : ''} · ${m[1] === 'play' ? (m[2][0] === 'g' ? 'Gitarre' : 'Klavier') : 'Antippen'} · ${m[4] === 'time' ? '60 s' : '20 Noten'}` : d === 'wackelnoten' ? 'Wackelnoten' : d; };
 let token = sessionStorage.getItem('nbLehrer') || '', days = 30, scope = 'alle', data = null, open = null;
 async function call(path, opt = {}) {
   try { const r = await fetch(API + path, { method: opt.method || (opt.body ? 'POST' : 'GET'), headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}) }, body: opt.body ? JSON.stringify(opt.body) : undefined }); const j = await r.json().catch(() => ({})); return { ...j, ok: r.ok, status: r.status }; }
@@ -56,8 +57,8 @@ function userRows(q) {
 }
 function detail(u) {
   const s = u.summary || {}, ls = s.levelStars || {};
-  return `<div class="det"><div><h3>Fortschritt</h3><p>Angelegt am ${day(u.created)} · an ${s.daysPlayed || 0} Tagen gespielt · zuletzt ${s.lastDay ? day(s.lastDay) : '–'} · ${s.creatures || 0} Notenwesen · Spielart: ${s.mode === 'profi' ? 'Profi' : 'Abenteuer'}</p>
-    ${WORLDS.map((w, wi) => `<p class="wl"><b>${esc(w.short)}</b> ${LEVELS.filter(l => l.world === wi).map(l => `<span class="lv s${ls[l.id] || 0}" title="${esc(l.title)}: ${ls[l.id] || 0} Sterne">${'★'.repeat(ls[l.id] || 0) || '·'}</span>`).join('')}</p>`).join('')}</div>
+  return `<div class="det"><div><h3>Fortschritt</h3><p>Angelegt am ${day(u.created)} · an ${s.daysPlayed || 0} Tagen gespielt · zuletzt ${s.lastDay ? day(s.lastDay) : '–'} · ${s.creatures || 0} Notenwesen · Spielart: ${s.mode === 'profi' ? 'Profi' : 'Abenteuer'}${s.instr === 'gitarre' ? ' · Instrument: Gitarre' : ''}</p>
+    ${[SETS.klavier, SETS.gitarre].filter((set, si) => si === 0 ? set.levels.some(l => ls[l.id]) || !SETS.gitarre.levels.some(l => ls[l.id]) : set.levels.some(l => ls[l.id])).map(set => set.worlds.map((w, wi) => `<p class="wl"><b>${set === SETS.gitarre ? 'Gitarre · ' : ''}${esc(w.short)}</b> ${set.levels.filter(l => l.world === wi).map(l => `<span class="lv s${ls[l.id] || 0}" title="${esc(l.title)}: ${ls[l.id] || 0} Sterne">${'★'.repeat(ls[l.id] || 0) || '·'}</span>`).join('')}</p>`).join('')).join('')}</div>
     <div><h3>Passwort zurücksetzen</h3><form id="rp"><input id="rpw" minlength="6" maxlength="100" required placeholder="Neues Passwort (mind. 6 Zeichen)" autocomplete="off"><button>Setzen</button></form><p id="rmsg"></p><h3>Konto löschen</h3><button id="del" class="danger">Konto löschen</button></div></div>`;
 }
 token ? load() : loginView();

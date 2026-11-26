@@ -29,6 +29,8 @@ export class RegenScene {
     } else { if (!a.tried) { a.tried = true; this.wrong++; const ck = `${a.n.key}>${l}`; p.conf[ck] = (p.conf[ck] || 0) + 1; } this.combo = 0; app.audio.sfx('oops'); btn.classList.add('shake'); setTimeout(() => btn.classList.remove('shake'), 350); }
     this.hudUpdate();
   }
+  /** Schmaler Bildschirm (hochkant): Der Weg bis zum Tor ist kürzer – die Noten fliegen entsprechend langsamer, damit gleich viel Zeit zum Lesen bleibt. */
+  narrow() { return Math.max(0.45, Math.min(1, (G.VIEW_W - GATE) / 268)); }
   update(dt) {
     this.t += dt; this.parts.update(dt); const { app } = this;
     if (this.done) return;
@@ -37,7 +39,7 @@ export class RegenScene {
       const th = app.profile.mode === 'profi' ? [12, 20, 28] : [8, 14, 20]; const stars = this.correct >= th[2] ? 3 : this.correct >= th[1] ? 2 : 1;
       app.finishLevel(this.level, { stars, score: this.score, freed: [], line: `<b>${this.correct}</b> Noten richtig erkannt &middot; <b>${this.score}</b> Punkte` }); return; }
     if (this.freeze > 0) { this.freeze -= dt; if (this.freeze <= 0) { this.notes.shift(); this.spawn(this.notes[this.notes.length - 1].x + SPACING); } return; }
-    for (const n of this.notes) n.x -= this.speed * dt;
+    for (const n of this.notes) n.x -= this.speed * this.narrow() * dt;
     const a = this.active;
     if (a && a.x <= GATE) { a.x = GATE; a.missed = true; this.freeze = 1.3; this.combo = 0; this.missed = (this.missed || 0) + 1; this.speed = Math.max(16, this.speed * 0.82);
       app.profile.notes[a.n.key] = srsUpdate(app.profile.notes[a.n.key] || newStat(), false); app.audio.sfx('miss'); app.bubble(`Das war <b>${nameHtml(a.n)}</b>.`, 1.3); this.hudUpdate(); }

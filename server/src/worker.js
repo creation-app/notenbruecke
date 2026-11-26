@@ -24,10 +24,10 @@ export function summarize(p, now = Date.now()) {
   p = p && typeof p === 'object' ? p : {}; const lv = p.levels || {}, days = p.days || {}, train = p.train || {};
   const lstars = Object.values(lv).reduce((a, l) => a + ((l && l.stars) || 0), 0), tstars = Object.values(train).reduce((a, t) => a + ((t && t.stars) || 0), 0);
   let week = 0; for (let i = 0; i < 7; i++) week += +days[today(now - i * DAY)] || 0;
-  const dk = Object.keys(days).filter(k => days[k] > 0).sort(), notes = Object.values(p.notes || {}), tb = train['play-treble-time'];
+  const dk = Object.keys(days).filter(k => days[k] > 0).sort(), notes = Object.values(p.notes || {}), tbest = Math.max((train['play-treble-time'] || {}).best || 0, (train['play-gall-time'] || {}).best || 0);
   return { stars: lstars + tstars, levels: Object.keys(lv).filter(k => lv[k] && lv[k].stars > 0).length, creatures: (p.creatures || []).length, minutesTotal: Math.round(Object.values(days).reduce((a, s) => a + (+s || 0), 0) / 60),
     minutesWeek: Math.round(week / 60), lastDay: dk[dk.length - 1] || null, daysPlayed: dk.length, mode: p.mode || null, sure: notes.filter(n => n && n.box >= 3).length, seenNotes: notes.length,
-    trainBest: tb ? tb.best || 0 : 0, trainRuns: Object.values(train).reduce((a, t) => a + ((t && t.runs && t.runs.length) || 0), 0), stars3: Object.values(lv).filter(l => l && l.stars >= 3).length,
+    trainBest: tbest, instr: p.instr === 'gitarre' ? 'gitarre' : 'klavier', trainRuns: Object.values(train).reduce((a, t) => a + ((t && t.runs && t.runs.length) || 0), 0), stars3: Object.values(lv).filter(l => l && l.stars >= 3).length,
     levelStars: Object.fromEntries(Object.entries(lv).map(([k, l]) => [k, (l && l.stars) || 0])) };
 }
 
