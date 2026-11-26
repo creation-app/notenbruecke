@@ -10,7 +10,9 @@ export class RegenScene {
   enter() {
     const { app, level } = this; this.clef = level.clef; this.theme = level.theme; this.bg = app.background(level.theme); this.line = G.THEMES[level.theme].line;
     this.notes = []; this.t = 0; this.left = DURATION; this.correct = 0; this.wrong = 0; this.combo = 0; this.score = 0; this.freeze = 0; this.last = null; this.parts = new G.Particles(); this.started = false;
-    this.speed = app.profile.mode === 'profi' ? 30 : 20; this.maxSpeed = app.profile.mode === 'profi' ? 85 : 60;
+    const base = app.profile.mode === 'profi' ? 30 : 20; this.maxSpeed = app.profile.mode === 'profi' ? 85 : 60; this.missed = 0;
+    // Wer beim letzten Mal schnell und sicher war, startet gleich zügiger (höchstens 18 über dem Grundtempo).
+    this.speed = Math.max(base, Math.min(base + 18, 0.75 * (app.profile.regenPace || 0)));
     const order = ['c', 'cis', 'des', 'd', 'dis', 'es', 'e', 'f', 'fis', 'g', 'gis', 'as', 'a', 'b', 'h'];
     const names = [...new Set(level.notes.map(k => letterName(N(k))))].sort((a, b) => order.indexOf(a) - order.indexOf(b));
     app.panel.showMic(false); app.panel.answers(names, (l, btn) => this.answer(l, btn)); app.panel.task('Tippe <b>unten den Namen</b> der Note an, bevor sie das rote Tor erreicht.'); app.hud.show(level.title, true); app.hud.progress(0, 0);
@@ -24,7 +26,9 @@ export class RegenScene {
     const a = this.active, { app } = this, p = app.profile; if (!a || this.freeze > 0 || this.left <= 0) return; this.started = true;
     if (letterName(a.n) === l) {
       p.notes[a.n.key] = srsUpdate(p.notes[a.n.key] || newStat(), !a.tried); this.correct++; this.combo = a.tried ? 0 : this.combo + 1; this.score += 10 + Math.min(10, this.combo);
-      this.speed = Math.min(this.maxSpeed, this.speed + 1.6); this.parts.burst(a.x, G.yOfPos(a.pos), [G.C.YE, G.C.W, G.C.OR], 14); app.audio.sfx('ok');
+      // Tempo passt sich dem Kind an: Wer in Serie richtig liegt UND früh antwortet (die Note ist noch weit vom Tor), wird deutlich schneller schneller.
+      const room = Math.max(0, Math.min(1, (a.x - GATE) / (G.VIEW_W - GATE))), inc = a.tried ? 0.8 : this.combo >= 5 && room >= 0.7 ? 7 : this.combo >= 3 && room >= 0.5 ? 4 : 1.6;
+      this.speed = Math.min(this.maxSpeed + (this.combo >= 8 ? 20 : 0), this.speed + inc); this.parts.burst(a.x, G.yOfPos(a.pos), [G.C.YE, G.C.W, G.C.OR], 14); app.audio.sfx('ok');
       this.notes.shift(); this.spawn(this.notes[this.notes.length - 1].x + SPACING);
     } else { if (!a.tried) { a.tried = true; this.wrong++; const ck = `${a.n.key}>${l}`; p.conf[ck] = (p.conf[ck] || 0) + 1; } this.combo = 0; app.audio.sfx('oops'); btn.classList.add('shake'); setTimeout(() => btn.classList.remove('shake'), 350); }
     this.hudUpdate();
@@ -37,11 +41,12 @@ export class RegenScene {
     if (this.started) { this.left -= dt; const el = document.getElementById('rTime'); if (el) el.textContent = Math.max(0, Math.ceil(this.left)); }
     if (this.left <= 0) { this.done = true; app.audio.sfx('done'); const total = this.correct + this.wrong + this.missed || 1;
       const th = app.profile.mode === 'profi' ? [12, 20, 28] : [8, 14, 20]; const stars = this.correct >= th[2] ? 3 : this.correct >= th[1] ? 2 : 1;
+      app.profile.regenPace = this.missed <= 1 && this.correct >= 8 && this.wrong <= this.correct * 0.1 ? Math.round(this.speed) : 0;
       app.finishLevel(this.level, { stars, score: this.score, freed: [], line: `<b>${this.correct}</b> Noten richtig erkannt &middot; <b>${this.score}</b> Punkte` }); return; }
     if (this.freeze > 0) { this.freeze -= dt; if (this.freeze <= 0) { this.notes.shift(); this.spawn(this.notes[this.notes.length - 1].x + SPACING); } return; }
-    for (const n of this.notes) n.x -= this.speed * this.narrow() * dt;
-    const a = this.active;
-    if (a && a.x <= GATE) { a.x = GATE; a.missed = true; this.freeze = 1.3; this.combo = 0; this.missed = (this.missed || 0) + 1; this.speed = Math.max(16, this.speed * 0.82);
+    const a = this.active, ahead = a && a.x > G.VIEW_W + 4; // Kind ist schneller als der Notenregen: Die nächsten Noten rücken sofort auf, statt Wartezeit zu erzeugen
+    for (const n of this.notes) n.x -= (ahead ? Math.max(260, this.speed * 4) : this.speed * this.narrow()) * dt;
+    if (a && a.x <= GATE) { a.x = GATE; a.missed = true; this.freeze = 1.3; this.combo = 0; this.missed++; this.speed = Math.max(16, this.speed * 0.82);
       app.profile.notes[a.n.key] = srsUpdate(app.profile.notes[a.n.key] || newStat(), false); app.audio.sfx('miss'); app.bubble(`Das war <b>${nameHtml(a.n)}</b>.`, 1.3); this.hudUpdate(); }
   }
   draw(ctx, tx) {

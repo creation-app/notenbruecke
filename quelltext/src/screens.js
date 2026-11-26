@@ -34,7 +34,7 @@ export function fill(root) { root.querySelectorAll('[data-cr]').forEach(e => e.a
 export function title(app) {
   app.backdrop('himmel'); const has = app.state.profiles.length > 0;
   app.screen(`<div class="title"><div class="logo">DIE<br>NOTENBRÜCKE</div><p class="sub">Ein Abenteuer auf fünf Linien</p>
-    <button class="btn big" data-act="go">${has ? 'Weiterspielen' : 'Neues Spiel'}</button>${has ? '<p><button class="btn" data-act="quick">Schnelles Training</button></p>' : ''}${accountsOn() ? '<p><button class="btn" data-act="acc">Mit Konto anmelden</button></p>' : ''}<p><button class="btn sm" data-act="info">Info und Datenschutz</button></p></div>`, { acc: () => { app.audio.ensure(); loginForm(app, () => title(app)); }, go: () => { app.audio.ensure(); app.musicReady = true; app.audio.startMusic(); has ? profiles(app) : newProf(app); },
+    <button class="btn big" data-act="go">${has ? 'Weiterspielen' : 'Neues Spiel'}</button>${has ? '<p><button class="btn" data-act="quick">Freies Training</button></p>' : ''}${accountsOn() ? '<p><button class="btn" data-act="acc">Mit Konto anmelden</button></p>' : ''}<p><button class="btn sm" data-act="info">Info und Datenschutz</button></p></div>`, { acc: () => { app.audio.ensure(); loginForm(app, () => title(app)); }, go: () => { app.audio.ensure(); app.musicReady = true; app.audio.startMusic(); has ? profiles(app) : newProf(app); },
     quick: () => { app.audio.ensure(); app.musicReady = true; app.audio.startMusic(); if (app.state.profiles.length === 1) { app.state.current = app.state.profiles[0].id; app.save(); app.applyProfile(); trainSetup(app); } else profiles(app, 'train'); }, info: () => about(app, () => title(app)) }, 'clear');
 }
 export function profiles(app, to) {
@@ -121,7 +121,7 @@ export function map(app, world) {
     <h3 class="mapq">Wähle eine Welt und dann ein Level:</h3>
     <div class="tabs" role="tablist">${WORLDS.map((w, i) => { const open = worldUnlocked(p, i); return `<button role="tab" aria-selected="${i === world}" class="tab ${i === world ? 'sel' : ''}" ${open ? '' : 'disabled'} data-act="world" data-w="${i}">${open ? esc(w.name) : `Noch im Nebel: ${WORLDS[i].need} Level in „${WORLDS[prevWorld(i)].short}“ schaffen`}</button>`; }).join('')}</div>
     <div class="nodes">${ls.map((l, i) => { const open = levelUnlocked(p, l), rec = p.levels[l.id]; return `<button class="node t-${l.type} ${rec ? 'done' : ''}" ${open ? '' : 'disabled'} data-act="lvl" data-id="${l.id}"><span class="num">${i + 1}</span><b>${esc(l.title)}</b><small>${TYPE_LABEL[l.type]}</small>${!open ? '<small class="lock">im Nebel</small>' : app.locked(l) ? '<small class="lock full">Vollversion</small>' : stars(rec ? rec.stars : 0)}</button>`; }).join('')}</div>
-    <nav class="mapnav" aria-label="Bereiche"><button class="btn tr" data-act="train"><b>Training</b><small>Tempo und Treffer</small></button><button class="btn" data-act="coll"><b>Sammlung</b><small>${p.creatures.length} von ${creatureTotal()} Wesen · Hüte</small></button><button class="btn" data-act="pass"><b>Übungspass</b><small>Dein Fortschritt</small></button><button class="btn" data-act="book"><b>Geschichte</b><small>Nachlesen</small></button><button class="btn" data-act="board"><b>Bestenliste</b><small>Auf diesem Gerät</small></button><button class="btn" data-act="set"><b>Einstellungen</b><small>${accountsOn() ? (p.acct ? 'Konto, Ton, Mikro' : 'Ton, Mikro, Konto') : 'Ton, Mikro, Code'}</small></button></nav>`, {
+    <nav class="mapnav" aria-label="Bereiche"><button class="btn tr" data-act="train"><b>Freies Training</b><small>Tempo üben, ohne Level</small></button><button class="btn" data-act="coll"><b>Sammlung</b><small>${p.creatures.length} von ${creatureTotal()} Wesen · Hüte</small></button><button class="btn" data-act="pass"><b>Übungspass</b><small>Dein Fortschritt</small></button><button class="btn" data-act="book"><b>Geschichte</b><small>Nachlesen</small></button><button class="btn" data-act="board"><b>Bestenliste</b><small>Auf diesem Gerät</small></button><button class="btn" data-act="set"><b>Einstellungen</b><small>${accountsOn() ? (p.acct ? 'Konto, Ton, Mikro' : 'Ton, Mikro, Konto') : 'Ton, Mikro, Code'}</small></button></nav>`, {
     prof: () => profiles(app), train: () => trainSetup(app), coll: () => collection(app), pass: () => pass(app), board: () => board(app), set: () => settings(app), book: () => storyBook(app, null, () => map(app, world)),
     world: e => map(app, +e.dataset.w), lvl: e => levelCard(app, LEVELS.find(l => l.id === e.dataset.id)) }, 'wide');
 }
@@ -285,7 +285,7 @@ export async function shareSave(app) {
   document.getElementById('qrHere').appendChild(qrCanvas(link));
 }
 
-export const VERSION = '2.8 · 26.11.2026';
+export const VERSION = '2.9 · 26.11.2026';
 /** Info, Datenschutz und Quellen. */
 export function about(app, back) {
   app.screen(`<div class="maphead"><h2>Info und Datenschutz</h2><button class="btn sm" data-act="back">Zurück</button></div><div class="book">

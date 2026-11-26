@@ -108,7 +108,10 @@ class App {
   hudCr() { const p = this.profile; this.$('hudCr').innerHTML = `Notenwesen <b>${p ? p.creatures.length : 0}</b>`; }
 
   screen(html, handlers = {}, cls = '') {
-    const sc = this.$('screen'); sc.hidden = false; sc.className = cls; sc.innerHTML = `<div class="sheet">${html}</div>`; S.fill(sc);
+    const sc = this.$('screen'); sc.hidden = false; sc.className = cls; sc.innerHTML = `<div class="sheet">${html}</div>`;
+    // Feste Fußleiste (Karten-Leiste, „Los!“-Knopf): Der Inhalt darüber scrollt in einem eigenen Bereich. Kein „sticky“ – das schwebt in Safari bei vergrößerten Menüs an der falschen Stelle.
+    { const sheet = sc.firstElementChild, foot = sheet.querySelector(':scope > .mapnav, :scope > .stick'); if (foot) { const body = document.createElement('div'); body.className = 'sbody'; while (sheet.firstChild && sheet.firstChild !== foot) body.appendChild(sheet.firstChild); sheet.insertBefore(body, foot); sheet.classList.add('split'); } }
+    S.fill(sc);
     sc.onclick = e => { const b = e.target.closest('[data-act]'); if (b && !b.disabled && handlers[b.dataset.act]) handlers[b.dataset.act](b); };
     const f = sc.querySelector('.go,[data-act]'); if (f && document.activeElement && document.activeElement.tagName !== 'INPUT') f.focus({ preventScroll: true });
   }
