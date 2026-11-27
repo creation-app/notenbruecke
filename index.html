@@ -101,7 +101,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:4px soli
 /* Menüs */
 #screen{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:rgba(23,40,66,.55);padding:20px}
 /* Handy: Menüs und Knöpfe vergrößert, dafür wird bei Bedarf gescrollt */
-#stage.phone #screen{zoom:1.45;padding:8px}#stage.phone .sheet{max-height:538px;padding:14px 18px}#stage.phone #screen.wide .sheet{height:538px;max-width:none}#stage.phone #screen.low{padding-bottom:14px}
+#stage.phone #screen{inset:auto;left:0;top:0;width:calc(100% / 1.45);height:calc(100% / 1.45);transform:scale(1.45);transform-origin:0 0;padding:8px}#stage.phone .sheet{max-height:538px;padding:14px 18px}#stage.phone #screen.wide .sheet{height:538px;max-width:none}#stage.phone #screen.low{padding-bottom:14px}
 /* iPad: hohes Bedienfeld – größere Tasten und Knöpfe statt leerer Fläche */
 #stage.tall .kb{transform:scale(1.22,1.85);transform-origin:right center;margin-left:120px}#stage.tall .kb span{display:inline-block;transform:scaleX(1.5)}#stage.tall .mic-l2{font-size:32px}#stage.tall .mic-l1{font-size:26px}#stage.tall .btn.ans{min-height:170px;min-width:140px;font-size:58px}#stage.tall .btn.sq,#stage.tall .bauctl .go{min-height:150px}#stage.tall .btn.sq{width:150px;font-size:56px}#stage.tall .bauctl .go{font-size:44px}
 #stage.phone .kb{transform:scale(1.7,1.1);transform-origin:right center;margin-left:381px}#stage.phone .kb span{display:inline-block;transform:scaleX(.75)}#stage.phone #sndHud,#stage.phone #pauseBtn{zoom:1.5}
@@ -168,7 +168,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 .lock.full{color:#8A4B00;font-weight:700}
 .toggle{display:flex;align-items:center;gap:14px;width:100%;min-height:60px;background:none;border:none;text-align:left;padding:6px 0}.toggle span{display:flex;flex-direction:column}
 .toggle i{flex:none;width:60px;height:32px;background:#B9A98A;border:4px solid var(--k);position:relative}.toggle i::after{content:"";position:absolute;left:2px;top:2px;width:20px;height:20px;background:var(--k)}
-.toggle.on i{background:var(--g1)}.toggle.on i::after{left:30px}
+.toggle.on i{background:var(--g1)}.toggle{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}.toggle *{pointer-events:none}.toggle.off i,.toggle:disabled i{opacity:.4}.toggle.off b,.toggle:disabled b{color:#6B7280}.toggle small.why{background:var(--y1,#FFD75E);color:var(--k);font-weight:700;padding:3px 8px;margin-top:2px}.toggle.on i::after{left:30px}
 .calib{text-align:center;background:#F3E3C3;padding:14px;margin-top:10px}.dots{display:flex;gap:14px;justify-content:center}.dots i{width:34px;height:34px;border:4px solid var(--k);background:#fff}.dots i.on{background:var(--g1)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
 
@@ -5429,7 +5429,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
           return null;
         }
       };
-      VERSION = "2.9 \xB7 26.11.2026";
+      VERSION = "2.10 \xB7 27.11.2026";
     }
   });
 
@@ -5476,7 +5476,9 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       start2();
     };
     const seg = (act, v, on, title2, sub, o = {}) => `<button class="btn opt seg ${on ? "sel" : ""}" data-act="${act}" data-v="${v}" ${o.dis ? "disabled" : ""} aria-pressed="${on}"><b>${title2}</b><small>${o.lock ? "Nur in der Vollversion" : sub}</small></button>`;
+    let shown = false, why = false;
     const render = () => {
+      const old = shown && document.querySelector("#screen .sbody"), keepY = old ? old.scrollTop : 0;
       const mic = app.audio.micState, keys = app.keysOn, play = cfg.input === "play", blocked = play && !keys && (mic === "denied" || mic === "unsupported"), d = disc(cfg), t = d && p.train && p.train[d], accOff = cfg.range === "bass" || cfg.weak;
       const micLine = !play ? "" : keys ? `<p class="note">Du spielst mit: ${INSTR.pad}.</p>` : mic === "on" ? '<p class="note ok">Mikrofon ist an.</p>' : mic === "off" ? `<p class="note">${INSTR.place} Das Spiel fragt gleich nach dem Mikrofon.</p>` : `<p class="note warn">${mic === "denied" ? "Das Mikrofon wurde nicht erlaubt." : "Hier gibt es kein Mikrofon."} Du kannst ohne Mikrofon spielen (${INSTR.pad}) oder \u201ENamen antippen\u201C w\xE4hlen.</p>`;
       const rec = cfg.weak ? "Hier geht es nur ums \xDCben: Wackelnoten-Runden z\xE4hlen nicht als Rekord." : t && t.best ? `Dein Rekord hier: <b>${t.best}</b> Noten pro Minute.` : "Hier hast du noch keinen Rekord.";
@@ -5484,7 +5486,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       <h3 class="segq">1. Wie antwortest du?</h3><div class="segrow c2">${seg("in", "play", play, INSTR.play, isGuitar() ? "Mit Mikrofon \u2013 die richtige Saite z\xE4hlt" : "Mit Mikrofon \u2013 die richtige Oktave z\xE4hlt")}${seg("in", "name", !play, "Namen antippen", "Ohne Klavier, nur lesen")}</div>
       <h3 class="segq">2. Welche Noten?</h3>${isGuitar() ? `<div class="segrow c4">${[["g0", "e-Saite und h-Saite"], ["g1", "g-Saite und d-Saite"], ["g2", "A-Saite und E-Saite"], ["gall", "Alle 17 T\xF6ne"]].map(([v, sub], i) => seg("range", v, !cfg.weak && cfg.range === v, rangeLabel(v), sub, { lock: !full && i > 0 })).join("")}</div>
       <button class="toggle ${cfg.weak ? "on" : ""}" data-act="range" data-v="${cfg.weak ? cfg.range : "weak"}" role="switch" aria-checked="${cfg.weak}" ${full && weakN < WEAK_MIN ? "disabled" : ""}><i></i><span><b>Nur meine Wackelnoten</b><small>${!full ? "Nur in der Vollversion" : weakN >= WEAK_MIN ? `${weakN} Noten, die noch nicht sitzen` : "Erst ab 3 unsicheren Noten"}</small></span></button>` : `<div class="segrow c4">${seg("range", "treble", !cfg.weak && cfg.range === "treble", "Violinschl\xFCssel", "c<sup>1</sup> bis a<sup>2</sup>")}${seg("range", "bass", !cfg.weak && cfg.range === "bass", "Bassschl\xFCssel", "C bis c<sup>1</sup>", { lock: !full })}${seg("range", "both", !cfg.weak && cfg.range === "both", "Beide Schl\xFCssel", "Die Schl\xFCssel wechseln", { lock: !full })}${seg("range", "weak", cfg.weak, "Meine Wackelnoten", weakN >= WEAK_MIN ? `${weakN} Noten, die noch nicht sitzen` : "Erst ab 3 unsicheren Noten", { dis: full && weakN < WEAK_MIN, lock: !full })}</div>
-      <button class="toggle ${cfg.acc ? "on" : ""}" data-act="acc" role="switch" aria-checked="${cfg.acc}" ${accOff ? "disabled" : ""}><i></i><span><b>Mit Vorzeichen (\u266F und \u266D)</b><small>${!full ? "Nur in der Vollversion" : accOff ? "Gibt es bisher nur im Violinschl\xFCssel" : "Kreuze und Bes aus dem Land der Zauberzeichen"}</small></span></button>`}
+      <button class="toggle ${cfg.acc ? "on" : ""} ${accOff ? "off" : ""}" data-act="acc" role="switch" aria-checked="${cfg.acc}" aria-disabled="${accOff}"><i></i><span><b>Mit Vorzeichen (\u266F und \u266D)</b><small class="${accOff && why ? "why" : ""}">${!full ? "Nur in der Vollversion" : accOff ? cfg.weak ? "Geht nicht bei den Wackelnoten \u2013 w\xE4hle oben einen Schl\xFCssel" : "Gibt es bisher nur im Violinschl\xFCssel \u2013 w\xE4hle oben \u201EViolinschl\xFCssel\u201C oder \u201EBeide Schl\xFCssel\u201C" : "Kreuze und Bes aus dem Land der Zauberzeichen"}</small></span></button>`}
       <h3 class="segq">3. Wie lange?</h3><div class="segrow c2">${seg("len", "time", cfg.len === "time", "60 Sekunden", "So viele Noten wie m\xF6glich")}${seg("len", "count", cfg.len === "count", "20 Noten", "In Ruhe \u2013 die Uhr l\xE4uft nur mit")}</div>
       <p class="note" id="trainRec">${rec}</p>${micLine}
       <div class="row stick">${blocked ? `<button class="btn go" data-act="keys">Ohne Mikrofon: ${INSTR.pad}</button><button class="btn" data-act="go">Mikrofon nochmal versuchen</button>` : '<button class="btn go big" data-act="go">Los!</button>'}</div>`, {
@@ -5514,11 +5516,19 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         },
         acc: () => {
           if (!full) return paywall(app, null);
+          if (accOff) {
+            why = true;
+            return render();
+          }
           cfg.acc = !cfg.acc;
           fix();
           render();
         }
       }, "wide");
+      const sb = document.querySelector("#screen .sbody");
+      if (sb && keepY) sb.scrollTop = keepY;
+      shown = true;
+      why = false;
     };
     render();
   }

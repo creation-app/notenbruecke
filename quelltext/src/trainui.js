@@ -17,7 +17,9 @@ export function trainSetup(app, preset, back) {
   const go = async keys => { app.audio.ensure(); if (keys) app.keysSession = true;
     if (cfg.input === 'play' && !app.keysOn) { app.audio.micState = app.audio.micState === 'on' ? 'on' : 'off'; const r = await app.audio.startMic(); if (r !== 'on') return render(); if (!p.calibrated) return calibrate(app, start); } start(); };
   const seg = (act, v, on, title, sub, o = {}) => `<button class="btn opt seg ${on ? 'sel' : ''}" data-act="${act}" data-v="${v}" ${o.dis ? 'disabled' : ''} aria-pressed="${on}"><b>${title}</b><small>${o.lock ? 'Nur in der Vollversion' : sub}</small></button>`;
+  let shown = false, why = false;
   const render = () => {
+    const old = shown && document.querySelector('#screen .sbody'), keepY = old ? old.scrollTop : 0; // beim Umschalten nicht nach oben springen
     const mic = app.audio.micState, keys = app.keysOn, play = cfg.input === 'play', blocked = play && !keys && (mic === 'denied' || mic === 'unsupported'), d = T.disc(cfg), t = d && p.train && p.train[d], accOff = cfg.range === 'bass' || cfg.weak;
     const micLine = !play ? '' : keys ? `<p class="note">Du spielst mit: ${INSTR.pad}.</p>` : mic === 'on' ? '<p class="note ok">Mikrofon ist an.</p>' : mic === 'off' ? `<p class="note">${INSTR.place} Das Spiel fragt gleich nach dem Mikrofon.</p>`
       : `<p class="note warn">${mic === 'denied' ? 'Das Mikrofon wurde nicht erlaubt.' : 'Hier gibt es kein Mikrofon.'} Du kannst ohne Mikrofon spielen (${INSTR.pad}) oder „Namen antippen“ wählen.</p>`;
@@ -27,13 +29,14 @@ export function trainSetup(app, preset, back) {
       <h3 class="segq">2. Welche Noten?</h3>${isGuitar() ? `<div class="segrow c4">${[['g0', 'e-Saite und h-Saite'], ['g1', 'g-Saite und d-Saite'], ['g2', 'A-Saite und E-Saite'], ['gall', 'Alle 17 Töne']].map(([v, sub], i) => seg('range', v, !cfg.weak && cfg.range === v, T.rangeLabel(v), sub, { lock: !full && i > 0 })).join('')}</div>
       <button class="toggle ${cfg.weak ? 'on' : ''}" data-act="range" data-v="${cfg.weak ? cfg.range : 'weak'}" role="switch" aria-checked="${cfg.weak}" ${full && weakN < T.WEAK_MIN ? 'disabled' : ''}><i></i><span><b>Nur meine Wackelnoten</b><small>${!full ? 'Nur in der Vollversion' : weakN >= T.WEAK_MIN ? `${weakN} Noten, die noch nicht sitzen` : 'Erst ab 3 unsicheren Noten'}</small></span></button>`
       : `<div class="segrow c4">${seg('range', 'treble', !cfg.weak && cfg.range === 'treble', 'Violinschlüssel', 'c<sup>1</sup> bis a<sup>2</sup>')}${seg('range', 'bass', !cfg.weak && cfg.range === 'bass', 'Bassschlüssel', 'C bis c<sup>1</sup>', { lock: !full })}${seg('range', 'both', !cfg.weak && cfg.range === 'both', 'Beide Schlüssel', 'Die Schlüssel wechseln', { lock: !full })}${seg('range', 'weak', cfg.weak, 'Meine Wackelnoten', weakN >= T.WEAK_MIN ? `${weakN} Noten, die noch nicht sitzen` : 'Erst ab 3 unsicheren Noten', { dis: full && weakN < T.WEAK_MIN, lock: !full })}</div>
-      <button class="toggle ${cfg.acc ? 'on' : ''}" data-act="acc" role="switch" aria-checked="${cfg.acc}" ${accOff ? 'disabled' : ''}><i></i><span><b>Mit Vorzeichen (♯ und ♭)</b><small>${!full ? 'Nur in der Vollversion' : accOff ? 'Gibt es bisher nur im Violinschlüssel' : 'Kreuze und Bes aus dem Land der Zauberzeichen'}</small></span></button>`}
+      <button class="toggle ${cfg.acc ? 'on' : ''} ${accOff ? 'off' : ''}" data-act="acc" role="switch" aria-checked="${cfg.acc}" aria-disabled="${accOff}"><i></i><span><b>Mit Vorzeichen (♯ und ♭)</b><small class="${accOff && why ? 'why' : ''}">${!full ? 'Nur in der Vollversion' : accOff ? (cfg.weak ? 'Geht nicht bei den Wackelnoten – wähle oben einen Schlüssel' : 'Gibt es bisher nur im Violinschlüssel – wähle oben „Violinschlüssel“ oder „Beide Schlüssel“') : 'Kreuze und Bes aus dem Land der Zauberzeichen'}</small></span></button>`}
       <h3 class="segq">3. Wie lange?</h3><div class="segrow c2">${seg('len', 'time', cfg.len === 'time', '60 Sekunden', 'So viele Noten wie möglich')}${seg('len', 'count', cfg.len === 'count', '20 Noten', 'In Ruhe – die Uhr läuft nur mit')}</div>
       <p class="note" id="trainRec">${rec}</p>${micLine}
       <div class="row stick">${blocked ? `<button class="btn go" data-act="keys">Ohne Mikrofon: ${INSTR.pad}</button><button class="btn" data-act="go">Mikrofon nochmal versuchen</button>` : '<button class="btn go big" data-act="go">Los!</button>'}</div>`, {
       back, go: () => go(false), keys: () => go(true), in: e => { cfg.input = e.dataset.v; fix(); render(); }, len: e => { cfg.len = e.dataset.v; fix(); render(); },
       range: e => { const v = e.dataset.v; if (!full && v !== R0) return paywall(app, null); if (v === 'weak') cfg.weak = true; else { cfg.weak = false; cfg.range = v; } fix(); render(); },
-      acc: () => { if (!full) return paywall(app, null); cfg.acc = !cfg.acc; fix(); render(); } }, 'wide');
+      acc: () => { if (!full) return paywall(app, null); if (accOff) { why = true; return render(); } cfg.acc = !cfg.acc; fix(); render(); } }, 'wide');
+    const sb = document.querySelector('#screen .sbody'); if (sb && keepY) sb.scrollTop = keepY; shown = true; why = false;
   };
   render();
 }
