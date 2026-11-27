@@ -5,7 +5,7 @@ const seq = (process.argv[3] || '60,60,60,67,60,67,67,60').split(',').map(Number
 writeWav(wav, seq.flatMap(m => [piano(m + shift, 0.9), sil])); const errors = [];
 const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox', '--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', `--use-file-for-fake-audio-capture=${wav}`, '--autoplay-policy=no-user-gesture-required'] });
 const page = await browser.newPage({ viewport: { width: 1280, height: 800 } }); page.on('pageerror', e => errors.push('pageerror: ' + e.message));
-const act = a => page.click(`#screen [data-act="${a}"]`); const wait = ms => page.waitForTimeout(ms);
+const act = async a => { await page.click(`#screen [data-act="${a}"]`); await page.waitForTimeout(60); while (await page.$('#screen:not([hidden]) .petcard')) { await page.click('#screen .petcard [data-act="ok"]'); await page.waitForTimeout(60); } }; /* Tier-Karten prüft e2e-pegasus */ const wait = ms => page.waitForTimeout(ms);
 await page.goto('file://' + path.resolve('dist/notenbruecke.html')); await wait(500); await act('go'); await page.fill('#pname', 'Mikro'); if (process.argv[4] === 'profi') await page.click('[data-m="profi"]'); await act('ok'); await act('skip'); await act('new'); await act('skip'); await wait(100);
 await page.click('[data-id="h1"]'); await act('go'); await wait(1200); await page.screenshot({ path: 'shots/mic-1-einstimmen.png' });
 await page.waitForFunction(() => __nb.profile.calibrated, null, { timeout: 30000 }).catch(() => errors.push('Einstimmen nicht abgeschlossen'));

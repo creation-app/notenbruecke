@@ -4,7 +4,7 @@ const url = 'file://' + path.resolve('dist/notenbruecke.html'); const errors = [
 const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox', '--autoplay-policy=no-user-gesture-required'] });
 const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
 page.on('pageerror', e => errors.push('pageerror: ' + e.message)); page.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
-const shot = n => page.screenshot({ path: `shots/${n}.png` }); const act = a => page.click(`#screen [data-act="${a}"]`); const wait = ms => page.waitForTimeout(ms);
+const shot = n => page.screenshot({ path: `shots/${n}.png` }); const act = async a => { await page.click(`#screen [data-act="${a}"]`); await page.waitForTimeout(60); while (await page.$('#screen:not([hidden]) .petcard')) { await page.click('#screen .petcard [data-act="ok"]'); await page.waitForTimeout(60); } }; /* Tier-Karten prüft e2e-pegasus */ const wait = ms => page.waitForTimeout(ms);
 const assert = (c, m) => { if (!c) { errors.push('ASSERT: ' + m); console.log('FEHLER', m); } };
 await page.goto(url); await wait(600); await shot('01-titel'); await act('go');
 await page.fill('#pname', 'Mika'); await page.click('[data-act="hero"][data-i="2"]'); await shot('02-profil'); await act('ok'); await wait(200); await shot('03-geschichte');

@@ -2,7 +2,7 @@
 import { chromium } from 'playwright'; import path from 'node:path'; const errors = [];
 const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'] });
 const page = await browser.newPage({ viewport: { width: 1024, height: 768 } }); page.on('pageerror', e => errors.push('pageerror: ' + e.message)); page.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
-const act = a => page.click(`#screen [data-act="${a}"]`); const wait = ms => page.waitForTimeout(ms); const ok = (c, m) => { if (!c) { errors.push(m); console.log('FEHLER', m); } };
+const act = async a => { await page.click(`#screen [data-act="${a}"]`); await page.waitForTimeout(60); while (await page.$('#screen:not([hidden]) .petcard')) { await page.click('#screen .petcard [data-act="ok"]'); await page.waitForTimeout(60); } }; /* Tier-Karten prüft e2e-pegasus */ const wait = ms => page.waitForTimeout(ms); const ok = (c, m) => { if (!c) { errors.push(m); console.log('FEHLER', m); } };
 await page.goto('file://' + path.resolve('dist/notenbruecke.html')); await wait(300); await act('go'); await page.fill('#pname', 'Budi'); await act('ok'); for (let i = 0; i < 4; i++) await act('next'); await act('new'); await act('next'); await act('next'); await wait(100);
 await page.evaluate(() => { const p = __nb.profile; p.keys = true; p.creatures = ['c1', 'e1']; p.notes.e1 = { box: 3, seen: 4, ok: 4 }; __nb.save(); __screens.map(__nb, 0); });
 await act('coll'); ok(await page.$eval('[data-k="g1"]', e => e.disabled), 'nicht gesammeltes Wesen ist gesperrt'); await page.click('[data-k="e1"]'); ok((await page.textContent('[data-act="buddy"]')).includes('mitnehmen'), 'Knopf mitnehmen'); await act('buddy'); await wait(100);

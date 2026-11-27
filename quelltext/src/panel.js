@@ -49,7 +49,15 @@ export class Panel {
   answers(labels, onPick) {
     this.clear(); const box = document.createElement('div'); box.className = 'answers'; this.ansBtns = {};
     for (const l of labels) { const b = document.createElement('button'); b.className = 'btn ans'; b.textContent = l; b.addEventListener('click', () => onPick(l, b)); box.appendChild(b); this.ansBtns[l] = b; }
-    this.right.appendChild(box);
+    this.right.appendChild(box); this.ansBox = box; this.fitAnswers();
+  }
+  /** Viele Antwortknöpfe (Training mit Vorzeichen: 15 Namen) als Raster einpassen – so groß wie möglich, aber nie über den Rand. */
+  fitAnswers() {
+    const box = this.ansBox; if (!box || !box.isConnected) return; const n = box.children.length; if (n <= 8) return;
+    const cs = getComputedStyle(this.root), gap = 10, W = this.root.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), H = this.root.clientHeight - parseFloat(cs.paddingTop) - Math.max(14, parseFloat(cs.paddingBottom)); let best = null;
+    if (!(W > 60 && H > 30)) { if ((box._try = (box._try || 0) + 1) < 120) requestAnimationFrame(() => this.fitAnswers()); return; } // Bedienfeld noch nicht sichtbar: gleich nochmal messen
+    for (let rows = 1; rows <= 5; rows++) { const cols = Math.ceil(n / rows), w = Math.min(170, (W - gap * (cols - 1)) / cols), h = Math.min(130, (H - gap * (rows - 1)) / rows), score = Math.min(w, h * 1.1); if (w > 16 && h > 16 && (!best || score > best.score)) best = { cols, w, h, score }; }
+    if (!best) return; box.classList.add('grid'); box.style.gridTemplateColumns = `repeat(${best.cols}, ${Math.floor(best.w)}px)`; box.style.gap = gap + 'px'; box.style.setProperty('--ah', Math.floor(best.h) + 'px'); box.style.setProperty('--af', Math.floor(Math.min(best.h * 0.5, best.w * 0.4)) + 'px');
   }
   bau(withAcc, on) {
     this.clear(); const box = document.createElement('div'); box.className = 'bauctl';

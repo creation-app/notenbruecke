@@ -154,12 +154,12 @@ textarea{width:100%;font:16px/1.3 ui-monospace,monospace;border:4px solid var(--
 .passgrid,.setgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .card{background:#fff;border:4px solid var(--k);padding:12px 16px}.card h3{margin-top:2px}
 .bigno{font-family:"Press Start 2P",monospace;font-size:40px;margin:4px 0}.bigno small{font-family:"Atkinson Hyperlegible",sans-serif;font-size:22px;font-weight:700}
-.cal{display:grid;grid-template-columns:repeat(7,26px);gap:5px;margin:8px 0 4px}.cal i{width:26px;height:26px;background:#E3D5B8}.cal .l1{background:#B9DE7A}.cal .l2{background:var(--g1)}.cal .l3{background:var(--g2)}
+.nw{white-space:nowrap}.cal{display:grid;grid-template-columns:repeat(7,26px);gap:5px;margin:8px 0 4px}.cal i{width:26px;height:26px;background:#E3D5B8}.cal .l1{background:#B9DE7A}.cal .l2{background:var(--g1)}.cal .l3{background:var(--g2)}
 .tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.tag{background:var(--k);color:var(--cream);padding:3px 10px;font-weight:700}
 .board{width:100%;border-collapse:collapse;font-size:22px;background:#fff}.board th,.board td{border:3px solid var(--k);padding:8px 12px;text-align:left}.board th{background:var(--k);color:var(--cream)}.board .me{background:#FFE9A8;font-weight:700}
 .shortcode{font-family:"Press Start 2P",monospace;font-size:26px;letter-spacing:1px;background:#F3E3C3;padding:12px 8px;text-align:center;user-select:text;-webkit-user-select:text;margin:6px 0}
 .place{display:flex;gap:24px;align-items:center;justify-content:center;margin:6px 0 12px}.place .staffpic{width:245px;height:280px}.place p{min-width:300px}
-.answers.small{width:auto}.answers.small .ans{min-width:84px;min-height:72px;font-size:36px}
+.answers.grid{display:grid;justify-content:center;align-content:center;width:auto;max-width:none}#stage #panel .answers.grid .btn.ans{min-width:0;min-height:0;width:auto;height:var(--ah);font-size:var(--af);padding:0;letter-spacing:0}.answers.small{width:auto}.answers.small .ans{min-width:84px;min-height:72px;font-size:36px}
 .qrrow{display:flex;gap:28px;align-items:flex-start;margin-top:8px}.qr{width:520px;height:520px;flex:none;border:4px solid var(--k)}
 .pill.goal{position:relative;overflow:hidden;color:var(--cream)}.pill.goal i{position:absolute;left:0;bottom:0;height:5px;background:var(--or)}.pill.goal.ok{background:var(--g2)}
 .book{max-height:640px;overflow:auto;padding-right:10px}.book p{max-width:1000px}.chapter{background:#F3E3C3;padding:6px 12px}
@@ -168,7 +168,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 .lock.full{color:#8A4B00;font-weight:700}
 .toggle{display:flex;align-items:center;gap:14px;width:100%;min-height:60px;background:none;border:none;text-align:left;padding:6px 0}.toggle span{display:flex;flex-direction:column}
 .toggle i{flex:none;width:60px;height:32px;background:#B9A98A;border:4px solid var(--k);position:relative}.toggle i::after{content:"";position:absolute;left:2px;top:2px;width:20px;height:20px;background:var(--k)}
-.toggle.on i{background:var(--g1)}.toggle{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}.toggle *{pointer-events:none}.toggle.off i,.toggle:disabled i{opacity:.4}.toggle.off b,.toggle:disabled b{color:#6B7280}.toggle small.why{background:var(--y1,#FFD75E);color:var(--k);font-weight:700;padding:3px 8px;margin-top:2px}.toggle.on i::after{left:30px}
+.petcard{text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px}.petcard p{margin:4px 0}.petcard .btn{margin-top:10px}.petcard canvas{animation:petbob 1.6s ease-in-out infinite}@keyframes petbob{50%{transform:translateY(-8px)}}.crcard.pet{width:164px;padding:6px 4px}.crcard.pet b{font-size:17px;line-height:1.1;text-align:center;max-width:100%}.crcard.pet small{font-size:15px;line-height:1.15;text-align:center}.petcard .row{justify-content:center;flex-wrap:wrap}.petrow{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:6px 0}.petrow .crcard{min-height:0}.toggle.on i{background:var(--g1)}.toggle{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}.toggle *{pointer-events:none}.toggle.off i,.toggle:disabled i{opacity:.4}.toggle.off b,.toggle:disabled b{color:#6B7280}.toggle small.why{background:var(--y1,#FFD75E);color:var(--k);font-weight:700;padding:3px 8px;margin-top:2px}.toggle.on i::after{left:30px}
 .calib{text-align:center;background:#F3E3C3;padding:14px;margin-top:10px}.dots{display:flex;gap:14px;justify-content:center}.dots i{width:34px;height:34px;border:4px solid var(--k);background:#fff}.dots i.on{background:var(--g1)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
 
@@ -229,482 +229,6 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     for (var name in all)
       __defProp(target, name, { get: all[name], enumerable: true });
   };
-
-  // src/save.js
-  function newProfile(name, hero = 0, mode = "abenteuer") {
-    return {
-      id: Math.random().toString(36).slice(2, 10),
-      name: String(name).slice(0, 14),
-      hero,
-      mode,
-      levels: {},
-      notes: {},
-      conf: {},
-      creatures: [],
-      days: {},
-      a4: 440,
-      keys: false,
-      unlockAll: false,
-      regenBest: 0,
-      seenIntro: false
-    };
-  }
-  function emptyState() {
-    return { v: 1, profiles: [], current: null };
-  }
-  function load(storage) {
-    try {
-      const raw = storage ? storage.getItem(KEY) : null;
-      const s = raw ? JSON.parse(raw) : memory;
-      if (s && s.v === 1 && Array.isArray(s.profiles)) return s;
-    } catch (e) {
-    }
-    return memory || emptyState();
-  }
-  function persist(storage, state) {
-    memory = state;
-    try {
-      if (storage) {
-        storage.setItem(KEY, JSON.stringify(state));
-        return true;
-      }
-    } catch (e) {
-    }
-    return false;
-  }
-  function dayKey(d = /* @__PURE__ */ new Date()) {
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-  }
-  function addPractice(profile, seconds, d = /* @__PURE__ */ new Date()) {
-    const k = dayKey(d);
-    profile.days[k] = Math.round((profile.days[k] || 0) + seconds);
-  }
-  function streak(profile, today = /* @__PURE__ */ new Date()) {
-    let n = 0;
-    const d = new Date(today);
-    if (!profile.days[dayKey(d)]) d.setDate(d.getDate() - 1);
-    while (profile.days[dayKey(d)]) {
-      n++;
-      d.setDate(d.getDate() - 1);
-    }
-    return n;
-  }
-  function checksum(str) {
-    let a = 1, b = 0;
-    for (let i = 0; i < str.length; i++) {
-      a = (a + str.charCodeAt(i)) % 65521;
-      b = (b + a) % 65521;
-    }
-    return ((b << 16 | a) >>> 0).toString(36);
-  }
-  function fromB64(b) {
-    const bin = atob(b.replace(/-/g, "+").replace(/_/g, "/"));
-    return new TextDecoder().decode(Uint8Array.from(bin, (c) => c.charCodeAt(0)));
-  }
-  function importCode(code) {
-    const m = /^NB1\.([A-Za-z0-9_-]+)\.([a-z0-9]+)$/.exec(String(code).replace(/\s+/g, ""));
-    if (!m || checksum(m[1]) !== m[2]) throw new Error("Der Code ist unvollst\xE4ndig oder falsch abgetippt.");
-    let p;
-    try {
-      p = JSON.parse(fromB64(m[1]));
-    } catch (e) {
-      throw new Error("Der Code l\xE4sst sich nicht lesen.");
-    }
-    if (!p || typeof p.name !== "string" || typeof p.levels !== "object") throw new Error("Der Code enth\xE4lt keinen Spielstand.");
-    return Object.assign(newProfile(p.name), p);
-  }
-  function shortSum(body) {
-    let s = 7;
-    for (let i = 0; i < body.length; i++) s = (s * 31 + B32.indexOf(body[i]) * (i + 3)) % 1024;
-    return B32[s >> 5] + B32[s & 31];
-  }
-  function exportShort(profile, worlds, instr = "klavier") {
-    const skip = (instr === "gitarre" ? profile.skipG : profile.skip) || [];
-    const bits = [];
-    const push = (v, n) => {
-      for (let i = n - 1; i >= 0; i--) bits.push(v >> i & 1);
-    };
-    push(2, 2);
-    push(profile.hero & 7, 3);
-    push(profile.mode === "profi" ? 1 : 0, 1);
-    push(profile.unlockAll ? 1 : 0, 1);
-    for (let w = 0; w < 4; w++) {
-      const done = (worlds[w] || []).filter((id) => profile.levels[id]);
-      const sum = done.reduce((a, id) => a + (profile.levels[id].stars || 1), 0);
-      push(Math.min(15, done.length), 4);
-      push(done.length ? Math.max(1, Math.min(3, Math.round(sum / done.length))) : 0, 2);
-      push(Math.min(15, skip[w] || 0), 4);
-    }
-    push(instr === "gitarre" ? 1 : 0, 1);
-    while (bits.length % 5) bits.push(0);
-    let body = "";
-    for (let i = 0; i < bits.length; i += 5) body += B32[bits.slice(i, i + 5).reduce((a, b) => a * 2 + b, 0)];
-    return (body + shortSum(body)).replace(/(.{4})(?=.)/g, "$1-");
-  }
-  function importShort(code, worlds) {
-    const c = String(code).toUpperCase().replace(/O/g, "0").replace(/[IL]/g, "1").replace(/U/g, "V").replace(/[^0-9A-Z]/g, "");
-    if (c.length !== 12 || [...c].some((ch) => !B32.includes(ch))) throw new Error("Der Kurzcode hat 12 Zeichen. Bitte pr\xFCfe, ob etwas fehlt.");
-    const body = c.slice(0, -2);
-    if (shortSum(body) !== c.slice(-2)) throw new Error("Der Kurzcode stimmt nicht. Bitte vergleiche ihn Zeichen f\xFCr Zeichen.");
-    const bits = [];
-    for (const ch of body) {
-      const v = B32.indexOf(ch);
-      for (let i = 4; i >= 0; i--) bits.push(v >> i & 1);
-    }
-    let k = 0;
-    const take = (n) => {
-      let v = 0;
-      for (let i = 0; i < n; i++) v = v * 2 + bits[k++];
-      return v;
-    };
-    if (take(2) !== 2) throw new Error("Dieser Kurzcode geh\xF6rt zu einer anderen Spielversion.");
-    const p = newProfile("Spieler", take(3), take(1) ? "profi" : "abenteuer");
-    p.unlockAll = !!take(1);
-    const guitar2 = bits[47] === 1 && !Array.isArray(worlds), skip = [];
-    if (guitar2) {
-      p.instr = "gitarre";
-      p.skipG = skip;
-    } else p.skip = skip;
-    if (!Array.isArray(worlds)) worlds = worlds[guitar2 ? "gitarre" : "klavier"];
-    for (let w = 0; w < 4; w++) {
-      const n = take(4), avg = take(2);
-      skip.push(take(4));
-      (worlds[w] || []).slice(0, n).forEach((id) => {
-        p.levels[id] = { stars: avg || 1 };
-      });
-    }
-    p.seenIntro = true;
-    return p;
-  }
-  async function pipe(bytes, stream) {
-    const w = stream.writable.getWriter();
-    w.write(bytes).catch(() => {
-    });
-    w.close().catch(() => {
-    });
-    return new Uint8Array(await new Response(stream.readable).arrayBuffer());
-  }
-  function b64(bytes) {
-    let bin = "";
-    for (const c of bytes) bin += String.fromCharCode(c);
-    return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-  }
-  function unb64(str) {
-    const bin = atob(str.replace(/-/g, "+").replace(/_/g, "/"));
-    return Uint8Array.from(bin, (c) => c.charCodeAt(0));
-  }
-  async function exportPayload(profile) {
-    const days = Object.fromEntries(Object.entries(profile.days).sort().slice(-120));
-    const raw = new TextEncoder().encode(JSON.stringify({ ...profile, days }));
-    if (typeof CompressionStream !== "undefined") {
-      try {
-        return "Z" + b64(await pipe(raw, new CompressionStream("deflate-raw")));
-      } catch (e) {
-      }
-    }
-    return "J" + b64(raw);
-  }
-  async function importPayload(payload) {
-    const kind = payload[0];
-    let bytes;
-    try {
-      bytes = unb64(payload.slice(1));
-      if (kind === "Z") bytes = await pipe(bytes, new DecompressionStream("deflate-raw"));
-      else if (kind !== "J") throw new Error("x");
-    } catch (e) {
-      throw new Error("Der Spielstand-Link ist unvollst\xE4ndig oder besch\xE4digt.");
-    }
-    let p;
-    try {
-      p = JSON.parse(new TextDecoder().decode(bytes));
-    } catch (e) {
-      throw new Error("Der Spielstand-Link l\xE4sst sich nicht lesen.");
-    }
-    if (!p || typeof p.name !== "string" || typeof p.levels !== "object") throw new Error("Der Link enth\xE4lt keinen Spielstand.");
-    return Object.assign(newProfile(p.name), p);
-  }
-  var KEY, memory, B32;
-  var init_save = __esm({
-    "src/save.js"() {
-      KEY = "notenbruecke.v1";
-      memory = null;
-      B32 = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
-    }
-  });
-
-  // src/config.js
-  var API_URL, CONFIG;
-  var init_config = __esm({
-    "src/config.js"() {
-      API_URL = "";
-      CONFIG = {
-        shop: typeof window !== "undefined" && !!window.NB_SHOP,
-        freeLevels: ["h1", "h2", "h3", "h4", "h5", "ga1", "ga2", "ga3", "ga4", "ga5"],
-        // in der Kauf-Variante ohne Schlüssel spielbar
-        priceOnce: "12,99 \u20AC",
-        priceAbo: "2,99 \u20AC im Monat",
-        // Platzhalter, bis die Preise feststehen
-        checkoutOnce: "",
-        checkoutAbo: "",
-        // Kauf-Adressen des Zahlungsanbieters; leer = Kauf noch nicht freigeschaltet
-        apiUrl: typeof window !== "undefined" && window.NB_API !== void 0 ? window.NB_API : API_URL,
-        // Server für Konten und Statistik; leer = beides aus
-        pubKey: { "kty": "EC", "crv": "P-256", "x": "6ZA8UmaJ8MpG0x4OnGe_dMbzVTbSnzEW7kJwKpGBObI", "y": "ltiwubgM3vXBnjZ6hzAn4PZDQKpiJpuhDKL-x1BAxAU" }
-      };
-    }
-  });
-
-  // src/stats.js
-  function track(name, n = 1) {
-    const ev = (CONFIG.shop ? "kauf/" : "test/") + name;
-    sent.push(ev);
-    if (!CONFIG.apiUrl) return;
-    queue.set(ev, (queue.get(ev) || 0) + n);
-    if (!timer) timer = setTimeout(() => flushStats(), 3e4);
-  }
-  function flushStats() {
-    clearTimeout(timer);
-    timer = null;
-    if (!queue.size || !CONFIG.apiUrl) return;
-    const events = [...queue].map(([e, n]) => ({ e, n: Math.round(n) })).filter((x) => x.n > 0);
-    queue.clear();
-    if (!events.length) return;
-    try {
-      fetch(CONFIG.apiUrl.replace(/\/+$/, "") + "/api/event", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ events }), keepalive: true }).catch(() => {
-      });
-    } catch (e) {
-    }
-  }
-  var sent, queue, timer;
-  var init_stats = __esm({
-    "src/stats.js"() {
-      init_config();
-      sent = [];
-      queue = /* @__PURE__ */ new Map();
-      timer = null;
-    }
-  });
-
-  // src/merge.js
-  function mergeProfiles(a, b) {
-    a = obj(a);
-    b = obj(b);
-    const out = { ...a, ...b };
-    const la = obj(a.levels), lb = obj(b.levels);
-    out.levels = {};
-    for (const k of /* @__PURE__ */ new Set([...Object.keys(la), ...Object.keys(lb)])) {
-      const x = obj(la[k]), y = obj(lb[k]);
-      out.levels[k] = num(y.stars) > num(x.stars) ? { ...x, ...y } : num(x.stars) > num(y.stars) ? { ...y, ...x } : { ...x, ...y };
-    }
-    const na = obj(a.notes), nb = obj(b.notes);
-    out.notes = {};
-    for (const k of /* @__PURE__ */ new Set([...Object.keys(na), ...Object.keys(nb)])) {
-      const x = na[k], y = nb[k];
-      out.notes[k] = !x ? y : !y ? x : num(y.seen) >= num(x.seen) ? y : x;
-    }
-    const ca = obj(a.conf), cb = obj(b.conf);
-    out.conf = {};
-    for (const k of /* @__PURE__ */ new Set([...Object.keys(ca), ...Object.keys(cb)])) out.conf[k] = Math.max(num(ca[k]), num(cb[k]));
-    out.creatures = [.../* @__PURE__ */ new Set([...Array.isArray(a.creatures) ? a.creatures : [], ...Array.isArray(b.creatures) ? b.creatures : []])];
-    const da = obj(a.days), db = obj(b.days);
-    out.days = {};
-    for (const k of /* @__PURE__ */ new Set([...Object.keys(da), ...Object.keys(db)])) out.days[k] = Math.max(num(da[k]), num(db[k]));
-    const ta = obj(a.train), tb = obj(b.train);
-    out.train = {};
-    for (const k of /* @__PURE__ */ new Set([...Object.keys(ta), ...Object.keys(tb)])) {
-      const x = obj(ta[k]), y = obj(tb[k]), bx = num(y.best) > num(x.best) ? y : x, rx = Array.isArray(x.runs) ? x.runs : [], ry = Array.isArray(y.runs) ? y.runs : [];
-      out.train[k] = { ...x, ...y, best: num(bx.best), bestAcc: num(bx.bestAcc), stars: Math.max(num(x.stars), num(y.stars)), runs: ry.length >= rx.length ? ry : rx };
-    }
-    out.regenBest = Math.max(num(a.regenBest), num(b.regenBest));
-    if (Array.isArray(a.skip) || Array.isArray(b.skip)) {
-      const sa = a.skip || [], sb = b.skip || [];
-      out.skip = Array.from({ length: Math.max(sa.length, sb.length) }, (_, i) => Math.max(num(sa[i]), num(sb[i])));
-    }
-    if (Array.isArray(a.skipG) || Array.isArray(b.skipG)) {
-      const sa = a.skipG || [], sb = b.skipG || [];
-      out.skipG = Array.from({ length: Math.max(sa.length, sb.length) }, (_, i) => Math.max(num(sa[i]), num(sb[i])));
-    }
-    out.seenIntro = !!(a.seenIntro || b.seenIntro);
-    out.calibrated = !!(a.calibrated || b.calibrated);
-    if (Array.isArray(a.storyRead) || Array.isArray(b.storyRead)) out.storyRead = [.../* @__PURE__ */ new Set([...a.storyRead || [], ...b.storyRead || []])];
-    return out;
-  }
-  var obj, num;
-  var init_merge = __esm({
-    "src/merge.js"() {
-      obj = (x) => x && typeof x === "object" && !Array.isArray(x) ? x : {};
-      num = (x) => typeof x === "number" && isFinite(x) ? x : 0;
-    }
-  });
-
-  // src/account.js
-  var account_exports = {};
-  __export(account_exports, {
-    accountsOn: () => accountsOn,
-    ago: () => ago,
-    api: () => api,
-    changePassword: () => changePassword,
-    login: () => login,
-    logout: () => logout,
-    pull: () => pull,
-    register: () => register,
-    strip: () => strip,
-    sync: () => sync,
-    touch: () => touch
-  });
-  async function api(path, { method, body, token, keepalive } = {}) {
-    const ctrl = typeof AbortController !== "undefined" ? new AbortController() : null, t = ctrl && setTimeout(() => ctrl.abort(), 15e3);
-    try {
-      const txt = body ? JSON.stringify(body) : void 0;
-      const r = await fetch(CONFIG.apiUrl.replace(/\/+$/, "") + path, { method: method || (body ? "POST" : "GET"), headers: { "Content-Type": "application/json", ...token ? { Authorization: "Bearer " + token } : {} }, body: txt, signal: ctrl ? ctrl.signal : void 0, keepalive: !!keepalive && (!txt || txt.length < 6e4) });
-      let data = {};
-      try {
-        data = await r.json();
-      } catch (e) {
-      }
-      return { ...data, ok: r.ok, status: r.status };
-    } catch (e) {
-      return { ok: false, status: 0, error: "Keine Verbindung zum Server. Bist du online?" };
-    } finally {
-      if (t) clearTimeout(t);
-    }
-  }
-  function replace(p, data) {
-    const { id, acct } = p;
-    for (const k of Object.keys(p)) delete p[k];
-    Object.assign(p, data, { id, acct });
-  }
-  async function register(app, p, name, password, email) {
-    const r = await api("/api/register", { body: { name, password, email: email || void 0, state: strip(p) } });
-    if (!r.ok) return r;
-    p.acct = { name: r.user.name, token: r.token, rev: r.rev, dirty: false, at: Date.now() };
-    quietSave(app);
-    return r;
-  }
-  async function login(app, loginName, password) {
-    const r = await api("/api/login", { body: { login: loginName, password } });
-    if (!r.ok) return r;
-    const st = app.state, server = r.state && Object.keys(r.state).length ? r.state : null;
-    let p = st.profiles.find((x) => x.acct && x.acct.name.toLowerCase() === r.user.name.toLowerCase()), dirty = false;
-    if (p) {
-      replace(p, server ? mergeProfiles(server, strip(p)) : strip(p));
-      dirty = true;
-    } else {
-      p = { ...newProfile(r.user.name), ...server || {} };
-      if (!p.id || st.profiles.some((x) => x.id === p.id)) p.id = Math.random().toString(36).slice(2, 10);
-      st.profiles.push(p);
-    }
-    p.acct = { name: r.user.name, token: r.token, rev: r.rev, dirty, at: Date.now() };
-    st.current = p.id;
-    quietSave(app);
-    app.applyProfile();
-    if (dirty) sync(app, p);
-    return r;
-  }
-  function touch(app) {
-    const p = app.profile;
-    if (!accountsOn() || !p || !p.acct || !p.acct.token) return;
-    p.acct.dirty = true;
-    clearTimeout(timer2);
-    timer2 = setTimeout(() => sync(app, p), 4e3);
-  }
-  async function sync(app, p, keepalive = false) {
-    if (!accountsOn() || !p || !p.acct || !p.acct.token || p.acct.expired || busy.has(p.id)) return;
-    busy.add(p.id);
-    try {
-      for (let i = 0; i < 3; i++) {
-        const r = await api("/api/state", { method: "PUT", body: { state: strip(p), rev: p.acct.rev }, token: p.acct.token, keepalive });
-        if (r.ok) {
-          p.acct.rev = r.rev;
-          p.acct.dirty = false;
-          p.acct.at = Date.now();
-          p.acct.err = null;
-          break;
-        }
-        if (r.status === 409 && r.state) {
-          replace(p, mergeProfiles(r.state, strip(p)));
-          p.acct.rev = r.rev;
-          if (app.profile === p) app.refreshLook && app.refreshLook();
-          continue;
-        }
-        if (r.status === 401) {
-          p.acct.expired = true;
-          p.acct.err = "Bitte melde dich neu an.";
-          break;
-        }
-        p.acct.err = r.error || "Gerade nicht erreichbar.";
-        break;
-      }
-    } finally {
-      busy.delete(p.id);
-      quietSave(app);
-    }
-  }
-  async function pull(app, p) {
-    if (!accountsOn() || !p || !p.acct || !p.acct.token || p.acct.expired) return;
-    const r = await api("/api/state", { token: p.acct.token });
-    if (r.status === 401) {
-      p.acct.expired = true;
-      p.acct.err = "Bitte melde dich neu an.";
-      quietSave(app);
-      return;
-    }
-    if (!r.ok) return;
-    if (r.rev !== p.acct.rev) {
-      replace(p, mergeProfiles(r.state, strip(p)));
-      p.acct.rev = r.rev;
-      p.acct.dirty = true;
-      if (app.profile === p) {
-        app.refreshLook && app.refreshLook();
-      }
-    }
-    if (p.acct.dirty) await sync(app, p);
-    else {
-      p.acct.at = Date.now();
-      quietSave(app);
-    }
-  }
-  async function logout(app, p, removeHere) {
-    if (p.acct && p.acct.token) await api("/api/logout", { body: {}, token: p.acct.token });
-    delete p.acct;
-    if (removeHere) {
-      app.state.profiles = app.state.profiles.filter((x) => x !== p);
-      if (app.state.current === p.id) app.state.current = app.state.profiles[0] ? app.state.profiles[0].id : null;
-    }
-    quietSave(app);
-    app.applyProfile();
-  }
-  async function changePassword(p, old, password) {
-    return api("/api/password", { body: { old, password }, token: p.acct.token });
-  }
-  function ago(t) {
-    if (!t) return "noch nie";
-    const s = Math.round((Date.now() - t) / 1e3);
-    return s < 60 ? "gerade eben" : s < 3600 ? `vor ${Math.round(s / 60)} Minuten` : s < 86400 ? `vor ${Math.round(s / 3600)} Stunden` : `am ${new Date(t).toLocaleDateString("de-DE")}`;
-  }
-  var accountsOn, strip, busy, timer2, quietSave;
-  var init_account = __esm({
-    "src/account.js"() {
-      init_config();
-      init_merge();
-      init_save();
-      accountsOn = () => !!CONFIG.apiUrl;
-      strip = (p) => {
-        const { acct, ...rest } = p || {};
-        return rest;
-      };
-      busy = /* @__PURE__ */ new Set();
-      timer2 = null;
-      quietSave = (app) => {
-        app._quiet = true;
-        try {
-          app.save();
-        } finally {
-          app._quiet = false;
-        }
-      };
-    }
-  });
 
   // src/music.js
   function letterIdx(n) {
@@ -842,6 +366,31 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   });
 
   // src/levels.js
+  var levels_exports = {};
+  __export(levels_exports, {
+    ALL_LEVELS: () => ALL_LEVELS,
+    ALL_NOTES: () => ALL_NOTES,
+    LEVELS: () => LEVELS,
+    LEVEL_SET: () => LEVEL_SET,
+    PLACEMENT: () => PLACEMENT,
+    PLACEMENT_PASS: () => PLACEMENT_PASS,
+    PLACEMENT_Q: () => PLACEMENT_Q,
+    SETS: () => SETS,
+    SKIP_KEY: () => SKIP_KEY,
+    TYPE_LABEL: () => TYPE_LABEL,
+    WORLDS: () => WORLDS,
+    creatureTotal: () => creatureTotal,
+    doneCount: () => doneCount,
+    levelUnlocked: () => levelUnlocked,
+    levelsOf: () => levelsOf,
+    nextLevel: () => nextLevel,
+    prevWorld: () => prevWorld,
+    setLevelSet: () => setLevelSet,
+    skipOf: () => skipOf,
+    starsFor: () => starsFor,
+    totalStars: () => totalStars,
+    worldUnlocked: () => worldUnlocked
+  });
   function prevWorld(world) {
     return WORLDS[world].after != null ? WORLDS[world].after : world - 1;
   }
@@ -1056,6 +605,534 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       LEVEL_SET = "klavier";
       PLACEMENT_Q = 5;
       PLACEMENT_PASS = 4;
+    }
+  });
+
+  // src/pets.js
+  function petName(id) {
+    return NAMES[id] || null;
+  }
+  function worldCleared(profile, world) {
+    const ls = levelsOf(world);
+    return ls.length > 0 && ((skipOf(profile)[world] || 0) >= ls.length || ls.every((l) => profile.levels[l.id]));
+  }
+  function wildLevel(id) {
+    const i = WILD.findIndex((w) => w[0] === id);
+    return i < 0 ? null : levelsOf(WORLDS.length - 1)[i] || null;
+  }
+  function earnedNow(profile) {
+    const out = [];
+    if (!profile) return out;
+    if (worldCleared(profile, PEGASUS_WORLD)) out.push(PEGASUS);
+    for (const [id] of WILD) {
+      const l = wildLevel(id);
+      if (l && profile.levels[l.id]) out.push(id);
+    }
+    return out;
+  }
+  function ownedPets(profile) {
+    return profile ? [.../* @__PURE__ */ new Set([...Array.isArray(profile.pets) ? profile.pets : [], ...earnedNow(profile)])].filter(petName) : [];
+  }
+  function owns(profile, id) {
+    return ownedPets(profile).includes(id);
+  }
+  function duePets(profile) {
+    const have = Array.isArray(profile.pets) ? profile.pets : [];
+    return earnedNow(profile).filter((id) => !have.includes(id));
+  }
+  var PEGASUS, PEGASUS_WORLD, WILD, NAMES;
+  var init_pets = __esm({
+    "src/pets.js"() {
+      init_levels();
+      PEGASUS = "pegasus";
+      PEGASUS_WORLD = 1;
+      WILD = [["schnecke", "Raketenschnecke"], ["krake", "Dreiaugen-Krake"], ["eule", "Disco-Eule"], ["drache", "Feuerdrache"], ["phoenix", "Feuervogel"]];
+      NAMES = { [PEGASUS]: "Pegasus", ...Object.fromEntries(WILD) };
+    }
+  });
+
+  // src/save.js
+  function newProfile(name, hero = 0, mode = "abenteuer") {
+    return {
+      id: Math.random().toString(36).slice(2, 10),
+      name: String(name).slice(0, 14),
+      hero,
+      mode,
+      levels: {},
+      notes: {},
+      conf: {},
+      creatures: [],
+      days: {},
+      a4: 440,
+      keys: false,
+      unlockAll: false,
+      regenBest: 0,
+      seenIntro: false
+    };
+  }
+  function emptyState() {
+    return { v: 1, profiles: [], current: null };
+  }
+  function load(storage) {
+    try {
+      const raw = storage ? storage.getItem(KEY) : null;
+      const s = raw ? JSON.parse(raw) : memory;
+      if (s && s.v === 1 && Array.isArray(s.profiles)) return s;
+    } catch (e) {
+    }
+    return memory || emptyState();
+  }
+  function persist(storage, state) {
+    memory = state;
+    try {
+      if (storage) {
+        storage.setItem(KEY, JSON.stringify(state));
+        return true;
+      }
+    } catch (e) {
+    }
+    return false;
+  }
+  function dayKey(d = /* @__PURE__ */ new Date()) {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  }
+  function addPractice(profile, seconds, d = /* @__PURE__ */ new Date()) {
+    const k = dayKey(d);
+    profile.days[k] = Math.round((profile.days[k] || 0) + seconds);
+  }
+  function practiced(profile, key) {
+    return ((profile.days || {})[key] || 0) >= DAY_MIN_S;
+  }
+  function practiceDays(profile) {
+    return Object.keys(profile.days || {}).filter((k) => practiced(profile, k)).length;
+  }
+  function streak(profile, today = /* @__PURE__ */ new Date()) {
+    let n = 0;
+    const d = new Date(today);
+    d.setHours(12, 0, 0, 0);
+    if (!practiced(profile, dayKey(d))) d.setDate(d.getDate() - 1);
+    while (practiced(profile, dayKey(d))) {
+      n++;
+      d.setDate(d.getDate() - 1);
+    }
+    return n;
+  }
+  function checksum(str) {
+    let a = 1, b = 0;
+    for (let i = 0; i < str.length; i++) {
+      a = (a + str.charCodeAt(i)) % 65521;
+      b = (b + a) % 65521;
+    }
+    return ((b << 16 | a) >>> 0).toString(36);
+  }
+  function fromB64(b) {
+    const bin = atob(b.replace(/-/g, "+").replace(/_/g, "/"));
+    return new TextDecoder().decode(Uint8Array.from(bin, (c) => c.charCodeAt(0)));
+  }
+  function importCode(code) {
+    const m = /^NB1\.([A-Za-z0-9_-]+)\.([a-z0-9]+)$/.exec(String(code).replace(/\s+/g, ""));
+    if (!m || checksum(m[1]) !== m[2]) throw new Error("Der Code ist unvollst\xE4ndig oder falsch abgetippt.");
+    let p;
+    try {
+      p = JSON.parse(fromB64(m[1]));
+    } catch (e) {
+      throw new Error("Der Code l\xE4sst sich nicht lesen.");
+    }
+    if (!p || typeof p.name !== "string" || typeof p.levels !== "object") throw new Error("Der Code enth\xE4lt keinen Spielstand.");
+    return Object.assign(newProfile(p.name), p);
+  }
+  function shortSum(body) {
+    let s = 7;
+    for (let i = 0; i < body.length; i++) s = (s * 31 + B32.indexOf(body[i]) * (i + 3)) % 1024;
+    return B32[s >> 5] + B32[s & 31];
+  }
+  function exportShort(profile, worlds, instr = "klavier") {
+    const skip = (instr === "gitarre" ? profile.skipG : profile.skip) || [];
+    const bits = [];
+    const push = (v, n) => {
+      for (let i = n - 1; i >= 0; i--) bits.push(v >> i & 1);
+    };
+    push(2, 2);
+    push(profile.hero & 7, 3);
+    push(profile.mode === "profi" ? 1 : 0, 1);
+    push(profile.unlockAll ? 1 : 0, 1);
+    for (let w = 0; w < 4; w++) {
+      const done = (worlds[w] || []).filter((id) => profile.levels[id]);
+      const sum = done.reduce((a, id) => a + (profile.levels[id].stars || 1), 0);
+      push(Math.min(15, done.length), 4);
+      push(done.length ? Math.max(1, Math.min(3, Math.round(sum / done.length))) : 0, 2);
+      push(Math.min(15, skip[w] || 0), 4);
+    }
+    push(instr === "gitarre" ? 1 : 0, 1);
+    while (bits.length % 5) bits.push(0);
+    let body = "";
+    for (let i = 0; i < bits.length; i += 5) body += B32[bits.slice(i, i + 5).reduce((a, b) => a * 2 + b, 0)];
+    return (body + shortSum(body)).replace(/(.{4})(?=.)/g, "$1-");
+  }
+  function importShort(code, worlds) {
+    const c = String(code).toUpperCase().replace(/O/g, "0").replace(/[IL]/g, "1").replace(/U/g, "V").replace(/[^0-9A-Z]/g, "");
+    if (c.length !== 12 || [...c].some((ch) => !B32.includes(ch))) throw new Error("Der Kurzcode hat 12 Zeichen. Bitte pr\xFCfe, ob etwas fehlt.");
+    const body = c.slice(0, -2);
+    if (shortSum(body) !== c.slice(-2)) throw new Error("Der Kurzcode stimmt nicht. Bitte vergleiche ihn Zeichen f\xFCr Zeichen.");
+    const bits = [];
+    for (const ch of body) {
+      const v = B32.indexOf(ch);
+      for (let i = 4; i >= 0; i--) bits.push(v >> i & 1);
+    }
+    let k = 0;
+    const take = (n) => {
+      let v = 0;
+      for (let i = 0; i < n; i++) v = v * 2 + bits[k++];
+      return v;
+    };
+    if (take(2) !== 2) throw new Error("Dieser Kurzcode geh\xF6rt zu einer anderen Spielversion.");
+    const p = newProfile("Spieler", take(3), take(1) ? "profi" : "abenteuer");
+    p.unlockAll = !!take(1);
+    const guitar2 = bits[47] === 1 && !Array.isArray(worlds), skip = [];
+    if (guitar2) {
+      p.instr = "gitarre";
+      p.skipG = skip;
+    } else p.skip = skip;
+    if (!Array.isArray(worlds)) worlds = worlds[guitar2 ? "gitarre" : "klavier"];
+    for (let w = 0; w < 4; w++) {
+      const n = take(4), avg = take(2);
+      skip.push(take(4));
+      (worlds[w] || []).slice(0, n).forEach((id) => {
+        p.levels[id] = { stars: avg || 1 };
+      });
+    }
+    p.seenIntro = true;
+    return p;
+  }
+  async function pipe(bytes, stream) {
+    const w = stream.writable.getWriter();
+    w.write(bytes).catch(() => {
+    });
+    w.close().catch(() => {
+    });
+    return new Uint8Array(await new Response(stream.readable).arrayBuffer());
+  }
+  function b64(bytes) {
+    let bin = "";
+    for (const c of bytes) bin += String.fromCharCode(c);
+    return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  }
+  function unb64(str) {
+    const bin = atob(str.replace(/-/g, "+").replace(/_/g, "/"));
+    return Uint8Array.from(bin, (c) => c.charCodeAt(0));
+  }
+  async function exportPayload(profile) {
+    const days = Object.fromEntries(Object.entries(profile.days).sort().slice(-120));
+    const raw = new TextEncoder().encode(JSON.stringify({ ...profile, days }));
+    if (typeof CompressionStream !== "undefined") {
+      try {
+        return "Z" + b64(await pipe(raw, new CompressionStream("deflate-raw")));
+      } catch (e) {
+      }
+    }
+    return "J" + b64(raw);
+  }
+  async function importPayload(payload) {
+    const kind = payload[0];
+    let bytes;
+    try {
+      bytes = unb64(payload.slice(1));
+      if (kind === "Z") bytes = await pipe(bytes, new DecompressionStream("deflate-raw"));
+      else if (kind !== "J") throw new Error("x");
+    } catch (e) {
+      throw new Error("Der Spielstand-Link ist unvollst\xE4ndig oder besch\xE4digt.");
+    }
+    let p;
+    try {
+      p = JSON.parse(new TextDecoder().decode(bytes));
+    } catch (e) {
+      throw new Error("Der Spielstand-Link l\xE4sst sich nicht lesen.");
+    }
+    if (!p || typeof p.name !== "string" || typeof p.levels !== "object") throw new Error("Der Link enth\xE4lt keinen Spielstand.");
+    return Object.assign(newProfile(p.name), p);
+  }
+  var KEY, memory, DAY_MIN_S, B32;
+  var init_save = __esm({
+    "src/save.js"() {
+      KEY = "notenbruecke.v1";
+      memory = null;
+      DAY_MIN_S = 60;
+      B32 = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+    }
+  });
+
+  // src/config.js
+  var API_URL, CONFIG;
+  var init_config = __esm({
+    "src/config.js"() {
+      API_URL = "";
+      CONFIG = {
+        shop: typeof window !== "undefined" && !!window.NB_SHOP,
+        freeLevels: ["h1", "h2", "h3", "h4", "h5", "ga1", "ga2", "ga3", "ga4", "ga5"],
+        // in der Kauf-Variante ohne Schlüssel spielbar
+        priceOnce: "12,99 \u20AC",
+        priceAbo: "2,99 \u20AC im Monat",
+        // Platzhalter, bis die Preise feststehen
+        checkoutOnce: "",
+        checkoutAbo: "",
+        // Kauf-Adressen des Zahlungsanbieters; leer = Kauf noch nicht freigeschaltet
+        apiUrl: typeof window !== "undefined" && window.NB_API !== void 0 ? window.NB_API : API_URL,
+        // Server für Konten und Statistik; leer = beides aus
+        pubKey: { "kty": "EC", "crv": "P-256", "x": "6ZA8UmaJ8MpG0x4OnGe_dMbzVTbSnzEW7kJwKpGBObI", "y": "ltiwubgM3vXBnjZ6hzAn4PZDQKpiJpuhDKL-x1BAxAU" }
+      };
+    }
+  });
+
+  // src/stats.js
+  function track(name, n = 1) {
+    const ev = (CONFIG.shop ? "kauf/" : "test/") + name;
+    sent.push(ev);
+    if (!CONFIG.apiUrl) return;
+    queue.set(ev, (queue.get(ev) || 0) + n);
+    if (!timer) timer = setTimeout(() => flushStats(), 3e4);
+  }
+  function flushStats() {
+    clearTimeout(timer);
+    timer = null;
+    if (!queue.size || !CONFIG.apiUrl) return;
+    const events = [...queue].map(([e, n]) => ({ e, n: Math.round(n) })).filter((x) => x.n > 0);
+    queue.clear();
+    if (!events.length) return;
+    try {
+      fetch(CONFIG.apiUrl.replace(/\/+$/, "") + "/api/event", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ events }), keepalive: true }).catch(() => {
+      });
+    } catch (e) {
+    }
+  }
+  var sent, queue, timer;
+  var init_stats = __esm({
+    "src/stats.js"() {
+      init_config();
+      sent = [];
+      queue = /* @__PURE__ */ new Map();
+      timer = null;
+    }
+  });
+
+  // src/merge.js
+  function mergeProfiles(a, b) {
+    a = obj(a);
+    b = obj(b);
+    const out = { ...a, ...b };
+    const la = obj(a.levels), lb = obj(b.levels);
+    out.levels = {};
+    for (const k of /* @__PURE__ */ new Set([...Object.keys(la), ...Object.keys(lb)])) {
+      const x = obj(la[k]), y = obj(lb[k]);
+      out.levels[k] = num(y.stars) > num(x.stars) ? { ...x, ...y } : num(x.stars) > num(y.stars) ? { ...y, ...x } : { ...x, ...y };
+    }
+    const na = obj(a.notes), nb = obj(b.notes);
+    out.notes = {};
+    for (const k of /* @__PURE__ */ new Set([...Object.keys(na), ...Object.keys(nb)])) {
+      const x = na[k], y = nb[k];
+      out.notes[k] = !x ? y : !y ? x : num(y.seen) >= num(x.seen) ? y : x;
+    }
+    const ca = obj(a.conf), cb = obj(b.conf);
+    out.conf = {};
+    for (const k of /* @__PURE__ */ new Set([...Object.keys(ca), ...Object.keys(cb)])) out.conf[k] = Math.max(num(ca[k]), num(cb[k]));
+    out.creatures = [.../* @__PURE__ */ new Set([...Array.isArray(a.creatures) ? a.creatures : [], ...Array.isArray(b.creatures) ? b.creatures : []])];
+    const da = obj(a.days), db = obj(b.days);
+    out.days = {};
+    for (const k of /* @__PURE__ */ new Set([...Object.keys(da), ...Object.keys(db)])) out.days[k] = Math.max(num(da[k]), num(db[k]));
+    const ta = obj(a.train), tb = obj(b.train);
+    out.train = {};
+    for (const k of /* @__PURE__ */ new Set([...Object.keys(ta), ...Object.keys(tb)])) {
+      const x = obj(ta[k]), y = obj(tb[k]), bx = num(y.best) > num(x.best) ? y : x, rx = Array.isArray(x.runs) ? x.runs : [], ry = Array.isArray(y.runs) ? y.runs : [];
+      out.train[k] = { ...x, ...y, best: num(bx.best), bestAcc: num(bx.bestAcc), stars: Math.max(num(x.stars), num(y.stars)), runs: ry.length >= rx.length ? ry : rx };
+    }
+    out.regenBest = Math.max(num(a.regenBest), num(b.regenBest));
+    if (Array.isArray(a.skip) || Array.isArray(b.skip)) {
+      const sa = a.skip || [], sb = b.skip || [];
+      out.skip = Array.from({ length: Math.max(sa.length, sb.length) }, (_, i) => Math.max(num(sa[i]), num(sb[i])));
+    }
+    if (Array.isArray(a.skipG) || Array.isArray(b.skipG)) {
+      const sa = a.skipG || [], sb = b.skipG || [];
+      out.skipG = Array.from({ length: Math.max(sa.length, sb.length) }, (_, i) => Math.max(num(sa[i]), num(sb[i])));
+    }
+    if (Array.isArray(a.pets) || Array.isArray(b.pets)) out.pets = [.../* @__PURE__ */ new Set([...Array.isArray(a.pets) ? a.pets : [], ...Array.isArray(b.pets) ? b.pets : []])];
+    out.seenIntro = !!(a.seenIntro || b.seenIntro);
+    out.calibrated = !!(a.calibrated || b.calibrated);
+    if (Array.isArray(a.storyRead) || Array.isArray(b.storyRead)) out.storyRead = [.../* @__PURE__ */ new Set([...a.storyRead || [], ...b.storyRead || []])];
+    return out;
+  }
+  var obj, num;
+  var init_merge = __esm({
+    "src/merge.js"() {
+      obj = (x) => x && typeof x === "object" && !Array.isArray(x) ? x : {};
+      num = (x) => typeof x === "number" && isFinite(x) ? x : 0;
+    }
+  });
+
+  // src/account.js
+  var account_exports = {};
+  __export(account_exports, {
+    accountsOn: () => accountsOn,
+    ago: () => ago,
+    api: () => api,
+    changePassword: () => changePassword,
+    login: () => login,
+    logout: () => logout,
+    pull: () => pull,
+    register: () => register,
+    strip: () => strip,
+    sync: () => sync,
+    touch: () => touch
+  });
+  async function api(path, { method, body, token, keepalive } = {}) {
+    const ctrl = typeof AbortController !== "undefined" ? new AbortController() : null, t = ctrl && setTimeout(() => ctrl.abort(), 15e3);
+    try {
+      const txt = body ? JSON.stringify(body) : void 0;
+      const r = await fetch(CONFIG.apiUrl.replace(/\/+$/, "") + path, { method: method || (body ? "POST" : "GET"), headers: { "Content-Type": "application/json", ...token ? { Authorization: "Bearer " + token } : {} }, body: txt, signal: ctrl ? ctrl.signal : void 0, keepalive: !!keepalive && (!txt || txt.length < 6e4) });
+      let data = {};
+      try {
+        data = await r.json();
+      } catch (e) {
+      }
+      return { ...data, ok: r.ok, status: r.status };
+    } catch (e) {
+      return { ok: false, status: 0, error: "Keine Verbindung zum Server. Bist du online?" };
+    } finally {
+      if (t) clearTimeout(t);
+    }
+  }
+  function replace(p, data) {
+    const { id, acct } = p;
+    for (const k of Object.keys(p)) delete p[k];
+    Object.assign(p, data, { id, acct });
+  }
+  async function register(app, p, name, password, email) {
+    const r = await api("/api/register", { body: { name, password, email: email || void 0, state: strip(p) } });
+    if (!r.ok) return r;
+    p.acct = { name: r.user.name, token: r.token, rev: r.rev, dirty: false, at: Date.now() };
+    quietSave(app);
+    return r;
+  }
+  async function login(app, loginName, password) {
+    const r = await api("/api/login", { body: { login: loginName, password } });
+    if (!r.ok) return r;
+    const st = app.state, server = r.state && Object.keys(r.state).length ? r.state : null;
+    let p = st.profiles.find((x) => x.acct && x.acct.name.toLowerCase() === r.user.name.toLowerCase()), dirty = false;
+    if (p) {
+      replace(p, server ? mergeProfiles(server, strip(p)) : strip(p));
+      dirty = true;
+    } else {
+      p = { ...newProfile(r.user.name), ...server || {} };
+      if (!p.id || st.profiles.some((x) => x.id === p.id)) p.id = Math.random().toString(36).slice(2, 10);
+      st.profiles.push(p);
+    }
+    p.acct = { name: r.user.name, token: r.token, rev: r.rev, dirty, at: Date.now() };
+    st.current = p.id;
+    quietSave(app);
+    app.applyProfile();
+    if (dirty) sync(app, p);
+    return r;
+  }
+  function touch(app) {
+    const p = app.profile;
+    if (!accountsOn() || !p || !p.acct || !p.acct.token) return;
+    p.acct.dirty = true;
+    clearTimeout(timer2);
+    timer2 = setTimeout(() => sync(app, p), 4e3);
+  }
+  async function sync(app, p, keepalive = false) {
+    if (!accountsOn() || !p || !p.acct || !p.acct.token || p.acct.expired || busy.has(p.id)) return;
+    busy.add(p.id);
+    try {
+      for (let i = 0; i < 3; i++) {
+        const r = await api("/api/state", { method: "PUT", body: { state: strip(p), rev: p.acct.rev }, token: p.acct.token, keepalive });
+        if (r.ok) {
+          p.acct.rev = r.rev;
+          p.acct.dirty = false;
+          p.acct.at = Date.now();
+          p.acct.err = null;
+          break;
+        }
+        if (r.status === 409 && r.state) {
+          replace(p, mergeProfiles(r.state, strip(p)));
+          p.acct.rev = r.rev;
+          if (app.profile === p) app.refreshLook && app.refreshLook();
+          continue;
+        }
+        if (r.status === 401) {
+          p.acct.expired = true;
+          p.acct.err = "Bitte melde dich neu an.";
+          break;
+        }
+        p.acct.err = r.error || "Gerade nicht erreichbar.";
+        break;
+      }
+    } finally {
+      busy.delete(p.id);
+      quietSave(app);
+    }
+  }
+  async function pull(app, p) {
+    if (!accountsOn() || !p || !p.acct || !p.acct.token || p.acct.expired) return;
+    const r = await api("/api/state", { token: p.acct.token });
+    if (r.status === 401) {
+      p.acct.expired = true;
+      p.acct.err = "Bitte melde dich neu an.";
+      quietSave(app);
+      return;
+    }
+    if (!r.ok) return;
+    if (r.rev !== p.acct.rev) {
+      replace(p, mergeProfiles(r.state, strip(p)));
+      p.acct.rev = r.rev;
+      p.acct.dirty = true;
+      if (app.profile === p) {
+        app.refreshLook && app.refreshLook();
+      }
+    }
+    if (p.acct.dirty) await sync(app, p);
+    else {
+      p.acct.at = Date.now();
+      quietSave(app);
+    }
+  }
+  async function logout(app, p, removeHere) {
+    if (p.acct && p.acct.token) await api("/api/logout", { body: {}, token: p.acct.token });
+    delete p.acct;
+    if (removeHere) {
+      app.state.profiles = app.state.profiles.filter((x) => x !== p);
+      if (app.state.current === p.id) app.state.current = app.state.profiles[0] ? app.state.profiles[0].id : null;
+    }
+    quietSave(app);
+    app.applyProfile();
+  }
+  async function changePassword(p, old, password) {
+    return api("/api/password", { body: { old, password }, token: p.acct.token });
+  }
+  function ago(t) {
+    if (!t) return "noch nie";
+    const s = Math.round((Date.now() - t) / 1e3);
+    return s < 60 ? "gerade eben" : s < 3600 ? `vor ${Math.round(s / 60)} Minuten` : s < 86400 ? `vor ${Math.round(s / 3600)} Stunden` : `am ${new Date(t).toLocaleDateString("de-DE")}`;
+  }
+  var accountsOn, strip, busy, timer2, quietSave;
+  var init_account = __esm({
+    "src/account.js"() {
+      init_config();
+      init_merge();
+      init_save();
+      accountsOn = () => !!CONFIG.apiUrl;
+      strip = (p) => {
+        const { acct, ...rest } = p || {};
+        return rest;
+      };
+      busy = /* @__PURE__ */ new Set();
+      timer2 = null;
+      quietSave = (app) => {
+        app._quiet = true;
+        try {
+          app.save();
+        } finally {
+          app._quiet = false;
+        }
+      };
     }
   });
 
@@ -2189,7 +2266,25 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       if (o > TW - VIEW_W) ctx.drawImage(L2.c, TW - o, 0);
     }
   }
-  var C, VIEW_W, VIEW_H, STAFF_BOTTOM, STEP_PX, q, HEAD, BODY, BODY_FLY, LEGS, EYES, HEROES, HERO_W, HERO_H, HATS, HAT_PAL, BUDDY_STAGE, CREATURE_COL, HEAD_MAP, hm, SHARP2, FLAT2, glowSprite, THEMES, TW, per, q4, Particles;
+  function makePegasus(locked = false) {
+    return PEG_WINGS.map((wing) => {
+      const c = cv(24, 20), x = c.getContext("2d"), put = (row, ox, oy) => {
+        for (let i = 0; i < row.length; i++) if (row[i] !== ".") px(x, ox + i, oy, locked ? row[i] === "K" ? "#7C8AA0" : "#B4BFCE" : PEG_PAL[row[i]]);
+      };
+      PEG_BODY.forEach((r, y) => put(r, 0, y));
+      wing.forEach(([ox, oy, r]) => put(r, ox, oy));
+      return c;
+    });
+  }
+  function makePet(id, locked = false) {
+    if (!WILD_ART[id]) return makePegasus(locked);
+    const rows = WILD_ART[id], c = cv(rows[0].length, rows.length), x = c.getContext("2d");
+    rows.forEach((r, y) => {
+      for (let i = 0; i < r.length; i++) if (r[i] !== ".") px(x, i, y, locked ? r[i] === "K" ? "#7C8AA0" : "#B4BFCE" : WILD_PAL[r[i]]);
+    });
+    return [c];
+  }
+  var C, VIEW_W, VIEW_H, STAFF_BOTTOM, STEP_PX, q, HEAD, BODY, BODY_FLY, LEGS, EYES, HEROES, HERO_W, HERO_H, HATS, HAT_PAL, BUDDY_STAGE, CREATURE_COL, HEAD_MAP, hm, SHARP2, FLAT2, glowSprite, THEMES, TW, per, q4, Particles, PEG_PAL, PEG_BODY, PEG_WINGS, WILD_PAL, WILD_ART;
   var init_gfx = __esm({
     "src/gfx.js"() {
       init_glyphs();
@@ -2318,6 +2413,17 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         draw(ctx, camX = 0) {
           for (const q2 of this.p) px(ctx, q4(q2.x - camX), q4(q2.y), q2.c);
         }
+      };
+      PEG_PAL = { K: C.K, W: "#FFFFFF", S: "#D3E2F4", F: "#A9CBEE", M: "#FFC83D", m: "#E8951C", H: "#7A5230" };
+      PEG_BODY = ["........................", "........................", "..................K.K...", ".................KWKWK..", "................KMWWWWK.", "...............KMMWWKWWK", "..............KMmWWWWWWK", ".KK...........KMMWWWKKK.", "KMMK.........KMmWWWK....", "KMmMKKKKKKKKKKMWWWWK....", "KMmMKWWWWWWWWWWWWWWK....", ".KMMKWWWWWWWWWWWWWSK....", ".KMmKWWWWWWWWWWWWSSK....", "..KMKSWWWWWWWWWWSSK.....", "..KKKKSSKKKKKKKSSKK.....", "....KWK.KSK...KWK.KSK...", "....KWK.KSK...KWK.KSK...", "...KWK.KSK.....KWK.KSK..", "...KHK.KHK.....KHK.KHK..", "...KKK.KKK.....KKK.KKK.."];
+      PEG_WINGS = [[[5, 1, "...KK...."], [5, 2, "..KWWK..."], [5, 3, ".KWWFK..."], [5, 4, ".KWWWFK.."], [5, 5, "KWWWFFK.."], [5, 6, "KWWWWFK.."], [5, 7, ".KWWWFFK."], [5, 8, ".KWWWWFK."], [5, 9, "..KKWWWK."], [5, 10, "....KKK.."]], [[1, 4, "...KKKK......"], [1, 5, "..KWWWWKK...."], [1, 6, ".KFWWWWWWKK.."], [1, 7, "..KFFWWWWWWK."], [1, 8, "...KKFFWWWWK."], [1, 9, ".....KKKWWWK."], [1, 10, "........KKK.."]]];
+      WILD_PAL = { K: C.K, "W": "#FFFFFF", "R": "#EF5350", "r": "#B93A3A", "O": "#FF9A3D", "Y": "#FFD75E", "G": "#78B833", "g": "#467C35", "B": "#2998E8", "b": "#174B83", "P": "#A56BE0", "p": "#7443B5", "M": "#F78FB3", "T": "#3CC9B5", "t": "#1F8F86", "N": "#A8744A", "n": "#7A5230", "C": "#FFF1D6", "S": "#D3E2F4", "L": "#A5D84F" };
+      WILD_ART = {
+        schnecke: ["....................", ".............K...K..", "............KWK.KWK.", "............KKK.KKK.", ".....KKKKK...K...K..", "...KKRRRRRKK.K...K..", "..KRRRRRRRRRKKK.KK..", "K.KBRRWWWRRRRKGGGGK.", "YKKBRRWKWRRRRKGGGGGK", "OYKBRRWWWRRRRKGKGGKK", "YKKBRRRRRRRRRKGGGGGK", "K.KBrrrrrrrrKGGGKKGK", "..KKKKKKKKKKGGGGGGK.", "..KgGGGGGGGGGGGGGK..", "...KKKKKKKKKKKKKK...", "...................."],
+        krake: ["......KKKKKKKK......", "....KKPPPPPPPPKK....", "...KPPPPPPPPPPPPK...", "..KPPMPPPPPPPPMPPK..", "..KPWWWPPWWWPPWWWK..", "..KPWKWPPWKWPPWKWK..", "..KPWWWPPWWWPPWWWK..", "..KPPPPPPPPPPPPPPK..", "..KPPPPKPPPPKPPPPK..", "...KPPPPKKKKPPPPK...", "..KKpPPPPPPPPPPpKK..", ".KPKKpKKPKKPKKpKKPK.", "KPK.KPK.KPK.KPK.KPK.", "KPK.KPK.KPK.KPK.KPK.", ".KPK.KK.KPK.KK.KPK..", "..KK.....K.....KK..."],
+        eule: ["...KK..........KK...", "..KNNK........KNNK..", "..KNNNKKKKKKKKNNNK..", "..KNNNNNNNNNNNNNNK..", ".KKKKKKKKKKKKKKKKKK.", ".KKKKWKKKKKKKKWKKKK.", ".KKKWKKKKKKKKWKKKKK.", "..KKKKKKNOONKKKKKK..", "..KNKKKKNOONKKKKNK..", ".KNNNNNNNOONNNNNNNK.", ".KNnNCCCCCCCCCCNnNK.", ".KNnNCCNCCCCNCCNnNK.", ".KNnNCCCCNNCCCCNnNK.", "..KNNCCNCCCCNCCNNK..", "...KKNCCCCCCCCNKK...", "....KOOKKKKKKOOK...."],
+        drache: ["..........K...K.....", ".........KGK.KGK....", "....KK...KGGKGGK....", "...KTTK.KGGGGGGGK...", "..KTTTTKKGWKGGWKGK..", "..KTTtTTKGWKGGWKGK..", "...KTtTTKGGGGGGGGK..", "....KTTKKGGKGGKGGKOY", ".....KKGGGGGGGGGGKYO", "....KLGGGGGGKKKKKKOY", "...KLGGGCCCCGGK.....", "K..KLGGCCCCCCGGK....", "KGKKLGGCCCCCCGGK....", ".KGGGGGCCCCCCGGK....", "..KKKGGKKKKKGGGK....", "....KKK.....KKK....."],
+        phoenix: [".........KK.........", "........KYYK........", "..K....KYOYK....K...", ".KRK...KOROK...KRK..", "KRORK.KKRRRRKK.KRORK", "KROORKRWKRRKWRKROORK", "KRYOORRWKRRKWRROOYRK", ".KRYOORRRYYRRROOYRK.", "..KRYOORROORROOYRK..", "...KRYORRYYRROYRK...", "....KKRRRRRRRRKK....", "......KRRrrRRK......", ".....KOKRRRRKOK.....", "....KYOK.KK.KOYK....", "...KYOK..KK..KOYK...", "...KKK...KK...KKK..."]
       };
     }
   });
@@ -2699,9 +2805,12 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   });
 
   // src/training.js
+  function hasCreature(key) {
+    return guitar() || KNOWN.has(key);
+  }
   function normalize(c = {}) {
     const cfg = { input: c.input === "name" ? "name" : "play", range: RANGES[LEVEL_SET].includes(c.range) ? c.range : RANGES[LEVEL_SET][0], acc: !!c.acc, len: c.len === "count" ? "count" : "time", weak: !!c.weak };
-    if (cfg.range === "bass" || cfg.weak || guitar()) cfg.acc = false;
+    if (cfg.weak || guitar()) cfg.acc = false;
     return cfg;
   }
   function weakNotes(profile) {
@@ -2716,7 +2825,10 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       TREBLE.forEach((k) => out.push({ key: k, clef: "treble" }));
       if (cfg.acc) ACC.forEach((k) => out.push({ key: k, clef: "treble" }));
     }
-    if (cfg.range !== "treble") BASS.forEach((k) => out.push({ key: k, clef: "bass" }));
+    if (cfg.range !== "treble") {
+      BASS.forEach((k) => out.push({ key: k, clef: "bass" }));
+      if (cfg.acc) BASS_ACC.forEach((k) => out.push({ key: k, clef: "bass" }));
+    }
     return out;
   }
   function disc(cfg) {
@@ -2780,7 +2892,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   function sameSound(a, b) {
     return !!a && !!b && midiOf(N(a.key)) === midiOf(N(b.key));
   }
-  var TRAIN_SECS, TRAIN_COUNT, RECORD_MIN_ACC, RECORD_MIN_NOTES, STAR_MIN_ACC, WEAK_MIN, STAR_AT, SLOW_MS, safe, PA, TREBLE, BASS, ACC, GA, GRANGE, RANGES, RANGE_LABEL, guitar, rangeLabel;
+  var TRAIN_SECS, TRAIN_COUNT, RECORD_MIN_ACC, RECORD_MIN_NOTES, STAR_MIN_ACC, WEAK_MIN, STAR_AT, SLOW_MS, safe, PA, TREBLE, BASS, ACC, BASS_ACC, KNOWN, GA, GRANGE, RANGES, RANGE_LABEL, guitar, rangeLabel;
   var init_training = __esm({
     "src/training.js"() {
       init_levels();
@@ -2806,6 +2918,8 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       TREBLE = PA[0].filter((k) => N(k).alt === 0);
       BASS = PA[1].filter((k) => N(k).alt === 0);
       ACC = PA[2].filter((k) => N(k).alt !== 0);
+      BASS_ACC = ["fis", "b", "cis", "es", "gis", "as", "des", "dis", "B", "As", "Fis", "Es"];
+      KNOWN = new Set(PA.flat());
       GA = SETS.gitarre.all;
       GRANGE = { g0: GA[0], g1: GA[1], g2: GA[2], gall: GA.flat() };
       RANGES = { klavier: ["treble", "bass", "both"], gitarre: ["g0", "g1", "g2", "gall"] };
@@ -4615,6 +4729,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     pass: () => pass,
     pause: () => pause,
     paywall: () => paywall,
+    petCard: () => petCard,
     placement: () => placement,
     profiles: () => profiles,
     result: () => result,
@@ -4643,6 +4758,14 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   }
   function fill(root) {
     root.querySelectorAll("[data-cr]").forEach((e) => e.appendChild(crCanvas(e.dataset.cr, e.dataset.locked === "1", +e.dataset.size || 64)));
+    root.querySelectorAll("[data-pet]").forEach((e) => {
+      const c = makePet(e.dataset.pet, e.dataset.locked === "1")[0], size = +e.dataset.size || 64;
+      c.style.width = size + "px";
+      c.style.height = size * c.height / c.width + "px";
+      c.className = "pix";
+      c.setAttribute("aria-hidden", "true");
+      e.appendChild(c);
+    });
     root.querySelectorAll("[data-hero]").forEach((e) => e.appendChild(heroCanvas(+e.dataset.hero, +e.dataset.size || 72, +e.dataset.hat || 0)));
   }
   function title(app) {
@@ -4907,6 +5030,24 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     }, "low");
     render();
   }
+  function petCard(app, ids, then) {
+    const p = app.profile, one = ids.length === 1 ? ids[0] : null, peg = ids.includes(PEGASUS), lv = one && wildLevel(one);
+    app.audio.sfx("star");
+    const pegLine = "Der Pegasus fliegt dir ab jetzt im Spiel hinterher.";
+    app.screen(
+      one ? `<div class="petcard"><small class="kicker">Neues Tier freigeschaltet</small><h2>${peg ? "Der Pegasus" : esc(petName(one))}</h2><span data-pet="${one}" data-size="192"></span><p class="lead">Du hast \u201E${esc(peg ? WORLDS[PEGASUS_WORLD].name : lv ? lv.title : "")}\u201C geschafft!</p>
+    <p>${peg ? pegLine : "Dieses Tier wohnt jetzt in deiner Sammlung."}</p>${peg ? '<p class="muted">In deiner Sammlung kannst du jederzeit einen anderen Begleiter w\xE4hlen.</p>' : ""}
+    <div class="row">${peg ? "" : '<button class="btn" data-act="take">Als Begleiter mitnehmen</button>'}<button class="btn go big" data-act="ok">Weiter</button></div></div>` : `<div class="petcard"><small class="kicker">Neue Tiere freigeschaltet</small><h2>${ids.length} neue Tiere</h2><div class="petrow">${ids.map((id) => `<span class="crcard pet"><span data-pet="${id}" data-size="72"></span><b>${esc(petName(id))}</b></span>`).join("")}</div>
+    <p>${peg ? pegLine + " " : ""}Alle Tiere wohnen jetzt in deiner Sammlung \u2013 dort kannst du deinen Begleiter w\xE4hlen.</p><div class="row"><button class="btn go big" data-act="ok">Weiter</button></div></div>`,
+      { ok: then, take: () => {
+        p.buddy = one;
+        app.save();
+        app.refreshLook();
+        app.audio.sfx("ok");
+        then();
+      } }
+    );
+  }
   function map(app, world) {
     app.refreshLook();
     const p = app.profile;
@@ -4916,6 +5057,17 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     p.seenWorld = p.seenWorld || {};
     const W = WORLDS[world];
     app.backdrop(W.theme);
+    {
+      const due = duePets(p);
+      if (due.length) {
+        p.pets = [...Array.isArray(p.pets) ? p.pets : [], ...due];
+        if (due.includes(PEGASUS)) p.buddy = PEGASUS;
+        app.save();
+        app.refreshLook();
+        due.forEach((id) => track("tier/" + id));
+        return petCard(app, due, () => map(app, world));
+      }
+    }
     if (!p.seenWorld[seenKey(world)]) {
       p.seenWorld[seenKey(world)] = 1;
       app.save();
@@ -5132,23 +5284,35 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     return c;
   }
   function collection(app, sel) {
-    const p = app.profile, stars2 = totalStars(p), worn = hatOf(p, stars2);
+    const p = app.profile, stars2 = totalStars(p), worn = hatOf(p, stars2), pets = ownedPets(p), bud = petName(p.buddy) && pets.includes(p.buddy) ? p.buddy : null;
     let detail = "";
+    const petBtn = (id, hint) => {
+      const own = pets.includes(id), on = bud === id;
+      return `<button class="crcard pet ${on ? "bud" : ""}" ${own ? "" : "disabled"} data-act="pet" data-id="${id}" aria-pressed="${on}"><span data-pet="${id}" data-locked="${own ? 0 : 1}" data-size="62"></span><b>${own ? esc(petName(id)) : "?"}</b><small>${own ? on ? "fliegt mit dir" : "antippen: mitnehmen" : hint}</small></button>`;
+    };
     if (sel) {
       const n = N(sel.key), st = p.notes[sel.key] || { box: 0, seen: 0, ok: 0 };
       detail = `<div class="crdetail"><span data-cr="${sel.key}" data-size="128"></span><div><h3>${nameHtml(n)}</h3><button class="btn sm ${p.buddy === sel.key ? "" : "go"}" data-act="buddy" style="margin-bottom:8px">${p.buddy === sel.key ? "Begleiter ablegen" : "Als Begleiter mitnehmen"}</button><p class="muted" style="margin:0 0 8px;font-size:17px">Als Begleiter: <b>${BUDDY_STAGE[buddyStage(st)]}</b>.${buddyStage(st) < 2 ? " Er w\xE4chst, wenn du diese Note sicherer spielst." : ""}</p><div id="staffHere"></div><p>${describePos(staffPos(n, sel.clef))}</p>
       <p>Sicherheit <span class="bar"><i style="width:${st.box * 25}%"></i></span></p><p>${st.ok} von ${st.seen} Mal beim ersten Versuch</p><button class="btn sm" data-act="play">Anh\xF6ren</button></div></div>`;
     }
-    app.screen(`<div class="maphead"><h2>Deine Sammlung</h2><button class="btn sm" data-act="back">Zur\xFCck</button></div><p class="muted" style="margin:0 0 8px">${p.buddy && p.creatures.includes(p.buddy) ? `Dein Begleiter: <b>${nameHtml(N(p.buddy))}</b>. Er fliegt dir im Spiel hinterher.` : "Tippe ein Notenwesen an und nimm es als Begleiter mit. Es fliegt dir dann im Spiel hinterher."}</p><div class="collwrap"><div class="coll"><h3>H\xFCte f\xFCr deine Figur <small class="muted">\xB7 du hast ${stars2} Sterne</small></h3><div class="crgrid">${HATS.map((h, i) => {
+    app.screen(`<div class="maphead"><h2>Deine Sammlung</h2><button class="btn sm" data-act="back">Zur\xFCck</button></div><p class="muted" style="margin:0 0 8px">${bud ? `Dein Begleiter: <b>${bud === PEGASUS ? "der Pegasus" : esc(petName(bud))}</b>. Er fliegt dir im Spiel hinterher.` : p.buddy && p.creatures.includes(p.buddy) ? `Dein Begleiter: <b>${nameHtml(N(p.buddy))}</b>. Er fliegt dir im Spiel hinterher.` : "Tippe ein Notenwesen an und nimm es als Begleiter mit. Es fliegt dir dann im Spiel hinterher."}</p><div class="collwrap"><div class="coll"><h3>Tiere</h3><div class="crgrid">${petBtn(PEGASUS, `wenn du \u201E${esc(WORLDS[PEGASUS_WORLD].short)}\u201C geschafft hast`)}</div><h3>H\xFCte f\xFCr deine Figur <small class="muted">\xB7 du hast ${stars2} Sterne</small></h3><div class="crgrid">${HATS.map((h, i) => {
       const open = stars2 >= h.stars;
       return `<button class="crcard hat ${worn === i ? "bud" : ""}" ${open ? "" : "disabled"} data-act="hat" data-i="${i}"><span data-hero="${p.hero}" data-hat="${open ? i : 0}" data-size="42"></span><b>${esc(h.name)}</b>${open ? "" : `<small>ab ${h.stars} Sternen</small>`}</button>`;
-    }).join("")}</div>${WORLDS.map((w, wi) => `<h3>${esc(w.name)}</h3><div class="crgrid">${ALL_NOTES[wi].map((k) => {
+    }).join("")}</div>${WORLDS.map((w, wi) => !ALL_NOTES[wi].length ? `<h3>${esc(w.name)} <small class="muted">\xB7 wilde Tiere</small></h3><div class="crgrid">${WILD.map(([id], i) => petBtn(id, `Level ${i + 1} dieser Welt`)).join("")}</div>` : `<h3>${esc(w.name)}</h3><div class="crgrid">${ALL_NOTES[wi].map((k) => {
       const has = p.creatures.includes(k);
       return `<button class="crcard ${sel && sel.key === k && sel.clef === w.clef ? "sel" : ""} ${p.buddy === k ? "bud" : ""}" ${has ? "" : "disabled"} data-act="cr" data-k="${k}" data-clef="${w.clef}"><span data-cr="${k}" data-locked="${has ? 0 : 1}" data-size="56"></span><b>${has ? nameHtml(N(k)) : "?"}</b>${has && isMastered(p.notes[k]) ? '<i class="tick" title="sicher"></i>' : ""}</button>`;
     }).join("")}</div>`).join("")}</div>${detail}</div>`, {
       back: () => map(app),
       cr: (e) => collection(app, { key: e.dataset.k, clef: e.dataset.clef }),
       play: () => app.audio.playNote(midiOf(N(sel.key))),
+      pet: (e) => {
+        const id = e.dataset.id;
+        p.buddy = p.buddy === id ? null : id;
+        app.save();
+        app.refreshLook();
+        app.audio.sfx("ok");
+        collection(app, sel);
+      },
       hat: (e) => {
         p.hat = +e.dataset.i;
         app.save();
@@ -5172,12 +5336,13 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   function pass(app) {
     const p = app.profile, today = /* @__PURE__ */ new Date(), cells = [];
     let week = 0, total = 0;
+    today.setHours(12, 0, 0, 0);
     for (let i = 27; i >= 0; i--) {
       const d = new Date(today);
       d.setDate(today.getDate() - i);
       const s = p.days[dayKey(d)] || 0;
       if (i < 7) week += s;
-      cells.push(`<i class="${s >= 600 ? "l3" : s >= 240 ? "l2" : s > 0 ? "l1" : ""}" title="${d.getDate()}.${d.getMonth() + 1}.: ${Math.round(s / 60)} min"></i>`);
+      cells.push(`<i class="${s >= 600 ? "l3" : s >= 240 ? "l2" : s >= DAY_MIN_S ? "l1" : ""}" data-day="${dayKey(d)}" title="${d.getDate()}.${d.getMonth() + 1}.: ${Math.floor(s / 60)} min"></i>`);
     }
     Object.values(p.days).forEach((s) => {
       total += s;
@@ -5186,7 +5351,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     const list = (ks) => ks.length ? ks.map((k) => `<span class="tag">${nameHtml(N(k))}</span>`).join("") : '<span class="muted">noch keine</span>';
     const conf = topConfusions(p.conf).filter((c) => safeN(c.target) && safeN(c.played));
     app.screen(`<div class="maphead"><h2>\xDCbungspass von ${esc(p.name)}</h2><button class="btn sm" data-act="back">Zur\xFCck</button></div>
-    <div class="passgrid"><div class="card"><h3>Ge\xFCbt</h3><p class="bigno">${streak(p)}<small> Tage in Folge</small></p><p>Diese Woche: <b>${Math.round(week / 60)} min</b> \xB7 Insgesamt: <b>${Math.round(total / 60)} min</b></p><div class="cal" role="img" aria-label="\xDCbungstage der letzten vier Wochen">${cells.join("")}</div><small class="muted">Die letzten 4 Wochen, heute unten rechts</small></div>
+    <div class="passgrid"><div class="card"><h3>Ge\xFCbt</h3><p class="bigno" id="passStreak">${streak(p)}<small> ${streak(p) === 1 ? "Tag" : "Tage"} in Folge</small></p><p id="passDays"><span class="nw">\xDCbungstage insgesamt: <b>${practiceDays(p)}</b></span> <span class="nw">${practiced(p, dayKey()) ? "\xB7 heute schon ge\xFCbt" : "\xB7 heute noch nicht"}</span></p><p id="passMin"><span class="nw">Letzte 7 Tage: <b>${Math.floor(week / 60)} min</b></span> <span class="nw">\xB7 Insgesamt: <b>${Math.floor(total / 60)} min</b></span></p><div class="cal" role="img" aria-label="\xDCbungstage der letzten vier Wochen">${cells.join("")}</div><small class="muted">Die letzten 4 Wochen, heute unten rechts. Ein Tag z\xE4hlt ab 1 Minute.</small></div>
     <div class="card"><h3>Fortschritt</h3><p><b>${totalStars(p)}</b> Sterne \xB7 <b>${p.creatures.length}</b> von ${creatureTotal()} Notenwesen</p>${WORLDS.map((w, i) => `<p>${esc(w.short)}: ${doneCount(p, i)} von ${levelsOf(i).length} Leveln <span class="bar"><i style="width:${100 * doneCount(p, i) / levelsOf(i).length}%"></i></span></p>`).join("")}</div>
     <div class="card"><h3>Diese Noten sitzen sicher <small>(richtig und z\xFCgig)</small></h3><div class="tags">${list(sure)}</div><h3>Diese Noten noch \xFCben</h3><div class="tags">${list(weak)}</div>${weakNotes(p).length >= WEAK_MIN ? '<p><button class="btn sm go" data-act="weak">Diese Noten trainieren</button></p>' : ""}</div>
     <div class="card"><h3>H\xE4ufige Verwechslungen</h3>${conf.length ? conf.map((c) => `<p><b>${nameHtml(N(c.target))}</b> wird oft mit <b>${nameHtml(N(c.played))}</b> verwechselt <span class="muted">(${c.n}\xD7)</span></p>`).join("") : '<p class="muted">Bisher keine auff\xE4lligen Verwechslungen.</p>'}</div>
@@ -5399,6 +5564,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       init_music();
       init_levels();
       init_music();
+      init_pets();
       init_gfx();
       init_save();
       init_config();
@@ -5429,7 +5595,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
           return null;
         }
       };
-      VERSION = "2.10 \xB7 27.11.2026";
+      VERSION = "2.11 \xB7 27.11.2026";
     }
   });
 
@@ -5479,14 +5645,14 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     let shown = false, why = false;
     const render = () => {
       const old = shown && document.querySelector("#screen .sbody"), keepY = old ? old.scrollTop : 0;
-      const mic = app.audio.micState, keys = app.keysOn, play = cfg.input === "play", blocked = play && !keys && (mic === "denied" || mic === "unsupported"), d = disc(cfg), t = d && p.train && p.train[d], accOff = cfg.range === "bass" || cfg.weak;
+      const mic = app.audio.micState, keys = app.keysOn, play = cfg.input === "play", blocked = play && !keys && (mic === "denied" || mic === "unsupported"), d = disc(cfg), t = d && p.train && p.train[d], accOff = cfg.weak;
       const micLine = !play ? "" : keys ? `<p class="note">Du spielst mit: ${INSTR.pad}.</p>` : mic === "on" ? '<p class="note ok">Mikrofon ist an.</p>' : mic === "off" ? `<p class="note">${INSTR.place} Das Spiel fragt gleich nach dem Mikrofon.</p>` : `<p class="note warn">${mic === "denied" ? "Das Mikrofon wurde nicht erlaubt." : "Hier gibt es kein Mikrofon."} Du kannst ohne Mikrofon spielen (${INSTR.pad}) oder \u201ENamen antippen\u201C w\xE4hlen.</p>`;
       const rec = cfg.weak ? "Hier geht es nur ums \xDCben: Wackelnoten-Runden z\xE4hlen nicht als Rekord." : t && t.best ? `Dein Rekord hier: <b>${t.best}</b> Noten pro Minute.` : "Hier hast du noch keinen Rekord.";
       app.screen(`<div class="maphead"><div><small class="kicker">Tempo und Treffsicherheit \xB7 ohne Level und Geschichte</small><h2>Freies Training</h2></div><button class="btn sm" data-act="back">Zur\xFCck</button></div>
       <h3 class="segq">1. Wie antwortest du?</h3><div class="segrow c2">${seg("in", "play", play, INSTR.play, isGuitar() ? "Mit Mikrofon \u2013 die richtige Saite z\xE4hlt" : "Mit Mikrofon \u2013 die richtige Oktave z\xE4hlt")}${seg("in", "name", !play, "Namen antippen", "Ohne Klavier, nur lesen")}</div>
       <h3 class="segq">2. Welche Noten?</h3>${isGuitar() ? `<div class="segrow c4">${[["g0", "e-Saite und h-Saite"], ["g1", "g-Saite und d-Saite"], ["g2", "A-Saite und E-Saite"], ["gall", "Alle 17 T\xF6ne"]].map(([v, sub], i) => seg("range", v, !cfg.weak && cfg.range === v, rangeLabel(v), sub, { lock: !full && i > 0 })).join("")}</div>
       <button class="toggle ${cfg.weak ? "on" : ""}" data-act="range" data-v="${cfg.weak ? cfg.range : "weak"}" role="switch" aria-checked="${cfg.weak}" ${full && weakN < WEAK_MIN ? "disabled" : ""}><i></i><span><b>Nur meine Wackelnoten</b><small>${!full ? "Nur in der Vollversion" : weakN >= WEAK_MIN ? `${weakN} Noten, die noch nicht sitzen` : "Erst ab 3 unsicheren Noten"}</small></span></button>` : `<div class="segrow c4">${seg("range", "treble", !cfg.weak && cfg.range === "treble", "Violinschl\xFCssel", "c<sup>1</sup> bis a<sup>2</sup>")}${seg("range", "bass", !cfg.weak && cfg.range === "bass", "Bassschl\xFCssel", "C bis c<sup>1</sup>", { lock: !full })}${seg("range", "both", !cfg.weak && cfg.range === "both", "Beide Schl\xFCssel", "Die Schl\xFCssel wechseln", { lock: !full })}${seg("range", "weak", cfg.weak, "Meine Wackelnoten", weakN >= WEAK_MIN ? `${weakN} Noten, die noch nicht sitzen` : "Erst ab 3 unsicheren Noten", { dis: full && weakN < WEAK_MIN, lock: !full })}</div>
-      <button class="toggle ${cfg.acc ? "on" : ""} ${accOff ? "off" : ""}" data-act="acc" role="switch" aria-checked="${cfg.acc}" aria-disabled="${accOff}"><i></i><span><b>Mit Vorzeichen (\u266F und \u266D)</b><small class="${accOff && why ? "why" : ""}">${!full ? "Nur in der Vollversion" : accOff ? cfg.weak ? "Geht nicht bei den Wackelnoten \u2013 w\xE4hle oben einen Schl\xFCssel" : "Gibt es bisher nur im Violinschl\xFCssel \u2013 w\xE4hle oben \u201EViolinschl\xFCssel\u201C oder \u201EBeide Schl\xFCssel\u201C" : "Kreuze und Bes aus dem Land der Zauberzeichen"}</small></span></button>`}
+      <button class="toggle ${cfg.acc ? "on" : ""} ${accOff ? "off" : ""}" data-act="acc" role="switch" aria-checked="${cfg.acc}" aria-disabled="${accOff}"><i></i><span><b>Mit Vorzeichen (\u266F und \u266D)</b><small class="${accOff && why ? "why" : ""}">${!full ? "Nur in der Vollversion" : accOff ? "Geht nicht bei den Wackelnoten \u2013 w\xE4hle oben einen Schl\xFCssel" : cfg.range === "bass" ? "Kreuze und Bes im Bassschl\xFCssel" : cfg.range === "both" ? "Kreuze und Bes in beiden Schl\xFCsseln" : "Kreuze und Bes aus dem Land der Zauberzeichen"}</small></span></button>`}
       <h3 class="segq">3. Wie lange?</h3><div class="segrow c2">${seg("len", "time", cfg.len === "time", "60 Sekunden", "So viele Noten wie m\xF6glich")}${seg("len", "count", cfg.len === "count", "20 Noten", "In Ruhe \u2013 die Uhr l\xE4uft nur mit")}</div>
       <p class="note" id="trainRec">${rec}</p>${micLine}
       <div class="row stick">${blocked ? `<button class="btn go" data-act="keys">Ohne Mikrofon: ${INSTR.pad}</button><button class="btn" data-act="go">Mikrofon nochmal versuchen</button>` : '<button class="btn go big" data-act="go">Los!</button>'}</div>`, {
@@ -5578,6 +5744,8 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   });
 
   // src/main.js
+  init_pets();
+  init_levels();
   init_save();
   init_config();
 
@@ -5771,6 +5939,31 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         this.ansBtns[l] = b;
       }
       this.right.appendChild(box);
+      this.ansBox = box;
+      this.fitAnswers();
+    }
+    /** Viele Antwortknöpfe (Training mit Vorzeichen: 15 Namen) als Raster einpassen – so groß wie möglich, aber nie über den Rand. */
+    fitAnswers() {
+      const box = this.ansBox;
+      if (!box || !box.isConnected) return;
+      const n = box.children.length;
+      if (n <= 8) return;
+      const cs = getComputedStyle(this.root), gap = 10, W = this.root.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), H = this.root.clientHeight - parseFloat(cs.paddingTop) - Math.max(14, parseFloat(cs.paddingBottom));
+      let best = null;
+      if (!(W > 60 && H > 30)) {
+        if ((box._try = (box._try || 0) + 1) < 120) requestAnimationFrame(() => this.fitAnswers());
+        return;
+      }
+      for (let rows = 1; rows <= 5; rows++) {
+        const cols = Math.ceil(n / rows), w = Math.min(170, (W - gap * (cols - 1)) / cols), h = Math.min(130, (H - gap * (rows - 1)) / rows), score = Math.min(w, h * 1.1);
+        if (w > 16 && h > 16 && (!best || score > best.score)) best = { cols, w, h, score };
+      }
+      if (!best) return;
+      box.classList.add("grid");
+      box.style.gridTemplateColumns = `repeat(${best.cols}, ${Math.floor(best.w)}px)`;
+      box.style.gap = gap + "px";
+      box.style.setProperty("--ah", Math.floor(best.h) + "px");
+      box.style.setProperty("--af", Math.floor(Math.min(best.h * 0.5, best.w * 0.4)) + "px");
     }
     bau(withAcc, on) {
       this.clear();
@@ -5953,6 +6146,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         } else drawNote(ctx, q(n.x), y, { style: "ink", up: stemUp(n.pos, this.clef), alt: n.n.alt, line });
       });
       drawClef(ctx, this.clef, 6, line);
+      this.app.drawBuddy(ctx, this, 18, 38, this.t, this.freeze > 0 ? 0 : Math.abs(Math.sin(this.t * 4)) * 2);
       this.parts.draw(ctx);
       label(tx, "Tor", GATE - 9, yOfPos(12.6), { size: 18, color: "#FFFFFF", stroke: C.RED });
     }
@@ -6108,6 +6302,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         }
         if (tk.word) label(tx, tk.word[i], x, 126, { size: 30, color: i < this.placed.length ? "#B4EB6B" : "#FFFFFF", stroke: C.K });
       }
+      this.app.drawBuddy(ctx, this, 18, 38, this.t, Math.abs(Math.sin(this.t * 4)) * 2);
       this.parts.draw(ctx);
     }
   };
@@ -6215,7 +6410,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       }
       p.notes[c.key] = update(p.notes[c.key] || newStat(), !this.curTried, ms > SLOW_MS[cfg.input]);
       this.times.push({ key: c.key, clef: c.clef, ms });
-      if (cfg.input === "play" && !p.creatures.includes(c.key)) {
+      if (cfg.input === "play" && hasCreature(c.key) && !p.creatures.includes(c.key)) {
         p.creatures.push(c.key);
         this.freed.push(c.n);
       }
@@ -6357,6 +6552,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       } else ctx.drawImage(f, q(x), 113);
     }
   };
+  var IDLE_MS = 6e4;
   var App = class {
     constructor() {
       const $ = (id) => document.getElementById(id);
@@ -6457,6 +6653,9 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       $("stage").addEventListener("pointermove", (e) => {
         if (e.buttons && !e.target.closest("#panel,#screen,#hud")) pt(e);
       });
+      for (const t of ["pointerdown", "keydown"]) document.addEventListener(t, () => {
+        this.lastAct = performance.now();
+      }, true);
       document.addEventListener("keydown", (e) => {
         const sc = this.scene;
         if (!sc || !sc.isLevel || this.paused || !$("screen").hidden) return;
@@ -6584,8 +6783,9 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     }
     /** Begleiter: ein gesammeltes Notenwesen schwebt der Figur hinterher (weich nachgezogen, wippt, hüpft bei Erfolg). o merkt sich die Position. */
     drawBuddy(ctx, o, tx, ty, t, hop = 0) {
-      const b = this.buddy;
-      if (!b) return;
+      const bb = this.buddy;
+      if (!bb) return;
+      const b = Array.isArray(bb) ? bb[(Math.floor((t || 0) * 5) % bb.length + bb.length) % bb.length] : bb;
       if (o.bx === void 0 || Math.abs(o.bx - tx) > 140) {
         o.bx = tx;
         o.by = ty;
@@ -6600,7 +6800,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         ctx.fillStyle = "#FFF1D6";
         ctx.fillRect(q(o.bx - 11 + Math.floor(t * 6) % 5), q(y + 4 - Math.floor(t * 4) % 7), 1, 1);
       }
-      ctx.drawImage(b, q(o.bx - 11), q(y - 14));
+      ctx.drawImage(b, q(o.bx - b.width / 2), q(y + 8 - b.height));
     }
     /** Figur (mit Hut) und Begleiter (mit Stufe) neu zeichnen – nach Profilwechsel und immer, wenn die Karte erscheint. */
     refreshLook() {
@@ -6608,7 +6808,12 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       this.heroFrames = makeHero(p ? p.hero : 0, p ? hatOf(p, totalStars(p)) : 0);
       this.buddy = null;
       this.buddySure = false;
-      if (p && p.buddy && p.creatures.includes(p.buddy)) {
+      if (p && petName(p.buddy)) {
+        if (owns(p, p.buddy)) {
+          this.buddy = makePet(p.buddy);
+          this.buddySure = true;
+        }
+      } else if (p && p.buddy && p.creatures.includes(p.buddy)) {
         const n = N(p.buddy), st = buddyStage(p.notes[p.buddy]);
         this.buddy = makeBuddy((n.step % 7 + 7) % 7, n.alt, st);
         this.buddySure = st === 2;
@@ -6638,6 +6843,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       setViewW(W / 4);
       this.$("panel").style.top = 600 + top + "px";
       this.$("panel").style.height = ph + "px";
+      if (this.panel) this.panel.fitAnswers();
       st.classList.toggle("tall", !port && ph >= 300);
     }
     applyProfile() {
@@ -6844,9 +7050,10 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
           this.panel.setLevel(this.listening ? this.audio.level : 0);
           this.panel.setHeard(h ? h.midi + INSTR.shift : null);
         }
+        if (ev) this.lastAct = ts;
         if (sc && !this.paused) {
           sc.update(dt);
-          if (sc.isLevel) {
+          if (sc.isLevel && ts - (this.lastAct || 0) < IDLE_MS) {
             this.sec += dt;
             if (this.sec > 20) this.flush();
           }
@@ -6877,6 +7084,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   var start = () => {
     window.__nb = new App();
     window.__levels = LEVELS;
+    window.__lv = levels_exports;
     window.__screens = screens_exports;
     window.__config = CONFIG;
     window.__train = trainui_exports;

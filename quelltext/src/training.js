@@ -11,6 +11,10 @@ export const STAR_AT = { play: [15, 25, 40], name: [25, 40, 55] };
 export const SLOW_MS = { play: 7000, name: 5000 };
 const safe = k => { try { return N(k); } catch (e) { return null; } };
 const PA = SETS.klavier.all, TREBLE = PA[0].filter(k => N(k).alt === 0), BASS = PA[1].filter(k => N(k).alt === 0), ACC = PA[2].filter(k => N(k).alt !== 0);
+// Vorzeichen im Bassschlüssel: dieselben Töne wie oben, eine bzw. zwei Oktaven tiefer – dazu vier in der großen Oktave.
+const BASS_ACC = ['fis', 'b', 'cis', 'es', 'gis', 'as', 'des', 'dis', 'B', 'As', 'Fis', 'Es'], KNOWN = new Set(PA.flat());
+/** Gibt es zu dieser Note ein Notenwesen in der Sammlung? (Die Vorzeichen im Bass haben noch keins.) */
+export function hasCreature(key) { return guitar() || KNOWN.has(key); }
 // Gitarre: Bereiche nach Saiten (alles im Violinschlüssel notiert)
 const GA = SETS.gitarre.all, GRANGE = { g0: GA[0], g1: GA[1], g2: GA[2], gall: GA.flat() };
 export const RANGES = { klavier: ['treble', 'bass', 'both'], gitarre: ['g0', 'g1', 'g2', 'gall'] };
@@ -19,7 +23,7 @@ const guitar = () => LEVEL_SET === 'gitarre';
 
 export function normalize(c = {}) {
   const cfg = { input: c.input === 'name' ? 'name' : 'play', range: RANGES[LEVEL_SET].includes(c.range) ? c.range : RANGES[LEVEL_SET][0], acc: !!c.acc, len: c.len === 'count' ? 'count' : 'time', weak: !!c.weak };
-  if (cfg.range === 'bass' || cfg.weak || guitar()) cfg.acc = false; return cfg;
+  if (cfg.weak || guitar()) cfg.acc = false; return cfg;
 }
 /** Noten, die schon vorkamen, aber noch nicht sicher sitzen – mit dem Schlüssel, in dem sie gezeigt werden. */
 export function weakNotes(profile) {
@@ -33,7 +37,7 @@ export function pool(cfg, profile) {
   if (GRANGE[cfg.range]) return GRANGE[cfg.range].map(k => ({ key: k, clef: 'treble' }));
   const out = [];
   if (cfg.range !== 'bass') { TREBLE.forEach(k => out.push({ key: k, clef: 'treble' })); if (cfg.acc) ACC.forEach(k => out.push({ key: k, clef: 'treble' })); }
-  if (cfg.range !== 'treble') BASS.forEach(k => out.push({ key: k, clef: 'bass' }));
+  if (cfg.range !== 'treble') { BASS.forEach(k => out.push({ key: k, clef: 'bass' })); if (cfg.acc) BASS_ACC.forEach(k => out.push({ key: k, clef: 'bass' })); }
   return out;
 }
 /** Kennung der Disziplin (für Rekorde). Wackelnoten-Runden haben keine: Die Noten wechseln ja. */

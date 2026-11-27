@@ -54,6 +54,6 @@ export class BauScene {
         G.drawLedgers(ctx, x - 9, 19, ledgerPositions(this.pos, this.clef), line); G.drawGlow(ctx, sx, y, 0.55 + 0.25 * Math.sin(this.t * 5)); G.drawNote(ctx, sx, y, { style: 'gold', halo: '#FFF1D6', up: stemUp(this.pos, this.clef), alt: this.alt, line: G.C.K });
         if (this.tries >= 2 && !tk.word) { const tp = staffPos(tk.notes[0], this.clef); ctx.globalAlpha = 0.45; G.drawNote(ctx, x, G.yOfPos(tp), { style: 'ghost', stem: false, line: G.C.G2 }); ctx.globalAlpha = 1; } }
       if (tk.word) label(tx, tk.word[i], x, 126, { size: 30, color: i < this.placed.length ? '#B4EB6B' : '#FFFFFF', stroke: G.C.K }); }
-    this.parts.draw(ctx);
+    this.app.drawBuddy(ctx, this, 18, 38, this.t, Math.abs(Math.sin(this.t * 4)) * 2); this.parts.draw(ctx);
   }
 }

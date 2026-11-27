@@ -1,4 +1,6 @@
 // Einstieg: Spielschleife, Szenenwechsel, Speicher, HUD.
+import { petName, owns } from './pets.js';
+import * as LV from './levels.js';
 import { load, persist, addPractice, dayKey, importPayload } from './save.js';
 import { CONFIG } from './config.js';
 import { verifyKey, isActive } from './license.js';
@@ -28,6 +30,8 @@ class Backdrop {
     this.app.drawBuddy(ctx, this, back && walking ? x + 30 : x - 12, 108, this.t, walking ? 0 : Math.abs(Math.sin(this.t * 4)) * 3);
     if (back && walking) { ctx.save(); ctx.translate(G.q(x) + 18, 113); ctx.scale(-1, 1); ctx.drawImage(f, 0, 0); ctx.restore(); } else ctx.drawImage(f, G.q(x), 113); }
 }
+/** Nach so langer Pause ohne Ton oder Tipp zählt die Zeit nicht mehr als Üben. */
+const IDLE_MS = 60000;
 class App {
   constructor() {
     const $ = id => document.getElementById(id); this.$ = $;
@@ -47,6 +51,7 @@ class App {
     $('pauseBtn').addEventListener('click', () => { if (this.scene && this.scene.isLevel) S.pause(this); });
     const pt = e => { if (!this.scene || !this.scene.pointer || this.paused) return; const r = this.world.getBoundingClientRect(); const u = (e.clientX - r.left) / r.width, v = (e.clientY - r.top) / r.height; this.scene.pointer(u * G.VIEW_W, (v * this.H - this.top) / 4); };
     $('stage').addEventListener('pointerdown', e => { if (e.target.closest('#panel,#screen,#hud')) return; pt(e); }); $('stage').addEventListener('pointermove', e => { if (e.buttons && !e.target.closest('#panel,#screen,#hud')) pt(e); });
+    for (const t of ['pointerdown', 'keydown']) document.addEventListener(t, () => { this.lastAct = performance.now(); }, true);
     document.addEventListener('keydown', e => { const sc = this.scene; if (!sc || !sc.isLevel || this.paused || !$('screen').hidden) return;
       if (e.key === 'Escape') S.pause(this); else if (sc.move && e.key === 'ArrowUp') { sc.move(1); e.preventDefault(); } else if (sc.move && e.key === 'ArrowDown') { sc.move(-1); e.preventDefault(); } else if (sc.place && e.key === 'Enter') sc.place(); });
     document.addEventListener('visibilitychange', () => { if (document.hidden) { this.quiet(); if (this.sec >= 1) this.flush(); flushStats(); const p = this.profile; if (p && p.acct && p.acct.dirty) ACC.sync(this, p, true); } else { this.audio.ensure(); if (this.scene && this.scene.isLevel) this.audio.keepAwake(true); else if (this.musicReady && this.scene instanceof Backdrop && !this.calib) this.audio.startMusic(); }
@@ -79,17 +84,18 @@ class App {
   get keysOn() { const p = this.profile; return this.keysSession || !!(p && p.keys); }
   get listening() { return this.audio.micState === 'on' && !this.keysOn; }
   /** Begleiter: ein gesammeltes Notenwesen schwebt der Figur hinterher (weich nachgezogen, wippt, hüpft bei Erfolg). o merkt sich die Position. */
-  drawBuddy(ctx, o, tx, ty, t, hop = 0) { const b = this.buddy; if (!b) return; if (o.bx === undefined || Math.abs(o.bx - tx) > 140) { o.bx = tx; o.by = ty; o.bt = t; }
+  drawBuddy(ctx, o, tx, ty, t, hop = 0) { const bb = this.buddy; if (!bb) return; const b = Array.isArray(bb) ? bb[((Math.floor((t || 0) * 5) % bb.length) + bb.length) % bb.length] : bb; /* Tiere schlagen mit den Flügeln */ if (o.bx === undefined || Math.abs(o.bx - tx) > 140) { o.bx = tx; o.by = ty; o.bt = t; }
     const dt = Math.min(0.1, Math.max(0, t - o.bt)), k = 1 - Math.exp(-dt * 5); o.bt = t; o.bx += (tx - o.bx) * k; o.by += (ty - o.by) * k;
     const y = o.by + Math.sin(t * 3) * 2 - hop; if (this.buddySure && Math.floor(t * 6) % 3 === 0) { ctx.fillStyle = '#FFF1D6'; ctx.fillRect(G.q(o.bx - 11 + (Math.floor(t * 6) % 5)), G.q(y + 4 - (Math.floor(t * 4) % 7)), 1, 1); }
-    ctx.drawImage(b, G.q(o.bx - 11), G.q(y - 14)); }
+    ctx.drawImage(b, G.q(o.bx - b.width / 2), G.q(y + 8 - b.height)); }
   /** Figur (mit Hut) und Begleiter (mit Stufe) neu zeichnen – nach Profilwechsel und immer, wenn die Karte erscheint. */
   refreshLook() { const p = this.profile; this.heroFrames = G.makeHero(p ? p.hero : 0, p ? G.hatOf(p, totalStars(p)) : 0); this.buddy = null; this.buddySure = false;
-    if (p && p.buddy && p.creatures.includes(p.buddy)) { const n = N(p.buddy), st = G.buddyStage(p.notes[p.buddy]); this.buddy = G.makeBuddy(((n.step % 7) + 7) % 7, n.alt, st); this.buddySure = st === 2; } }
+    if (p && petName(p.buddy)) { if (owns(p, p.buddy)) { this.buddy = G.makePet(p.buddy); this.buddySure = true; } }
+    else if (p && p.buddy && p.creatures.includes(p.buddy)) { const n = N(p.buddy), st = G.buddyStage(p.notes[p.buddy]); this.buddy = G.makeBuddy(((n.step % 7) + 7) % 7, n.alt, st); this.buddySure = st === 2; } }
   resizeStage(W, H, top = 0, port = false) { this.W = W; this.H = H; this.top = top; const st = this.$('stage'), ph = H - 600 - top; st.style.width = W + 'px'; st.style.height = H + 'px';
     st.style.setProperty('--wy', top + 'px'); st.style.setProperty('--H', H); st.style.setProperty('--ksy', Math.max(1, Math.min(2.8, (ph - 290) / 150)).toFixed(2)); st.classList.toggle('port', port); st.classList.toggle('pbig', port && ph >= 700); st.classList.toggle('hud2', port && top > 100);
     for (const c of [this.world, this.$('text')]) { c.width = W; c.height = H; c.style.width = W + 'px'; c.style.height = H + 'px'; }
-    this.ctx.setTransform(4, 0, 0, 4, 0, 0); this.ctx.imageSmoothingEnabled = false; G.setViewW(W / 4); this.$('panel').style.top = (600 + top) + 'px'; this.$('panel').style.height = ph + 'px'; st.classList.toggle('tall', !port && ph >= 300); }
+    this.ctx.setTransform(4, 0, 0, 4, 0, 0); this.ctx.imageSmoothingEnabled = false; G.setViewW(W / 4); this.$('panel').style.top = (600 + top) + 'px'; this.$('panel').style.height = ph + 'px'; if (this.panel) this.panel.fitAnswers(); st.classList.toggle('tall', !port && ph >= 300); }
   applyProfile() { const p = this.profile; setInstr(p ? p.instr : 'klavier'); this.audio.shift = INSTR.shift; this.refreshLook(); this.audio.muted = !!this.state.muted; this.audio.setRef(this.state.micRef || (this.state.micGain ? GAIN_TARGET / this.state.micGain : 0)); /* ältere Einstellungen ohne Bezugspegel: aus der Verstärkung zurückrechnen */ this.audio.setGain(this.state.micGain || 1); this.audio.song = this.state.song || 'tanz'; if (p) { this.audio.setA4(p.a4); this.audio.musicOff = p.music === false; } if (this.audio.muted || this.audio.musicOff) this.audio.stopMusic(); if (this.paintSound) this.paintSound(); }
   /** Ton für das ganze Gerät an oder aus (Musik, Spielklänge, Erfolgsmelodie). */
   setMuted(m) { this.state.muted = !!m; this.audio.muted = !!m; this.save(); if (m) { this.audio.stopMusic(); if (this.audio.bus) this.audio.bus.gain.value = 0; } else { this.audio.ensure(); if (this.musicReady && this.scene instanceof Backdrop && !this.calib) this.audio.startMusic(); } this.paintSound(); }
@@ -147,7 +153,7 @@ class App {
       if (ev && sink && sink.onNote && (this.calib || this.listening)) sink.onNote(ev.midi + INSTR.shift, ev); // Gitarre klingt eine Oktave tiefer als notiert
       if (this.calib) this.calib.level(this.audio.level);
       else if (sc && sc.isLevel && sc.onNote) { const h = this.listening ? this.audio.heard : null; this.panel.setLevel(this.listening ? this.audio.level : 0); this.panel.setHeard(h ? h.midi + INSTR.shift : null); }
-      if (sc && !this.paused) { sc.update(dt); if (sc.isLevel) { this.sec += dt; if (this.sec > 20) this.flush(); } }
+      if (ev) this.lastAct = ts; if (sc && !this.paused) { sc.update(dt); if (sc.isLevel && ts - (this.lastAct || 0) < IDLE_MS) { this.sec += dt; if (this.sec > 20) this.flush(); } } // Übungszeit zählt nur, solange gespielt wird – nicht, wenn das Gerät offen herumliegt
     }
     if (sc) { this.ctx.fillStyle = (G.THEMES[sc.theme] || G.THEMES.himmel).hill[4]; this.ctx.fillRect(0, 0, G.VIEW_W, this.H / 4); this.tx.clearRect(0, 0, this.W, this.H);
       const ty = this.top / 4; if (ty) { this.ctx.fillStyle = (G.THEMES[sc.theme] || G.THEMES.himmel).bands[0]; this.ctx.fillRect(0, 0, G.VIEW_W, ty); this.ctx.save(); this.ctx.translate(0, ty); this.tx.save(); this.tx.translate(0, this.top); } // hochkant: Welt beginnt unter dem Anzeigen-Streifen
@@ -155,5 +161,5 @@ class App {
     requestAnimationFrame(t => this.loop(t));
   }
 }
-const start = () => { window.__nb = new App(); window.__levels = LEVELS; window.__screens = S; window.__config = CONFIG; window.__train = TU; window.__acc = ACC; window.__setInstr = setInstr; window.__flushStats = flushStats; };
+const start = () => { window.__nb = new App(); window.__levels = LEVELS; window.__lv = LV; window.__screens = S; window.__config = CONFIG; window.__train = TU; window.__acc = ACC; window.__setInstr = setInstr; window.__flushStats = flushStats; };
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(start, start); else start();

@@ -3,7 +3,7 @@ import { chromium } from 'playwright'; import path from 'node:path'; import fs f
 const priv = JSON.parse(fs.readFileSync('../geheim/privat.jwk.json', 'utf8'));
 const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox', '--autoplay-policy=no-user-gesture-required'] });
 const page = await browser.newPage({ viewport: { width: 1280, height: 800 } }); page.on('pageerror', e => errors.push('pageerror: ' + e.message)); page.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
-const act = a => page.click(`#screen [data-act="${a}"]`); const wait = ms => page.waitForTimeout(ms); const ok = (c, m) => { if (!c) { errors.push('ASSERT: ' + m); console.log('FEHLER', m); } };
+const act = async a => { await page.click(`#screen [data-act="${a}"]`); await page.waitForTimeout(60); while (await page.$('#screen:not([hidden]) .petcard')) { await page.click('#screen .petcard [data-act="ok"]'); await page.waitForTimeout(60); } }; /* Tier-Karten prüft e2e-pegasus */ const wait = ms => page.waitForTimeout(ms); const ok = (c, m) => { if (!c) { errors.push('ASSERT: ' + m); console.log('FEHLER', m); } };
 const FREE = 'file://' + path.resolve('dist/index.html'), SHOP = 'file://' + path.resolve('dist/shop/index.html');
 const midiJs = `(() => { const t = __nb.scene.target; return 60 + Math.floor(t.step / 7) * 12 + [0, 2, 4, 5, 7, 9, 11][((t.step % 7) + 7) % 7] + t.alt; })()`;
 const playJump = async () => { for (let g = 0; g < 500 && await page.evaluate(() => document.getElementById('screen').hidden); g++) { if (await page.evaluate(() => __nb.scene.phase === 'listen')) await page.evaluate(`__nb.keyTap(${midiJs})`); await wait(110); } };

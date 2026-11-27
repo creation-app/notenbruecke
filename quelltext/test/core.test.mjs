@@ -84,6 +84,19 @@ test('Übungstage in Folge', () => {
   assert.equal(V.streak(p, d), 3); const next = new Date(d); next.setDate(d.getDate() + 1); assert.equal(V.streak(p, next), 3);
   next.setDate(next.getDate() + 1); assert.equal(V.streak(p, next), 0);
 });
+test('Übungstage: Monats-, Jahres- und Zeitumstellungs-Grenzen, Mindestzeit', () => {
+  const mk = (from, n, secs = 300) => { const p = V.newProfile('A'); for (let i = 0; i < n; i++) { const x = new Date(from); x.setDate(from.getDate() - i); V.addPractice(p, secs, x); } return p; };
+  assert.equal(V.streak(mk(new Date(2026, 11, 3, 18), 10), new Date(2026, 11, 3, 18)), 10, 'über den Monatswechsel');
+  assert.equal(V.streak(mk(new Date(2027, 0, 4, 9), 12), new Date(2027, 0, 4, 9)), 12, 'über den Jahreswechsel');
+  assert.equal(V.streak(mk(new Date(2026, 2, 31, 7), 6), new Date(2026, 2, 31, 7)), 6, 'über die Umstellung auf Sommerzeit (29.3.2026)');
+  assert.equal(V.streak(mk(new Date(2026, 9, 27, 23, 30), 6), new Date(2026, 9, 27, 23, 30)), 6, 'über die Umstellung auf Winterzeit (25.10.2026)');
+  assert.equal(V.streak(mk(new Date(2026, 2, 29, 0, 30), 3), new Date(2026, 2, 29, 0, 30)), 3, 'kurz nach Mitternacht am Umstellungstag');
+  assert.equal(V.streak(mk(new Date(2028, 2, 2), 5), new Date(2028, 2, 2)), 5, 'über den 29. Februar');
+  const late = mk(new Date(2026, 10, 26, 23, 59), 4); assert.equal(V.streak(late, new Date(2026, 10, 27, 0, 1)), 4, 'eine Minute nach Mitternacht: gestern zählt noch'); assert.equal(V.streak(late, new Date(2026, 10, 28, 0, 1)), 0, 'ein ganzer Tag Pause: Serie vorbei');
+  const short = V.newProfile('B'), d = new Date(2026, 10, 27, 16); V.addPractice(short, 59, d); assert.equal(V.streak(short, d), 0, 'unter einer Minute ist kein Übungstag'); assert.equal(V.practiceDays(short), 0); V.addPractice(short, 1, d); assert.equal(V.streak(short, d), 1); assert.equal(V.practiceDays(short), 1); assert.equal(V.practiced(short, V.dayKey(d)), true);
+  const gap = mk(new Date(2026, 10, 27), 3); V.addPractice(gap, 300, new Date(2026, 10, 20)); V.addPractice(gap, 20, new Date(2026, 10, 24)); assert.equal(V.streak(gap, new Date(2026, 10, 27)), 3); assert.equal(V.practiceDays(gap), 4, 'Übungstage insgesamt zählen auch alte Tage, aber keine Mini-Tage');
+  const two = V.newProfile('C'); V.addPractice(two, 40, d); V.addPractice(two, 40, d); assert.equal(two.days[V.dayKey(d)], 80, 'mehrere Runden am selben Tag werden addiert'); assert.equal(V.dayKey(new Date(2026, 0, 5, 23, 59)), '2026-01-05'); assert.equal(V.dayKey(new Date(2026, 0, 6, 0, 0)), '2026-01-06');
+});
 test('Erkennung mit halber Abtastrate (wie im Spiel): C bis c³', () => {
   for (let m = 36; m <= 84; m++) { const full = piano(m, 0, 0.2).subarray(2000, 2000 + 4096), d = new Float32Array(2048); for (let i = 0; i < 2048; i++) d[i] = (full[2 * i] + full[2 * i + 1]) / 2;
     const r = detectPitch(d, SR / 2); assert.ok(r, 'kein Ergebnis ' + m); const mf = M.midiOfFreq(r.freq); assert.equal(Math.round(mf), m, 'MIDI ' + m); assert.ok(Math.abs(mf - m) < 0.2, 'Abweichung ' + m + ': ' + (mf - m)); }
@@ -142,7 +155,8 @@ test('Wiederholung: langsam richtig reicht nicht für "sicher"', () => {
 test('Training: Notenvorrat, Disziplin und Voreinstellungen', async () => {
   const T = await import('../src/training.js'); const { N } = await import('../src/music.js');
   const d = T.normalize({}); assert.deepEqual(d, { input: 'play', range: 'treble', acc: false, len: 'time', weak: false });
-  assert.equal(T.normalize({ range: 'bass', acc: true }).acc, false, 'Vorzeichen gibt es im Bass nicht'); assert.equal(T.normalize({ range: 'quatsch', input: 'x', len: 'y' }).range, 'treble');
+  assert.equal(T.normalize({ range: 'bass', acc: true }).acc, true, 'Vorzeichen gibt es auch im Bass'); assert.equal(T.normalize({ weak: true, acc: true }).acc, false);
+  { const bv = T.pool(T.normalize({ range: 'bass', acc: true }), {}), av = T.pool(T.normalize({ range: 'both', acc: true }), {}), flat = bv.filter(e => N(e.key).alt !== 0); assert.ok(flat.length >= 8 && bv.every(e => e.clef === 'bass')); for (const e of flat) { const pos = M.staffPos(N(e.key), 'bass'); assert.ok(pos >= -2 && pos <= 10, e.key + ' liegt im Bass-System: ' + pos); assert.ok(M.midiOf(N(e.key)) >= 36 && M.midiOf(N(e.key)) < 60, e.key); assert.equal(T.hasCreature(e.key), false); } assert.ok(av.some(e => e.clef === 'treble' && N(e.key).alt) && av.some(e => e.clef === 'bass' && N(e.key).alt)); assert.equal(T.disc(T.normalize({ range: 'bass', acc: true })), 'play-bass+v-time'); assert.equal(T.hasCreature('fis1'), true); } assert.equal(T.normalize({ range: 'quatsch', input: 'x', len: 'y' }).range, 'treble');
   const tr = T.pool(T.normalize({}), {}), ba = T.pool(T.normalize({ range: 'bass' }), {}), both = T.pool(T.normalize({ range: 'both' }), {}), acc = T.pool(T.normalize({ acc: true }), {});
   assert.ok(tr.length >= 10 && tr.every(e => e.clef === 'treble' && N(e.key).alt === 0)); assert.ok(ba.length >= 10 && ba.every(e => e.clef === 'bass' && N(e.key).alt === 0));
   assert.equal(both.length, tr.length + ba.length); assert.ok(acc.length > tr.length && acc.some(e => N(e.key).alt !== 0));

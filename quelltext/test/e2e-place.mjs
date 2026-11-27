@@ -2,7 +2,7 @@
 import { chromium } from 'playwright'; import path from 'node:path'; const errors = [];
 const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox', '--autoplay-policy=no-user-gesture-required'] });
 const page = await browser.newPage({ viewport: { width: 1280, height: 800 } }); page.on('pageerror', e => errors.push('pageerror: ' + e.message));
-const act = a => page.click(`#screen [data-act="${a}"]`); const wait = ms => page.waitForTimeout(ms); const ok = (c, m) => { if (!c) { errors.push('ASSERT: ' + m); } };
+const act = async a => { await page.click(`#screen [data-act="${a}"]`); await page.waitForTimeout(60); while (await page.$('#screen:not([hidden]) .petcard')) { await page.click('#screen .petcard [data-act="ok"]'); await page.waitForTimeout(60); } }; /* Tier-Karten prüft e2e-pegasus */ const wait = ms => page.waitForTimeout(ms); const ok = (c, m) => { if (!c) { errors.push('ASSERT: ' + m); } };
 await page.goto('file://' + path.resolve('dist/notenbruecke.html')); await wait(500); await act('go'); await page.fill('#pname', 'Könner'); await act('ok'); await act('skip'); await wait(100); await page.screenshot({ path: 'shots/p1-frage.png' }); await act('test'); await wait(600);
 const answer = async (right) => { const label = await page.$eval('#plStaff canvas', c => c.getAttribute('aria-label')); // Position aus dem Bild ablesen wie ein Kind
   const m = /(\d)\. (Linie|Zwischenraum)|(\d)\. Hilfslinie (unter|über)|direkt (unter|über)|(unter|über) der (\d)\. Hilfslinie/.exec(label); const bass = label.includes('Bass');

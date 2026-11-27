@@ -2,8 +2,9 @@
 import { N, nameHtml, nameStr, noteOfMidi, midiOf, staffPos, describePos, ledgerPositions } from './music.js';
 import { WORLDS, LEVELS, TYPE_LABEL, ALL_NOTES, levelsOf, doneCount, worldUnlocked, levelUnlocked, nextLevel, totalStars, creatureTotal, PLACEMENT, PLACEMENT_Q, PLACEMENT_PASS } from './levels.js';
 import { letterName } from './music.js';
-import { HEROES, HATS, hatOf, buddyStage, BUDDY_STAGE, makeHero, makeCreature, cv, drawStaff, drawClef, drawNote, drawLedgers, yOfPos, C } from './gfx.js';
-import { newProfile, importCode, exportShort, importShort, exportPayload, importPayload, streak, dayKey } from './save.js';
+import { PEGASUS, PEGASUS_WORLD, WILD, petName, wildLevel, ownedPets, duePets } from './pets.js';
+import { HEROES, HATS, hatOf, buddyStage, BUDDY_STAGE, makeHero, makeCreature, makePet, cv, drawStaff, drawClef, drawNote, drawLedgers, yOfPos, C } from './gfx.js';
+import { newProfile, importCode, exportShort, importShort, exportPayload, importPayload, streak, dayKey, practiced, practiceDays, DAY_MIN_S } from './save.js';
 import { CONFIG } from './config.js';
 import { SONGS, gainFor, refFor } from './audio.js';
 import { trainSetup, trainCard } from './trainui.js';
@@ -29,7 +30,7 @@ export const stars = (n, cls = '') => `<span class="stars ${cls}" role="img" ari
 const safeN = k => { try { return N(k); } catch (e) { return null; } };
 function crCanvas(key, locked, size = 64) { const n = N(key), c = makeCreature(((n.step % 7) + 7) % 7, n.alt, locked); c.style.width = c.style.height = size + 'px'; c.className = 'pix'; c.setAttribute('aria-hidden', 'true'); return c; }
 function heroCanvas(i, size = 72, hat = 0) { const c = makeHero(i, hat).idle0; c.style.width = size + 'px'; c.style.height = size * 24 / 18 + 'px'; c.className = 'pix'; c.setAttribute('aria-hidden', 'true'); return c; }
-export function fill(root) { root.querySelectorAll('[data-cr]').forEach(e => e.appendChild(crCanvas(e.dataset.cr, e.dataset.locked === '1', +e.dataset.size || 64))); root.querySelectorAll('[data-hero]').forEach(e => e.appendChild(heroCanvas(+e.dataset.hero, +e.dataset.size || 72, +e.dataset.hat || 0))); }
+export function fill(root) { root.querySelectorAll('[data-cr]').forEach(e => e.appendChild(crCanvas(e.dataset.cr, e.dataset.locked === '1', +e.dataset.size || 64))); root.querySelectorAll('[data-pet]').forEach(e => { const c = makePet(e.dataset.pet, e.dataset.locked === '1')[0], size = +e.dataset.size || 64; c.style.width = size + 'px'; c.style.height = size * c.height / c.width + 'px'; c.className = 'pix'; c.setAttribute('aria-hidden', 'true'); e.appendChild(c); }); root.querySelectorAll('[data-hero]').forEach(e => e.appendChild(heroCanvas(+e.dataset.hero, +e.dataset.size || 72, +e.dataset.hat || 0))); }
 
 export function title(app) {
   app.backdrop('himmel'); const has = app.state.profiles.length > 0;
@@ -110,10 +111,22 @@ export function story(app, pages, then, theme) {
   render();
 }
 
+/** Neue Tiere freigeschaltet (einmalig): der Pegasus nach der zweiten Welt, ein wildes Tier nach jedem Level der letzten Welt. Mehrere auf einmal (z. B. nach dem Laden eines Spielstands) kommen auf eine gemeinsame Karte. */
+export function petCard(app, ids, then) {
+  const p = app.profile, one = ids.length === 1 ? ids[0] : null, peg = ids.includes(PEGASUS), lv = one && wildLevel(one); app.audio.sfx('star');
+  const pegLine = 'Der Pegasus fliegt dir ab jetzt im Spiel hinterher.';
+  app.screen(one ? `<div class="petcard"><small class="kicker">Neues Tier freigeschaltet</small><h2>${peg ? 'Der Pegasus' : esc(petName(one))}</h2><span data-pet="${one}" data-size="192"></span><p class="lead">Du hast „${esc(peg ? WORLDS[PEGASUS_WORLD].name : lv ? lv.title : '')}“ geschafft!</p>
+    <p>${peg ? pegLine : 'Dieses Tier wohnt jetzt in deiner Sammlung.'}</p>${peg ? '<p class="muted">In deiner Sammlung kannst du jederzeit einen anderen Begleiter wählen.</p>' : ''}
+    <div class="row">${peg ? '' : '<button class="btn" data-act="take">Als Begleiter mitnehmen</button>'}<button class="btn go big" data-act="ok">Weiter</button></div></div>`
+    : `<div class="petcard"><small class="kicker">Neue Tiere freigeschaltet</small><h2>${ids.length} neue Tiere</h2><div class="petrow">${ids.map(id => `<span class="crcard pet"><span data-pet="${id}" data-size="72"></span><b>${esc(petName(id))}</b></span>`).join('')}</div>
+    <p>${peg ? pegLine + ' ' : ''}Alle Tiere wohnen jetzt in deiner Sammlung – dort kannst du deinen Begleiter wählen.</p><div class="row"><button class="btn go big" data-act="ok">Weiter</button></div></div>`,
+    { ok: then, take: () => { p.buddy = one; app.save(); app.refreshLook(); app.audio.sfx('ok'); then(); } });
+}
 export function map(app, world) {
   app.refreshLook();
   const p = app.profile; if (world == null) world = p.lastWorld || 0; if (!worldUnlocked(p, world)) world = 0; p.lastWorld = world; p.seenWorld = p.seenWorld || {};
   const W = WORLDS[world]; app.backdrop(W.theme);
+  { const due = duePets(p); if (due.length) { p.pets = [...(Array.isArray(p.pets) ? p.pets : []), ...due]; if (due.includes(PEGASUS)) p.buddy = PEGASUS; app.save(); app.refreshLook(); due.forEach(id => track('tier/' + id)); return petCard(app, due, () => map(app, world)); } }
   if (!p.seenWorld[seenKey(world)]) { p.seenWorld[seenKey(world)] = 1; app.save(); return story(app, WORLD_INTRO[world], () => map(app, world), W.theme); }
   const ls = levelsOf(world), goal = p.goal || 5, today = Math.floor((p.days[dayKey()] || 0) / 60);
   app.screen(`<div class="maphead"><button class="chip" data-act="prof" aria-label="Profil wechseln"><span data-hero="${p.hero}" data-hat="${hatOf(p, totalStars(p))}" data-size="36"></span><b>${esc(p.name)}</b></button>
@@ -186,25 +199,26 @@ export function pause(app) {
 function staffCanvas(n, clef) { const c = cv(70, 80), x = c.getContext('2d'); x.translate(0, -35); const pos = staffPos(n, clef); drawStaff(x, C.K, 2, 68); drawClef(x, clef, 3, C.K); drawLedgers(x, 39, 19, ledgerPositions(pos, clef), C.K); drawNote(x, 48, yOfPos(pos), { style: 'ink', up: pos < 4, alt: n.alt });
   c.className = 'pix staffpic'; c.setAttribute('role', 'img'); c.setAttribute('aria-label', `${describePos(pos)} im ${clef === 'bass' ? 'Bassschlüssel' : 'Violinschlüssel'}`); return c; }
 export function collection(app, sel) {
-  const p = app.profile, stars = totalStars(p), worn = hatOf(p, stars); let detail = '';
+  const p = app.profile, stars = totalStars(p), worn = hatOf(p, stars), pets = ownedPets(p), bud = petName(p.buddy) && pets.includes(p.buddy) ? p.buddy : null; let detail = '';
+  const petBtn = (id, hint) => { const own = pets.includes(id), on = bud === id; return `<button class="crcard pet ${on ? 'bud' : ''}" ${own ? '' : 'disabled'} data-act="pet" data-id="${id}" aria-pressed="${on}"><span data-pet="${id}" data-locked="${own ? 0 : 1}" data-size="62"></span><b>${own ? esc(petName(id)) : '?'}</b><small>${own ? (on ? 'fliegt mit dir' : 'antippen: mitnehmen') : hint}</small></button>`; };
   if (sel) { const n = N(sel.key), st = p.notes[sel.key] || { box: 0, seen: 0, ok: 0 };
     detail = `<div class="crdetail"><span data-cr="${sel.key}" data-size="128"></span><div><h3>${nameHtml(n)}</h3><button class="btn sm ${p.buddy === sel.key ? '' : 'go'}" data-act="buddy" style="margin-bottom:8px">${p.buddy === sel.key ? 'Begleiter ablegen' : 'Als Begleiter mitnehmen'}</button><p class="muted" style="margin:0 0 8px;font-size:17px">Als Begleiter: <b>${BUDDY_STAGE[buddyStage(st)]}</b>.${buddyStage(st) < 2 ? ' Er wächst, wenn du diese Note sicherer spielst.' : ''}</p><div id="staffHere"></div><p>${describePos(staffPos(n, sel.clef))}</p>
       <p>Sicherheit <span class="bar"><i style="width:${st.box * 25}%"></i></span></p><p>${st.ok} von ${st.seen} Mal beim ersten Versuch</p><button class="btn sm" data-act="play">Anhören</button></div></div>`; }
-  app.screen(`<div class="maphead"><h2>Deine Sammlung</h2><button class="btn sm" data-act="back">Zurück</button></div><p class="muted" style="margin:0 0 8px">${p.buddy && p.creatures.includes(p.buddy) ? `Dein Begleiter: <b>${nameHtml(N(p.buddy))}</b>. Er fliegt dir im Spiel hinterher.` : 'Tippe ein Notenwesen an und nimm es als Begleiter mit. Es fliegt dir dann im Spiel hinterher.'}</p><div class="collwrap"><div class="coll"><h3>Hüte für deine Figur <small class="muted">· du hast ${stars} Sterne</small></h3><div class="crgrid">${HATS.map((h, i) => { const open = stars >= h.stars; return `<button class="crcard hat ${worn === i ? 'bud' : ''}" ${open ? '' : 'disabled'} data-act="hat" data-i="${i}"><span data-hero="${p.hero}" data-hat="${open ? i : 0}" data-size="42"></span><b>${esc(h.name)}</b>${open ? '' : `<small>ab ${h.stars} Sternen</small>`}</button>`; }).join('')}</div>${WORLDS.map((w, wi) => `<h3>${esc(w.name)}</h3><div class="crgrid">${ALL_NOTES[wi].map(k => { const has = p.creatures.includes(k);
+  app.screen(`<div class="maphead"><h2>Deine Sammlung</h2><button class="btn sm" data-act="back">Zurück</button></div><p class="muted" style="margin:0 0 8px">${bud ? `Dein Begleiter: <b>${bud === PEGASUS ? 'der Pegasus' : esc(petName(bud))}</b>. Er fliegt dir im Spiel hinterher.` : p.buddy && p.creatures.includes(p.buddy) ? `Dein Begleiter: <b>${nameHtml(N(p.buddy))}</b>. Er fliegt dir im Spiel hinterher.` : 'Tippe ein Notenwesen an und nimm es als Begleiter mit. Es fliegt dir dann im Spiel hinterher.'}</p><div class="collwrap"><div class="coll"><h3>Tiere</h3><div class="crgrid">${petBtn(PEGASUS, `wenn du „${esc(WORLDS[PEGASUS_WORLD].short)}“ geschafft hast`)}</div><h3>Hüte für deine Figur <small class="muted">· du hast ${stars} Sterne</small></h3><div class="crgrid">${HATS.map((h, i) => { const open = stars >= h.stars; return `<button class="crcard hat ${worn === i ? 'bud' : ''}" ${open ? '' : 'disabled'} data-act="hat" data-i="${i}"><span data-hero="${p.hero}" data-hat="${open ? i : 0}" data-size="42"></span><b>${esc(h.name)}</b>${open ? '' : `<small>ab ${h.stars} Sternen</small>`}</button>`; }).join('')}</div>${WORLDS.map((w, wi) => !ALL_NOTES[wi].length ? `<h3>${esc(w.name)} <small class="muted">· wilde Tiere</small></h3><div class="crgrid">${WILD.map(([id], i) => petBtn(id, `Level ${i + 1} dieser Welt`)).join('')}</div>` : `<h3>${esc(w.name)}</h3><div class="crgrid">${ALL_NOTES[wi].map(k => { const has = p.creatures.includes(k);
       return `<button class="crcard ${sel && sel.key === k && sel.clef === w.clef ? 'sel' : ''} ${p.buddy === k ? 'bud' : ''}" ${has ? '' : 'disabled'} data-act="cr" data-k="${k}" data-clef="${w.clef}"><span data-cr="${k}" data-locked="${has ? 0 : 1}" data-size="56"></span><b>${has ? nameHtml(N(k)) : '?'}</b>${has && isMastered(p.notes[k]) ? '<i class="tick" title="sicher"></i>' : ''}</button>`; }).join('')}</div>`).join('')}</div>${detail}</div>`, {
-    back: () => map(app), cr: e => collection(app, { key: e.dataset.k, clef: e.dataset.clef }), play: () => app.audio.playNote(midiOf(N(sel.key))), hat: e => { p.hat = +e.dataset.i; app.save(); app.refreshLook(); app.audio.sfx('ok'); collection(app, sel); }, buddy: () => { p.buddy = p.buddy === sel.key ? null : sel.key; app.save(); app.refreshLook(); app.audio.sfx('ok'); collection(app, sel); } }, 'wide');
+    back: () => map(app), cr: e => collection(app, { key: e.dataset.k, clef: e.dataset.clef }), play: () => app.audio.playNote(midiOf(N(sel.key))), pet: e => { const id = e.dataset.id; p.buddy = p.buddy === id ? null : id; app.save(); app.refreshLook(); app.audio.sfx('ok'); collection(app, sel); }, hat: e => { p.hat = +e.dataset.i; app.save(); app.refreshLook(); app.audio.sfx('ok'); collection(app, sel); }, buddy: () => { p.buddy = p.buddy === sel.key ? null : sel.key; app.save(); app.refreshLook(); app.audio.sfx('ok'); collection(app, sel); } }, 'wide');
   if (sel) { const h = document.getElementById('staffHere'); if (h) h.appendChild(staffCanvas(N(sel.key), sel.clef)); }
 }
 
 export function pass(app) {
   const p = app.profile, today = new Date(), cells = []; let week = 0, total = 0;
-  for (let i = 27; i >= 0; i--) { const d = new Date(today); d.setDate(today.getDate() - i); const s = p.days[dayKey(d)] || 0; if (i < 7) week += s; cells.push(`<i class="${s >= 600 ? 'l3' : s >= 240 ? 'l2' : s > 0 ? 'l1' : ''}" title="${d.getDate()}.${d.getMonth() + 1}.: ${Math.round(s / 60)} min"></i>`); }
+  today.setHours(12, 0, 0, 0); for (let i = 27; i >= 0; i--) { const d = new Date(today); d.setDate(today.getDate() - i); const s = p.days[dayKey(d)] || 0; if (i < 7) week += s; cells.push(`<i class="${s >= 600 ? 'l3' : s >= 240 ? 'l2' : s >= DAY_MIN_S ? 'l1' : ''}" data-day="${dayKey(d)}" title="${d.getDate()}.${d.getMonth() + 1}.: ${Math.floor(s / 60)} min"></i>`); }
   Object.values(p.days).forEach(s => { total += s; });
   const known = Object.keys(p.notes).filter(k => safeN(k) && /\d|^[A-Ha-h]/.test(k)), sure = known.filter(k => isMastered(p.notes[k])), weak = known.filter(k => !isMastered(p.notes[k]) && p.notes[k].seen >= 2);
   const list = ks => ks.length ? ks.map(k => `<span class="tag">${nameHtml(N(k))}</span>`).join('') : '<span class="muted">noch keine</span>';
   const conf = topConfusions(p.conf).filter(c => safeN(c.target) && safeN(c.played));
   app.screen(`<div class="maphead"><h2>Übungspass von ${esc(p.name)}</h2><button class="btn sm" data-act="back">Zurück</button></div>
-    <div class="passgrid"><div class="card"><h3>Geübt</h3><p class="bigno">${streak(p)}<small> Tage in Folge</small></p><p>Diese Woche: <b>${Math.round(week / 60)} min</b> · Insgesamt: <b>${Math.round(total / 60)} min</b></p><div class="cal" role="img" aria-label="Übungstage der letzten vier Wochen">${cells.join('')}</div><small class="muted">Die letzten 4 Wochen, heute unten rechts</small></div>
+    <div class="passgrid"><div class="card"><h3>Geübt</h3><p class="bigno" id="passStreak">${streak(p)}<small> ${streak(p) === 1 ? 'Tag' : 'Tage'} in Folge</small></p><p id="passDays"><span class="nw">Übungstage insgesamt: <b>${practiceDays(p)}</b></span> <span class="nw">${practiced(p, dayKey()) ? '· heute schon geübt' : '· heute noch nicht'}</span></p><p id="passMin"><span class="nw">Letzte 7 Tage: <b>${Math.floor(week / 60)} min</b></span> <span class="nw">· Insgesamt: <b>${Math.floor(total / 60)} min</b></span></p><div class="cal" role="img" aria-label="Übungstage der letzten vier Wochen">${cells.join('')}</div><small class="muted">Die letzten 4 Wochen, heute unten rechts. Ein Tag zählt ab 1 Minute.</small></div>
     <div class="card"><h3>Fortschritt</h3><p><b>${totalStars(p)}</b> Sterne · <b>${p.creatures.length}</b> von ${creatureTotal()} Notenwesen</p>${WORLDS.map((w, i) => `<p>${esc(w.short)}: ${doneCount(p, i)} von ${levelsOf(i).length} Leveln <span class="bar"><i style="width:${100 * doneCount(p, i) / levelsOf(i).length}%"></i></span></p>`).join('')}</div>
     <div class="card"><h3>Diese Noten sitzen sicher <small>(richtig und zügig)</small></h3><div class="tags">${list(sure)}</div><h3>Diese Noten noch üben</h3><div class="tags">${list(weak)}</div>${weakNotes(p).length >= WEAK_MIN ? '<p><button class="btn sm go" data-act="weak">Diese Noten trainieren</button></p>' : ''}</div>
     <div class="card"><h3>Häufige Verwechslungen</h3>${conf.length ? conf.map(c => `<p><b>${nameHtml(N(c.target))}</b> wird oft mit <b>${nameHtml(N(c.played))}</b> verwechselt <span class="muted">(${c.n}×)</span></p>`).join('') : '<p class="muted">Bisher keine auffälligen Verwechslungen.</p>'}</div>
@@ -285,7 +299,7 @@ export async function shareSave(app) {
   document.getElementById('qrHere').appendChild(qrCanvas(link));
 }
 
-export const VERSION = '2.10 · 27.11.2026';
+export const VERSION = '2.11 · 27.11.2026';
 /** Info, Datenschutz und Quellen. */
 export function about(app, back) {
   app.screen(`<div class="maphead"><h2>Info und Datenschutz</h2><button class="btn sm" data-act="back">Zurück</button></div><div class="book">

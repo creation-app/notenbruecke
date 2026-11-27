@@ -1,7 +1,7 @@
 // Spielart "Training": eine Note nach der anderen, so schnell und sicher wie möglich. Keine Geschichte, nur Tempo und Treffer.
 import { stemUp, N, midiOf, staffPos, classify, noteOfMidi, nameHtml, letterName, ledgerPositions } from './music.js';
 import { pickNext, update as srsUpdate, newStat } from './srs.js';
-import { pool, sameSound, TRAIN_SECS, TRAIN_COUNT, SLOW_MS } from './training.js';
+import { pool, sameSound, hasCreature, TRAIN_SECS, TRAIN_COUNT, SLOW_MS } from './training.js';
 import * as G from './gfx.js';
 import { INSTR } from './instrument.js';
 import { label } from './text.js';
@@ -40,7 +40,7 @@ export class TrainScene {
     const { app, cfg } = this, p = app.profile, c = this.cur, ms = (this.elapsed - this.noteStart) * 1000;
     this.correct++; if (!this.curTried) { this.first++; this.tried++; }
     p.notes[c.key] = srsUpdate(p.notes[c.key] || newStat(), !this.curTried, ms > SLOW_MS[cfg.input]); this.times.push({ key: c.key, clef: c.clef, ms });
-    if (cfg.input === 'play' && !p.creatures.includes(c.key)) { p.creatures.push(c.key); this.freed.push(c.n); }
+    if (cfg.input === 'play' && hasCreature(c.key) && !p.creatures.includes(c.key)) { p.creatures.push(c.key); this.freed.push(c.n); }
     app.audio.sfx('ok'); this.parts.burst(NOTE_X, G.yOfPos(c.pos), [G.C.YE, G.C.W, G.C.OR], 12); this.hop = 1;
     if (cfg.input === 'play') { app.panel.flash(midi, 'good'); app.panel.say(app.listening ? 'Ich höre …' : INSTR.pad, `<b>${nameHtml(c.n)}</b> – richtig!`, 'ok'); }
     if (cfg.len === 'count' && this.correct >= TRAIN_COUNT) { this.hudUpdate(); return this.finish(); }

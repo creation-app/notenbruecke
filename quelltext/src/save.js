@@ -27,11 +27,16 @@ export function dayKey(d = new Date()) {
 export function addPractice(profile, seconds, d = new Date()) {
   const k = dayKey(d); profile.days[k] = Math.round((profile.days[k] || 0) + seconds);
 }
+/** Ein Tag zählt als Übungstag ab einer vollen Minute – passend zur Anzeige „Heute geübt: … Minuten“. */
+export const DAY_MIN_S = 60;
+export function practiced(profile, key) { return ((profile.days || {})[key] || 0) >= DAY_MIN_S; }
+/** Alle Übungstage, die es je gab. */
+export function practiceDays(profile) { return Object.keys(profile.days || {}).filter(k => practiced(profile, k)).length; }
 /** Übungstage in Folge bis heute (heute darf noch fehlen). */
 export function streak(profile, today = new Date()) {
-  let n = 0; const d = new Date(today);
-  if (!profile.days[dayKey(d)]) d.setDate(d.getDate() - 1);
-  while (profile.days[dayKey(d)]) { n++; d.setDate(d.getDate() - 1); }
+  let n = 0; const d = new Date(today); d.setHours(12, 0, 0, 0); // mittags rechnen: Zeitumstellung kann keinen Tag verschlucken
+  if (!practiced(profile, dayKey(d))) d.setDate(d.getDate() - 1);
+  while (practiced(profile, dayKey(d))) { n++; d.setDate(d.getDate() - 1); }
   return n;
 }
 

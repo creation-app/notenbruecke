@@ -55,7 +55,7 @@ export class RegenScene {
     this.notes.forEach((n, i) => { if (n.x > G.VIEW_W + 12) return; const y = G.yOfPos(n.pos); G.drawLedgers(ctx, G.q(n.x) - 9, 19, ledgerPositions(n.pos, this.clef), line);
       if (i === 0) { G.drawGlow(ctx, G.q(n.x), y, 0.6 + 0.3 * Math.sin(this.t * 6)); G.drawNote(ctx, G.q(n.x), y, { halo: '#FFF1D6', style: n.missed ? 'ghost' : 'gold', up: stemUp(n.pos, this.clef), alt: n.n.alt, line: n.missed ? G.C.RED : G.C.K }); }
       else G.drawNote(ctx, G.q(n.x), y, { style: 'ink', up: stemUp(n.pos, this.clef), alt: n.n.alt, line }); });
-    G.drawClef(ctx, this.clef, 6, line); this.parts.draw(ctx);
+    G.drawClef(ctx, this.clef, 6, line); this.app.drawBuddy(ctx, this, 18, 38, this.t, this.freeze > 0 ? 0 : Math.abs(Math.sin(this.t * 4)) * 2); this.parts.draw(ctx);
     label(tx, 'Tor', GATE - 9, G.yOfPos(12.6), { size: 18, color: '#FFFFFF', stroke: G.C.RED });
   }
 }

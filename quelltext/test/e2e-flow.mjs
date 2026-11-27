@@ -2,7 +2,7 @@
 import { chromium } from 'playwright'; import path from 'node:path'; const errors = [];
 const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox', '--autoplay-policy=no-user-gesture-required'] });
 const page = await browser.newPage({ viewport: { width: 1024, height: 768 } }); page.on('pageerror', e => errors.push('pageerror: ' + e.message)); page.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
-const act = a => page.click(`#screen [data-act="${a}"]`); const wait = ms => page.waitForTimeout(ms); const ok = (c, m) => { if (!c) { errors.push('ASSERT: ' + m); console.log('FEHLER', m); } };
+const act = async a => { await page.click(`#screen [data-act="${a}"]`); await page.waitForTimeout(60); while (await page.$('#screen:not([hidden]) .petcard')) { await page.click('#screen .petcard [data-act="ok"]'); await page.waitForTimeout(60); } }; /* Tier-Karten prüft e2e-pegasus */ const wait = ms => page.waitForTimeout(ms); const ok = (c, m) => { if (!c) { errors.push('ASSERT: ' + m); console.log('FEHLER', m); } };
 const midi = () => page.evaluate(() => { const t = __nb.scene.target; return 60 + Math.floor(t.step / 7) * 12 + [0, 2, 4, 5, 7, 9, 11][((t.step % 7) + 7) % 7] + t.alt; });
 const shown = () => page.evaluate(() => !document.getElementById('screen').hidden);
 async function play(type) {
@@ -26,7 +26,7 @@ await act('map'); await wait(200); ok(!(await page.$eval('[data-w="1"]', e => e.
 ok(await page.$('.story'), 'Welt-2-Geschichte erscheint'); await act('next'); await act('next'); await wait(100); ok(!(await page.$eval('[data-id="t1"]', e => e.disabled)), 't1 offen');
 const pr = await page.evaluate(() => __nb.profile); ok(Object.values(pr.days)[0] > 5, 'Übungszeit gezählt: ' + JSON.stringify(pr.days)); ok(pr.levels.h1.time > 0, 'Bestzeit gespeichert'); ok(pr.creatures.length >= 7, 'Notenwesen: ' + pr.creatures.length);
 // Finale
-await page.evaluate(() => { const p = __nb.profile; __levels.forEach(l => { if (l.id !== 'z7') p.levels[l.id] = { stars: 1 }; }); p.seenWorld = { 0: 1, 1: 1, 2: 1 }; p.levels.z7 = undefined; delete p.levels.z7; __screens.map(__nb, 2); }); await wait(200);
+await page.evaluate(() => { const p = __nb.profile; __levels.forEach(l => { if (l.id !== 'z7') p.levels[l.id] = { stars: 1 }; }); p.pets = ['pegasus', 'schnecke', 'krake', 'eule', 'drache', 'phoenix']; /* Tier-Karten prüft e2e-pegasus */ p.seenWorld = { 0: 1, 1: 1, 2: 1 }; p.levels.z7 = undefined; delete p.levels.z7; __screens.map(__nb, 2); }); await wait(200);
 await page.click('[data-id="z7"]'); await act('go'); await wait(300); await page.evaluate(() => { const s = __nb.scene; s.idx = s.targets.length - 2; s.hero.x = s.plats[s.idx].x; s.hero.y = 100 - s.plats[s.idx].pos * 5; }); await wait(700); await page.screenshot({ path: 'shots/f6-waechter.png' });
 await play('boss'); await wait(400); await act('next'); await wait(200); ok(await page.$('.story'), 'Finale erscheint'); await page.screenshot({ path: 'shots/f7-finale.png' }); await act('next'); await act('next'); await act('next'); await wait(200); if (await page.$('.story')) { await act('next'); await act('next'); await wait(200); } ok(await page.$('.nodes'), 'zurück auf der Karte');
 // Handy quer

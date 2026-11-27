@@ -228,3 +228,30 @@ export class Particles {
   update(dt) { for (const q of this.p) { q.t += dt; q.x += q.vx * dt; q.y += q.vy * dt; q.vy += 160 * dt; } this.p = this.p.filter(q => q.t < q.life); }
   draw(ctx, camX = 0) { for (const q of this.p) px(ctx, q4(q.x - camX), q4(q.y), q.c); }
 }
+
+// ---------- Tiere ----------
+// Pegasus: Belohnung für die zweite Welt. 24 × 20 Pixel, zwei Bilder für den Flügelschlag.
+const PEG_PAL = { K: C.K, W: '#FFFFFF', S: '#D3E2F4', F: '#A9CBEE', M: '#FFC83D', m: '#E8951C', H: '#7A5230' };
+const PEG_BODY = ["........................", "........................", "..................K.K...", ".................KWKWK..", "................KMWWWWK.", "...............KMMWWKWWK", "..............KMmWWWWWWK", ".KK...........KMMWWWKKK.", "KMMK.........KMmWWWK....", "KMmMKKKKKKKKKKMWWWWK....", "KMmMKWWWWWWWWWWWWWWK....", ".KMMKWWWWWWWWWWWWWSK....", ".KMmKWWWWWWWWWWWWSSK....", "..KMKSWWWWWWWWWWSSK.....", "..KKKKSSKKKKKKKSSKK.....", "....KWK.KSK...KWK.KSK...", "....KWK.KSK...KWK.KSK...", "...KWK.KSK.....KWK.KSK..", "...KHK.KHK.....KHK.KHK..", "...KKK.KKK.....KKK.KKK.."];
+const PEG_WINGS = [[[5, 1, "...KK...."], [5, 2, "..KWWK..."], [5, 3, ".KWWFK..."], [5, 4, ".KWWWFK.."], [5, 5, "KWWWFFK.."], [5, 6, "KWWWWFK.."], [5, 7, ".KWWWFFK."], [5, 8, ".KWWWWFK."], [5, 9, "..KKWWWK."], [5, 10, "....KKK.."]], [[1, 4, "...KKKK......"], [1, 5, "..KWWWWKK...."], [1, 6, ".KFWWWWWWKK.."], [1, 7, "..KFFWWWWWWK."], [1, 8, "...KKFFWWWWK."], [1, 9, ".....KKKWWWK."], [1, 10, "........KKK.."]]];
+/** Zwei Bilder (Flügel oben, Flügel hinten). locked: nur der Umriss – für die Sammlung, solange er noch nicht frei ist. */
+export function makePegasus(locked = false) {
+  return PEG_WINGS.map(wing => { const c = cv(24, 20), x = c.getContext('2d'), put = (row, ox, oy) => { for (let i = 0; i < row.length; i++) if (row[i] !== '.') px(x, ox + i, oy, locked ? (row[i] === 'K' ? '#7C8AA0' : '#B4BFCE') : PEG_PAL[row[i]]); };
+    PEG_BODY.forEach((r, y) => put(r, 0, y)); wing.forEach(([ox, oy, r]) => put(r, ox, oy)); return c; });
+}
+
+// Die wilden Tiere der letzten Welt: je 20 × 16 Pixel.
+const WILD_PAL = { K: C.K,'W': '#FFFFFF', 'R': '#EF5350', 'r': '#B93A3A', 'O': '#FF9A3D', 'Y': '#FFD75E', 'G': '#78B833', 'g': '#467C35', 'B': '#2998E8', 'b': '#174B83', 'P': '#A56BE0', 'p': '#7443B5', 'M': '#F78FB3', 'T': '#3CC9B5', 't': '#1F8F86', 'N': '#A8744A', 'n': '#7A5230', 'C': '#FFF1D6', 'S': '#D3E2F4', 'L': '#A5D84F' };
+const WILD_ART = {
+  schnecke: ["....................", ".............K...K..", "............KWK.KWK.", "............KKK.KKK.", ".....KKKKK...K...K..", "...KKRRRRRKK.K...K..", "..KRRRRRRRRRKKK.KK..", "K.KBRRWWWRRRRKGGGGK.", "YKKBRRWKWRRRRKGGGGGK", "OYKBRRWWWRRRRKGKGGKK", "YKKBRRRRRRRRRKGGGGGK", "K.KBrrrrrrrrKGGGKKGK", "..KKKKKKKKKKGGGGGGK.", "..KgGGGGGGGGGGGGGK..", "...KKKKKKKKKKKKKK...", "...................."],
+  krake: ["......KKKKKKKK......", "....KKPPPPPPPPKK....", "...KPPPPPPPPPPPPK...", "..KPPMPPPPPPPPMPPK..", "..KPWWWPPWWWPPWWWK..", "..KPWKWPPWKWPPWKWK..", "..KPWWWPPWWWPPWWWK..", "..KPPPPPPPPPPPPPPK..", "..KPPPPKPPPPKPPPPK..", "...KPPPPKKKKPPPPK...", "..KKpPPPPPPPPPPpKK..", ".KPKKpKKPKKPKKpKKPK.", "KPK.KPK.KPK.KPK.KPK.", "KPK.KPK.KPK.KPK.KPK.", ".KPK.KK.KPK.KK.KPK..", "..KK.....K.....KK..."],
+  eule: ["...KK..........KK...", "..KNNK........KNNK..", "..KNNNKKKKKKKKNNNK..", "..KNNNNNNNNNNNNNNK..", ".KKKKKKKKKKKKKKKKKK.", ".KKKKWKKKKKKKKWKKKK.", ".KKKWKKKKKKKKWKKKKK.", "..KKKKKKNOONKKKKKK..", "..KNKKKKNOONKKKKNK..", ".KNNNNNNNOONNNNNNNK.", ".KNnNCCCCCCCCCCNnNK.", ".KNnNCCNCCCCNCCNnNK.", ".KNnNCCCCNNCCCCNnNK.", "..KNNCCNCCCCNCCNNK..", "...KKNCCCCCCCCNKK...", "....KOOKKKKKKOOK...."],
+  drache: ["..........K...K.....", ".........KGK.KGK....", "....KK...KGGKGGK....", "...KTTK.KGGGGGGGK...", "..KTTTTKKGWKGGWKGK..", "..KTTtTTKGWKGGWKGK..", "...KTtTTKGGGGGGGGK..", "....KTTKKGGKGGKGGKOY", ".....KKGGGGGGGGGGKYO", "....KLGGGGGGKKKKKKOY", "...KLGGGCCCCGGK.....", "K..KLGGCCCCCCGGK....", "KGKKLGGCCCCCCGGK....", ".KGGGGGCCCCCCGGK....", "..KKKGGKKKKKGGGK....", "....KKK.....KKK....."],
+  phoenix: [".........KK.........", "........KYYK........", "..K....KYOYK....K...", ".KRK...KOROK...KRK..", "KRORK.KKRRRRKK.KRORK", "KROORKRWKRRKWRKROORK", "KRYOORRWKRRKWRROOYRK", ".KRYOORRRYYRRROOYRK.", "..KRYOORROORROOYRK..", "...KRYORRYYRROYRK...", "....KKRRRRRRRRKK....", "......KRRrrRRK......", ".....KOKRRRRKOK.....", "....KYOK.KK.KOYK....", "...KYOK..KK..KOYK...", "...KKK...KK...KKK..."]
+};
+/** Bilder eines Tiers (Pegasus: zwei für den Flügelschlag, sonst eins). locked: nur der Umriss. */
+export function makePet(id, locked = false) {
+  if (!WILD_ART[id]) return makePegasus(locked);
+  const rows = WILD_ART[id], c = cv(rows[0].length, rows.length), x = c.getContext('2d');
+  rows.forEach((r, y) => { for (let i = 0; i < r.length; i++) if (r[i] !== '.') px(x, i, y, locked ? (r[i] === 'K' ? '#7C8AA0' : '#B4BFCE') : WILD_PAL[r[i]]); }); return [c];
+}
