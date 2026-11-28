@@ -15,7 +15,7 @@ export class BauScene {
   }
   buildTasks() {
     const { level } = this, stats = this.app.profile.notes, out = []; let last = null; const words = (level.words || []).slice().sort(() => Math.random() - 0.5).slice(0, 3);
-    const singles = 8 - words.length; for (let i = 0; i < singles; i++) { last = pickNext(level.notes, stats, Math.random, last); out.push({ notes: [N(last)], word: null }); }
+    const singles = (level.master ? level.len : 8) - words.length; for (let i = 0; i < singles; i++) { last = pickNext(level.notes, stats, Math.random, last); out.push({ notes: [N(last)], word: null }); }
     words.forEach((w, i) => out.splice(2 + i * 2, 0, { word: w, notes: null }));
     return out;
   }
@@ -37,7 +37,7 @@ export class BauScene {
       if (this.app.levelNoteKeys(this.level).includes(cand.key) && !p.creatures.includes(cand.key)) { p.creatures.push(cand.key); this.freed.push(cand); }
       this.placed.push(cand); this.parts.burst(this.xs[this.slot], G.yOfPos(this.pos), [G.C.YE, G.C.W, G.C.GL], 14); this.slot++; this.tries = 0; this.t0 = performance.now(); if (this.slot < this.n) app.bubble(`Schreibe das Wort <b>${tk.word}</b> – Note für Note.`, 0);
       if (this.slot >= this.n) { if (this.taskClean) this.firstTry++; this.locked = true; app.bubble('Richtig!', 1);
-        setTimeout(() => { this.locked = false; this.ti++; if (this.ti >= this.tasks.length) { app.audio.sfx('done'); app.finishLevel(this.level, { ratio: this.firstTry / this.tasks.length, freed: this.freed, line: `Beim ersten Versuch richtig: <b>${this.firstTry} von ${this.tasks.length}</b>` }); } else this.startTask(); }, 900); }
+        setTimeout(() => { this.locked = false; this.ti++; if (this.ti >= this.tasks.length) { app.audio.sfx('done'); app.finishLevel(this.level, { ratio: this.firstTry / this.tasks.length, n: this.tasks.length, time: this.t, freed: this.freed, line: `Beim ersten Versuch richtig: <b>${this.firstTry} von ${this.tasks.length}</b>` }); } else this.startTask(); }, 900); }
     } else {
       this.tries++; this.taskClean = false; this.wrongT = 0.5; const want = tk.word ? tk.word[this.slot].toLowerCase() : null;
       if (!tk.word) { const ck = `${tk.notes[0].key}>${cand.key}`; p.conf[ck] = (p.conf[ck] || 0) + 1; p.notes[tk.notes[0].key] = srsUpdate(p.notes[tk.notes[0].key] || newStat(), false); }

@@ -10,7 +10,7 @@ export class RegenScene {
   enter() {
     const { app, level } = this; this.clef = level.clef; this.theme = level.theme; this.bg = app.background(level.theme); this.line = G.THEMES[level.theme].line;
     this.notes = []; this.t = 0; this.left = DURATION; this.correct = 0; this.wrong = 0; this.combo = 0; this.score = 0; this.freeze = 0; this.last = null; this.parts = new G.Particles(); this.started = false;
-    const base = app.profile.mode === 'profi' ? 30 : 20; this.maxSpeed = app.profile.mode === 'profi' ? 85 : 60; this.missed = 0;
+    const base = level.master ? 38 : app.profile.mode === 'profi' ? 30 : 20; this.maxSpeed = level.master ? 110 : app.profile.mode === 'profi' ? 85 : 60; this.missed = 0;
     // Wer beim letzten Mal schnell und sicher war, startet gleich zügiger (höchstens 18 über dem Grundtempo).
     this.speed = Math.max(base, Math.min(base + 18, 0.75 * (app.profile.regenPace || 0)));
     const order = ['c', 'cis', 'des', 'd', 'dis', 'es', 'e', 'f', 'fis', 'g', 'gis', 'as', 'a', 'b', 'h'];
@@ -41,8 +41,8 @@ export class RegenScene {
     if (this.started) { this.left -= dt; const el = document.getElementById('rTime'); if (el) el.textContent = Math.max(0, Math.ceil(this.left)); }
     if (this.left <= 0) { this.done = true; app.audio.sfx('done'); const total = this.correct + this.wrong + this.missed || 1;
       const th = app.profile.mode === 'profi' ? [12, 20, 28] : [8, 14, 20]; const stars = this.correct >= th[2] ? 3 : this.correct >= th[1] ? 2 : 1;
-      app.profile.regenPace = this.missed <= 1 && this.correct >= 8 && this.wrong <= this.correct * 0.1 ? Math.round(this.speed) : 0;
-      app.finishLevel(this.level, { stars, score: this.score, freed: [], line: `<b>${this.correct}</b> Noten richtig erkannt &middot; <b>${this.score}</b> Punkte` }); return; }
+      if (!this.level.master) app.profile.regenPace = this.missed <= 1 && this.correct >= 8 && this.wrong <= this.correct * 0.1 ? Math.round(this.speed) : 0;
+      app.finishLevel(this.level, { stars, score: this.score, correct: this.correct, errors: this.wrong + this.missed, freed: [], line: `<b>${this.correct}</b> Noten richtig erkannt &middot; <b>${this.score}</b> Punkte` }); return; }
     if (this.freeze > 0) { this.freeze -= dt; if (this.freeze <= 0) { this.notes.shift(); this.spawn(this.notes[this.notes.length - 1].x + SPACING); } return; }
     const a = this.active, ahead = a && a.x > G.VIEW_W + 4; // Kind ist schneller als der Notenregen: Die nächsten Noten rücken sofort auf, statt Wartezeit zu erzeugen
     for (const n of this.notes) n.x -= (ahead ? Math.max(260, this.speed * 4) : this.speed * this.narrow()) * dt;

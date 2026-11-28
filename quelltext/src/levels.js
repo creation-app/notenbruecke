@@ -155,6 +155,38 @@ export function levelUnlocked(profile, level) {
   if (profile.unlockAll) return true; if (!worldUnlocked(profile, level.world)) return false;
   const ls = levelsOf(level.world), i = ls.indexOf(level); return i === 0 || i < (skipOf(profile)[level.world] || 0) || !!profile.levels[ls[i - 1].id];
 }
+/** Welt geschafft: jedes Level gespielt – oder die Einstufung hat die ganze Welt übersprungen. */
+export function worldCleared(profile, world) { const ls = levelsOf(world); return ls.length > 0 && ((skipOf(profile)[world] || 0) >= ls.length || ls.every(l => profile.levels[l.id])); }
+
+// ---------- Meisterprüfungen ----------
+// Pro Welt drei Prüfungen (Spielen, Lesen, Schreiben) mit ALLEN Noten der Welt – schneller und ohne Hilfen. Belohnung: Bronze-, Silber- oder Gold-Krone.
+export const MASTER_TYPES = ['jump', 'regen', 'bau'];
+const MASTER_TITLE = { jump: 'Meister im Spielen', regen: 'Meister im Lesen', bau: 'Meister im Schreiben' };
+export const MASTER_LEN = { jump: 16, bau: 12 };
+/** Was es für Silber (2) und Gold (3) braucht. Bronze (1) gibt es fürs Durchhalten. */
+export const MASTER_RULES = {
+  jump: { 3: { ratio: 0.9, perNote: 3.5 }, 2: { ratio: 0.75, perNote: 6 } },
+  regen: { 3: { correct: 34, errors: 3 }, 2: { correct: 24, errors: 8 } },
+  bau: { 3: { ratio: 11 / 12, perNote: 6 }, 2: { ratio: 0.75, perNote: 10 } } };
+export function masterLevels(world) {
+  const W = WORLDS[world]; if (!W) return []; const notes = [...new Set(levelsOf(world).flatMap(l => l.notes))];
+  return MASTER_TYPES.map(type => ({ id: `m-${W.id}-${type}`, world, type, master: true, title: MASTER_TITLE[type], notes, fresh: [], len: MASTER_LEN[type] || 10, clef: W.clef, theme: W.theme, accidentals: notes.some(k => N(k).alt !== 0) }));
+}
+/** Die Prüfungen öffnen sich, sobald die Welt geschafft ist. */
+export function masterOpen(profile, world) { return !!profile.unlockAll || worldCleared(profile, world); }
+/** Level oder Meisterprüfung zu einer Kennung (im aktuellen Level-Satz). */
+export function findLevel(id) { return LEVELS.find(l => l.id === id) || WORLDS.flatMap((w, i) => masterLevels(i)).find(l => l.id === id) || null; }
+/** Krone für ein Ergebnis: 1 Bronze, 2 Silber, 3 Gold. r: { ratio, time, n } (Spielen, Schreiben) oder { correct, errors } (Lesen). */
+export function masterCrown(type, r) {
+  const rules = MASTER_RULES[type]; if (!rules) return 1;
+  for (const c of [3, 2]) { const q = rules[c]; if (type === 'regen' ? r.correct >= q.correct && r.errors <= q.errors : r.ratio >= q.ratio - 1e-9 && r.time / Math.max(1, r.n) <= q.perNote) return c; }
+  return 1;
+}
+export function crownOf(profile, level) { const m = (profile.master || {})[level.id]; return m ? m.crown || 0 : 0; }
+/** Kronen im aktuellen Level-Satz: { gold, any, total }. */
+export function crownCount(profile) { const all = WORLDS.flatMap((w, i) => masterLevels(i)), cs = all.map(l => crownOf(profile, l)); return { gold: cs.filter(c => c === 3).length, any: cs.filter(c => c > 0).length, total: all.length }; }
+export function worldMastered(profile, world) { return masterLevels(world).every(l => crownOf(profile, l) === 3); }
+
 export function nextLevel(level) { const i = LEVELS.indexOf(level); return LEVELS[i + 1] || null; }
 export function starsFor(ratio) { return ratio >= 0.85 ? 3 : ratio >= 0.65 ? 2 : 1; }
 /** Sterne aus Leveln plus Sterne aus dem Training. */

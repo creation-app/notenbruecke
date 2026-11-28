@@ -9,6 +9,10 @@
 <meta name="color-scheme" content="only light">
 <meta name="supported-color-schemes" content="light only">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Notenbrücke">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'%3E%3Crect width='16' height='16' fill='%2375CCF5'/%3E%3Cg fill='%2326364B'%3E%3Crect y='5' width='16' height='1'/%3E%3Crect y='10' width='16' height='1'/%3E%3Crect x='10' y='2' width='1' height='9'/%3E%3C/g%3E%3Crect x='5' y='9' width='6' height='4' fill='%23FFD966' stroke='%2326364B'/%3E%3C/svg%3E">
 <style>
@@ -154,7 +158,7 @@ textarea{width:100%;font:16px/1.3 ui-monospace,monospace;border:4px solid var(--
 .passgrid,.setgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .card{background:#fff;border:4px solid var(--k);padding:12px 16px}.card h3{margin-top:2px}
 .bigno{font-family:"Press Start 2P",monospace;font-size:40px;margin:4px 0}.bigno small{font-family:"Atkinson Hyperlegible",sans-serif;font-size:22px;font-weight:700}
-.nw{white-space:nowrap}.cal{display:grid;grid-template-columns:repeat(7,26px);gap:5px;margin:8px 0 4px}.cal i{width:26px;height:26px;background:#E3D5B8}.cal .l1{background:#B9DE7A}.cal .l2{background:var(--g1)}.cal .l3{background:var(--g2)}
+.nw{white-space:nowrap}.crown{display:inline-block;width:34px;height:24px;vertical-align:-4px;background:#D9CDB4;clip-path:polygon(0 100%,0 18%,24% 56%,50% 0,76% 56%,100% 18%,100% 100%);flex:none}.crown.c1{background:#C8813A}.crown.c2{background:#AEBBCB}.crown.c3{background:#FFC83D}.crown.mini{width:22px;height:16px;vertical-align:-2px}.crown.huge{width:150px;height:104px;margin:6px 0}.mq2{margin-top:16px}.mq2.first{margin-top:10px}.mq2 small{display:block;font-family:inherit;font-size:17px;font-weight:400;letter-spacing:0;text-transform:none;margin-top:4px}.nodes.masters{grid-template-columns:repeat(3,minmax(0,1fr))}.node.master{border-color:#8A6412;box-shadow:4px 4px 0 #8A6412;background:#FFF7DD;min-height:92px}.node.master:disabled{border-color:var(--k);box-shadow:4px 4px 0 var(--k);background:#fff}.pill.kr{background:#8A6412;color:#fff}.cal{display:grid;grid-template-columns:repeat(7,26px);gap:5px;margin:8px 0 4px}.cal i{width:26px;height:26px;background:#E3D5B8}.cal .l1{background:#B9DE7A}.cal .l2{background:var(--g1)}.cal .l3{background:var(--g2)}
 .tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.tag{background:var(--k);color:var(--cream);padding:3px 10px;font-weight:700}
 .board{width:100%;border-collapse:collapse;font-size:22px;background:#fff}.board th,.board td{border:3px solid var(--k);padding:8px 12px;text-align:left}.board th{background:var(--k);color:var(--cream)}.board .me{background:#FFE9A8;font-weight:700}
 .shortcode{font-family:"Press Start 2P",monospace;font-size:26px;letter-spacing:1px;background:#F3E3C3;padding:12px 8px;text-align:center;user-select:text;-webkit-user-select:text;margin:6px 0}
@@ -231,6 +235,31 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   };
 
   // src/music.js
+  var music_exports = {};
+  __export(music_exports, {
+    CLEFS: () => CLEFS,
+    LETTERS: () => LETTERS,
+    N: () => N,
+    classify: () => classify,
+    describePos: () => describePos,
+    freqOfMidi: () => freqOfMidi,
+    ledgerPositions: () => ledgerPositions,
+    letterIdx: () => letterIdx,
+    letterName: () => letterName,
+    midiOf: () => midiOf,
+    midiOfFreq: () => midiOfFreq,
+    nameHtml: () => nameHtml,
+    nameParts: () => nameParts,
+    nameStr: () => nameStr,
+    note: () => note,
+    noteOfMidi: () => noteOfMidi,
+    octaveOf: () => octaveOf,
+    setNamer: () => setNamer,
+    shownParts: () => shownParts,
+    staffLines: () => staffLines,
+    staffPos: () => staffPos,
+    stemUp: () => stemUp
+  });
   function letterIdx(n) {
     return (n.step % 7 + 7) % 7;
   }
@@ -372,6 +401,9 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     ALL_NOTES: () => ALL_NOTES,
     LEVELS: () => LEVELS,
     LEVEL_SET: () => LEVEL_SET,
+    MASTER_LEN: () => MASTER_LEN,
+    MASTER_RULES: () => MASTER_RULES,
+    MASTER_TYPES: () => MASTER_TYPES,
     PLACEMENT: () => PLACEMENT,
     PLACEMENT_PASS: () => PLACEMENT_PASS,
     PLACEMENT_Q: () => PLACEMENT_Q,
@@ -380,15 +412,23 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     TYPE_LABEL: () => TYPE_LABEL,
     WORLDS: () => WORLDS,
     creatureTotal: () => creatureTotal,
+    crownCount: () => crownCount,
+    crownOf: () => crownOf,
     doneCount: () => doneCount,
+    findLevel: () => findLevel,
     levelUnlocked: () => levelUnlocked,
     levelsOf: () => levelsOf,
+    masterCrown: () => masterCrown,
+    masterLevels: () => masterLevels,
+    masterOpen: () => masterOpen,
     nextLevel: () => nextLevel,
     prevWorld: () => prevWorld,
     setLevelSet: () => setLevelSet,
     skipOf: () => skipOf,
     starsFor: () => starsFor,
     totalStars: () => totalStars,
+    worldCleared: () => worldCleared,
+    worldMastered: () => worldMastered,
     worldUnlocked: () => worldUnlocked
   });
   function prevWorld(world) {
@@ -441,6 +481,42 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     const ls = levelsOf(level.world), i = ls.indexOf(level);
     return i === 0 || i < (skipOf(profile)[level.world] || 0) || !!profile.levels[ls[i - 1].id];
   }
+  function worldCleared(profile, world) {
+    const ls = levelsOf(world);
+    return ls.length > 0 && ((skipOf(profile)[world] || 0) >= ls.length || ls.every((l) => profile.levels[l.id]));
+  }
+  function masterLevels(world) {
+    const W = WORLDS[world];
+    if (!W) return [];
+    const notes = [...new Set(levelsOf(world).flatMap((l) => l.notes))];
+    return MASTER_TYPES.map((type) => ({ id: `m-${W.id}-${type}`, world, type, master: true, title: MASTER_TITLE[type], notes, fresh: [], len: MASTER_LEN[type] || 10, clef: W.clef, theme: W.theme, accidentals: notes.some((k) => N(k).alt !== 0) }));
+  }
+  function masterOpen(profile, world) {
+    return !!profile.unlockAll || worldCleared(profile, world);
+  }
+  function findLevel(id) {
+    return LEVELS.find((l) => l.id === id) || WORLDS.flatMap((w, i) => masterLevels(i)).find((l) => l.id === id) || null;
+  }
+  function masterCrown(type, r) {
+    const rules = MASTER_RULES[type];
+    if (!rules) return 1;
+    for (const c of [3, 2]) {
+      const q2 = rules[c];
+      if (type === "regen" ? r.correct >= q2.correct && r.errors <= q2.errors : r.ratio >= q2.ratio - 1e-9 && r.time / Math.max(1, r.n) <= q2.perNote) return c;
+    }
+    return 1;
+  }
+  function crownOf(profile, level) {
+    const m = (profile.master || {})[level.id];
+    return m ? m.crown || 0 : 0;
+  }
+  function crownCount(profile) {
+    const all = WORLDS.flatMap((w, i) => masterLevels(i)), cs = all.map((l) => crownOf(profile, l));
+    return { gold: cs.filter((c) => c === 3).length, any: cs.filter((c) => c > 0).length, total: all.length };
+  }
+  function worldMastered(profile, world) {
+    return masterLevels(world).every((l) => crownOf(profile, l) === 3);
+  }
   function nextLevel(level) {
     const i = LEVELS.indexOf(level);
     return LEVELS[i + 1] || null;
@@ -451,7 +527,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   function totalStars(profile) {
     return Object.values(profile.levels).reduce((a, l) => a + (l.stars || 0), 0) + Object.values(profile.train || {}).reduce((a, t) => a + (t.stars || 0), 0);
   }
-  var PIANO_WORLDS, GUITAR_WORLDS, WORLDS, TYPE_LABEL, L, T1, T2, T3, T4, T5, B1, B2, B3, B4, B5, ENTCHEN, FREUDE, HAENSCHEN, JAKOB, TIEFSEE, JAKOB2, ELISE, PIANO_LEVELS, GS1, GS2, GH, GS3, GS4, GM, GS5, GS6, GT, GALL, G_HAENSCHEN, G_FREUDE, G_LAMM, G_JAKOB, G_ENTCHEN, G_TIEF, G_JAKOB_TIEF, G_LEITER, GUITAR_LEVELS, PIANO_PLACEMENT, GUITAR_PLACEMENT, SETS, ALL_LEVELS, LEVELS, ALL_NOTES, PLACEMENT, SKIP_KEY, LEVEL_SET, PLACEMENT_Q, PLACEMENT_PASS;
+  var PIANO_WORLDS, GUITAR_WORLDS, WORLDS, TYPE_LABEL, L, T1, T2, T3, T4, T5, B1, B2, B3, B4, B5, ENTCHEN, FREUDE, HAENSCHEN, JAKOB, TIEFSEE, JAKOB2, ELISE, PIANO_LEVELS, GS1, GS2, GH, GS3, GS4, GM, GS5, GS6, GT, GALL, G_HAENSCHEN, G_FREUDE, G_LAMM, G_JAKOB, G_ENTCHEN, G_TIEF, G_JAKOB_TIEF, G_LEITER, GUITAR_LEVELS, PIANO_PLACEMENT, GUITAR_PLACEMENT, SETS, ALL_LEVELS, LEVELS, ALL_NOTES, PLACEMENT, SKIP_KEY, LEVEL_SET, MASTER_TYPES, MASTER_TITLE, MASTER_LEN, MASTER_RULES, PLACEMENT_Q, PLACEMENT_PASS;
   var init_levels = __esm({
     "src/levels.js"() {
       init_music();
@@ -603,6 +679,14 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       PLACEMENT = PIANO_PLACEMENT;
       SKIP_KEY = "skip";
       LEVEL_SET = "klavier";
+      MASTER_TYPES = ["jump", "regen", "bau"];
+      MASTER_TITLE = { jump: "Meister im Spielen", regen: "Meister im Lesen", bau: "Meister im Schreiben" };
+      MASTER_LEN = { jump: 16, bau: 12 };
+      MASTER_RULES = {
+        jump: { 3: { ratio: 0.9, perNote: 3.5 }, 2: { ratio: 0.75, perNote: 6 } },
+        regen: { 3: { correct: 34, errors: 3 }, 2: { correct: 24, errors: 8 } },
+        bau: { 3: { ratio: 11 / 12, perNote: 6 }, 2: { ratio: 0.75, perNote: 10 } }
+      };
       PLACEMENT_Q = 5;
       PLACEMENT_PASS = 4;
     }
@@ -611,10 +695,6 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   // src/pets.js
   function petName(id) {
     return NAMES[id] || null;
-  }
-  function worldCleared(profile, world) {
-    const ls = levelsOf(world);
-    return ls.length > 0 && ((skipOf(profile)[world] || 0) >= ls.length || ls.every((l) => profile.levels[l.id]));
   }
   function wildLevel(id) {
     const i = WILD.findIndex((w) => w[0] === id);
@@ -943,6 +1023,16 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     for (const k of /* @__PURE__ */ new Set([...Object.keys(ta), ...Object.keys(tb)])) {
       const x = obj(ta[k]), y = obj(tb[k]), bx = num(y.best) > num(x.best) ? y : x, rx = Array.isArray(x.runs) ? x.runs : [], ry = Array.isArray(y.runs) ? y.runs : [];
       out.train[k] = { ...x, ...y, best: num(bx.best), bestAcc: num(bx.bestAcc), stars: Math.max(num(x.stars), num(y.stars)), runs: ry.length >= rx.length ? ry : rx };
+    }
+    {
+      const ma = obj(a.master), mb = obj(b.master);
+      if (Object.keys(ma).length || Object.keys(mb).length) {
+        out.master = {};
+        for (const k of /* @__PURE__ */ new Set([...Object.keys(ma), ...Object.keys(mb)])) {
+          const x = obj(ma[k]), y = obj(mb[k]);
+          out.master[k] = { crown: Math.max(num(x.crown), num(y.crown)), runs: Math.max(num(x.runs), num(y.runs)) };
+        }
+      }
     }
     out.regenBest = Math.max(num(a.regenBest), num(b.regenBest));
     if (Array.isArray(a.skip) || Array.isArray(b.skip)) {
@@ -2570,7 +2660,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
           this.parts = new Particles();
           this.accMidi = null;
           this.accAt = -1e9;
-          this.hintAfter = (p.mode === "profi" ? 3 : 2) + (this.boss ? 1 : 0);
+          this.hintAfter = level.master ? Infinity : (p.mode === "profi" ? 3 : 2) + (this.boss ? 1 : 0);
           app.panel.showMic(true);
           app.panel.keyboard(this.clef);
           app.hud.show(level.title, true);
@@ -2593,7 +2683,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         prompt(first) {
           const { app } = this, tg = this.target;
           this.tries = 0;
-          const isNew = !app.profile.notes[tg.key];
+          const isNew = !app.profile.notes[tg.key] && !this.level.master;
           this.t0 = performance.now();
           this.fresh = isNew;
           this.hint = isNew;
@@ -2604,9 +2694,9 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
             app.bubbleSide(pos <= -5 || from <= -5);
           }
           app.hud.progress(this.idx, this.targets.length);
-          app.hud.extra(app.profile.mode === "profi" ? `<span id="jTime">0:00</span>${this.combo > 1 ? ` &middot; <b>${this.combo}\xD7</b> Serie` : ""}` : "");
+          app.hud.extra(app.profile.mode === "profi" || this.level.master ? `<span id="jTime">${fmtTime(this.elapsed)}</span>${this.combo > 1 ? ` &middot; <b>${this.combo}\xD7</b> Serie` : ""}` : "");
           if (isNew) app.bubble(isGuitar() ? `Neu: <b>${nameHtml(tg)}</b> \u2013 ${describePos(staffPos(tg, this.clef), this.clef)}. Greife: ${gripText(midiOf(tg))}.` : `Neu: <b>${nameHtml(tg)}</b> \u2013 ${describePos(staffPos(tg, this.clef), this.clef)}. Die Taste leuchtet.`, 0);
-          else if (first) app.bubble(this.boss ? `Spiele die Melodie: <b>${this.level.title}</b>` : "Welcher Ton baut die Br\xFCcke?", 4);
+          else if (first) app.bubble(this.level.master ? "Meisterpr\xFCfung: Lies jede Note und spiele sie \u2013 ohne Tipps!" : this.boss ? `Spiele die Melodie: <b>${this.level.title}</b>` : "Welcher Ton baut die Br\xFCcke?", 4);
           else app.bubble(null);
           if (first) app.panel.say(app.listening ? "Ich h\xF6re \u2026" : INSTR.pad, app.listening ? "Ich h\xF6re noch nichts." : "");
         }
@@ -2714,6 +2804,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
               this.reported = true;
               app.finishLevel(this.level, {
                 ratio: this.firstTry / this.targets.length,
+                n: this.targets.length,
                 time: this.elapsed,
                 freed: this.freed,
                 line: `Beim ersten Versuch richtig: <b>${this.firstTry} von ${this.targets.length}</b>`
@@ -4720,11 +4811,13 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     calibrate: () => calibrate,
     collection: () => collection,
     confirmImport: () => confirmImport,
+    crown: () => crown,
     esc: () => esc,
     fill: () => fill,
     levelCard: () => levelCard,
     levelCheck: () => levelCheck,
     map: () => map,
+    masterResult: () => masterResult,
     notice: () => notice,
     pass: () => pass,
     pause: () => pause,
@@ -4735,6 +4828,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     result: () => result,
     settings: () => settings,
     shareSave: () => shareSave,
+    standalone: () => standalone,
     stars: () => stars,
     startPlacement: () => startPlacement,
     story: () => story,
@@ -5073,18 +5167,24 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       app.save();
       return story(app, WORLD_INTRO[world], () => map(app, world), W.theme);
     }
-    const ls = levelsOf(world), goal = p.goal || 5, today = Math.floor((p.days[dayKey()] || 0) / 60);
+    const ls = levelsOf(world), mOpen = masterOpen(p, world), kr = crownCount(p), goal = p.goal || 5, today = Math.floor((p.days[dayKey()] || 0) / 60);
+    const mBlock = `<h3 class="mapq mq2 ${mOpen ? "first" : ""}">Meisterpr\xFCfungen <small>${mOpen ? "Alle Noten dieser Welt \u2013 schneller und ohne Hilfen. Hol dir die Gold-Kronen!" : "Sie \xF6ffnen sich, wenn du alle Level dieser Welt geschafft hast."}</small></h3>
+    <div class="nodes masters">${masterLevels(world).map((l) => {
+      const c = crownOf(p, l);
+      return `<button class="node master t-${l.type} ${c ? "done" : ""}" ${mOpen ? "" : "disabled"} data-act="lvl" data-id="${l.id}"><b>${esc(l.title)}</b><small>${TYPE_LABEL[l.type]}</small>${!mOpen ? '<small class="lock">noch zu</small>' : app.locked(l) ? '<small class="lock full">Vollversion</small>' : crown(c)}</button>`;
+    }).join("")}</div>`;
     app.screen(`<div class="maphead"><button class="chip" data-act="prof" aria-label="Profil wechseln"><span data-hero="${p.hero}" data-hat="${hatOf(p, totalStars(p))}" data-size="36"></span><b>${esc(p.name)}</b></button>
-    <div class="row tight"><span class="pill goal ${today >= goal ? "ok" : ""}" role="img" aria-label="Tagesziel: ${today} von ${goal} Minuten">Heute ge\xFCbt: ${Math.min(today, goal)} von ${goal} Minuten<i style="width:${Math.min(100, 100 * today / goal)}%"></i></span><span class="pill">${totalStars(p)} Sterne</span></div></div>
+    <div class="row tight"><span class="pill goal ${today >= goal ? "ok" : ""}" role="img" aria-label="Tagesziel: ${today} von ${goal} Minuten">Heute ge\xFCbt: ${Math.min(today, goal)} von ${goal} Minuten<i style="width:${Math.min(100, 100 * today / goal)}%"></i></span><span class="pill">${totalStars(p)} Sterne</span>${kr.any ? `<span class="pill kr">${kr.gold} von ${kr.total} Gold-Kronen</span>` : ""}</div></div>
     <h3 class="mapq">W\xE4hle eine Welt und dann ein Level:</h3>
     <div class="tabs" role="tablist">${WORLDS.map((w, i) => {
       const open = worldUnlocked(p, i);
-      return `<button role="tab" aria-selected="${i === world}" class="tab ${i === world ? "sel" : ""}" ${open ? "" : "disabled"} data-act="world" data-w="${i}">${open ? esc(w.name) : `Noch im Nebel: ${WORLDS[i].need} Level in \u201E${WORLDS[prevWorld(i)].short}\u201C schaffen`}</button>`;
+      return `<button role="tab" aria-selected="${i === world}" class="tab ${i === world ? "sel" : ""}" ${open ? "" : "disabled"} data-act="world" data-w="${i}">${open ? esc(w.name) + (worldMastered(p, i) ? " " + crown(3, "mini") : "") : `Noch im Nebel: ${WORLDS[i].need} Level in \u201E${WORLDS[prevWorld(i)].short}\u201C schaffen`}</button>`;
     }).join("")}</div>
+    ${mOpen ? mBlock + '<h3 class="mapq mq2">Alle Level dieser Welt</h3>' : ""}
     <div class="nodes">${ls.map((l, i) => {
       const open = levelUnlocked(p, l), rec = p.levels[l.id];
       return `<button class="node t-${l.type} ${rec ? "done" : ""}" ${open ? "" : "disabled"} data-act="lvl" data-id="${l.id}"><span class="num">${i + 1}</span><b>${esc(l.title)}</b><small>${TYPE_LABEL[l.type]}</small>${!open ? '<small class="lock">im Nebel</small>' : app.locked(l) ? '<small class="lock full">Vollversion</small>' : stars(rec ? rec.stars : 0)}</button>`;
-    }).join("")}</div>
+    }).join("")}</div>${mOpen ? "" : mBlock}
     <nav class="mapnav" aria-label="Bereiche"><button class="btn tr" data-act="train"><b>Freies Training</b><small>Tempo \xFCben, ohne Level</small></button><button class="btn" data-act="coll"><b>Sammlung</b><small>${p.creatures.length} von ${creatureTotal()} Wesen \xB7 H\xFCte</small></button><button class="btn" data-act="pass"><b>\xDCbungspass</b><small>Dein Fortschritt</small></button><button class="btn" data-act="book"><b>Geschichte</b><small>Nachlesen</small></button><button class="btn" data-act="board"><b>Bestenliste</b><small>Auf diesem Ger\xE4t</small></button><button class="btn" data-act="set"><b>Einstellungen</b><small>${accountsOn() ? p.acct ? "Konto, Ton, Mikro" : "Ton, Mikro, Konto" : "Ton, Mikro, Code"}</small></button></nav>`, {
       prof: () => profiles(app),
       train: () => trainSetup(app),
@@ -5094,18 +5194,19 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       set: () => settings(app),
       book: () => storyBook(app, null, () => map(app, world)),
       world: (e) => map(app, +e.dataset.w),
-      lvl: (e) => levelCard(app, LEVELS.find((l) => l.id === e.dataset.id))
+      lvl: (e) => levelCard(app, findLevel(e.dataset.id))
     }, "wide");
   }
   function levelCard(app, level) {
     if (app.locked(level)) return paywall(app, level);
     const p = app.profile, needsPiano = level.type === "jump" || level.type === "boss", mic = app.audio.micState, keys = app.keysOn;
-    const how = { jump: `Lies die leuchtende Note und spiele sie ${INSTR.onThe}. ${INSTR.octave}`, boss: `Spiele die Melodie Note f\xFCr Note ${INSTR.onThe}.`, regen: "Tippe den Namen der leuchtenden Note, bevor sie das Tor erreicht. 60 Sekunden!", bau: "Schiebe die Note an die richtige Stelle und tippe auf \u201ESetzen\u201C." }[level.type];
+    const rule = level.master ? MASTER_RULES[level.type][3] : null, goldLine = !level.master ? "" : level.type === "regen" ? `F\xFCr Gold: mindestens <b>${rule.correct} Noten</b> in 60 Sekunden und h\xF6chstens <b>${rule.errors} Fehler</b>.` : `F\xFCr Gold: mindestens <b>${Math.ceil(rule.ratio * MASTER_LEN[level.type] - 1e-9)} von ${MASTER_LEN[level.type]}</b> beim ersten Versuch und im Schnitt h\xF6chstens <b>${String(rule.perNote).replace(".", ",")} Sekunden</b> pro Note.`;
+    const how = level.master ? { jump: `Lies jede Note und spiele sie ${INSTR.onThe} \u2013 es kommen <b>alle Noten dieser Welt</b>, und es gibt keine Tipps.`, regen: "Tippe den Namen jeder Note. Es kommen <b>alle Noten dieser Welt</b>, und der Notenregen ist von Anfang an schnell.", bau: "Setze jede Note an die richtige Stelle. Es kommen <b>alle Noten dieser Welt</b> \u2013 z\xFCgig und ohne Fehler!" }[level.type] + " " + goldLine : { jump: `Lies die leuchtende Note und spiele sie ${INSTR.onThe}. ${INSTR.octave}`, boss: `Spiele die Melodie Note f\xFCr Note ${INSTR.onThe}.`, regen: "Tippe den Namen der leuchtenden Note, bevor sie das Tor erreicht. 60 Sekunden!", bau: "Schiebe die Note an die richtige Stelle und tippe auf \u201ESetzen\u201C." }[level.type];
     let micLine = "";
     if (needsPiano) micLine = keys ? `<p class="note">Du spielst mit: ${INSTR.pad}.</p>` : mic === "on" ? '<p class="note ok">Mikrofon ist an.</p>' : mic === "off" ? `<p class="note">${INSTR.place} Das Spiel fragt gleich nach dem Mikrofon.</p>` : `<p class="note warn">${mic === "denied" ? "Das Mikrofon wurde nicht erlaubt." : "Hier gibt es kein Mikrofon."} \xD6ffne den Link direkt in Safari oder Chrome und erlaube dort das Mikrofon. Bis dahin kannst du ohne Mikrofon spielen (${INSTR.pad}).</p>`;
     const blocked = needsPiano && !keys && (mic === "denied" || mic === "unsupported");
-    app.screen(`<small class="kicker">${esc(WORLDS[level.world].name)} \xB7 ${TYPE_LABEL[level.type]}</small><h2>${esc(level.title)}</h2><p class="lead">${esc(LEVEL_STORY[level.id] || "")}</p><p>${how}</p>${micLine}
-    <div class="row"><button class="btn" data-act="back">Zur\xFCck</button><button class="btn" data-act="book">Was bisher geschah</button>${blocked ? `<button class="btn go" data-act="keys">Ohne Mikrofon: ${INSTR.pad}</button><button class="btn" data-act="go">Mikrofon nochmal versuchen</button>` : '<button class="btn go" data-act="go">Los!</button>'}</div>`, {
+    app.screen(`<small class="kicker">${esc(WORLDS[level.world].name)} \xB7 ${level.master ? "Meisterpr\xFCfung" : TYPE_LABEL[level.type]}</small><h2>${esc(level.title)}</h2>${level.master ? `<p class="lead">${crown(crownOf(p, level))} ${crownOf(p, level) ? `Deine Krone bisher: <b>${CROWN_NAME[crownOf(p, level)]}</b>` : "Noch keine Krone"}</p>` : `<p class="lead">${esc(LEVEL_STORY[level.id] || "")}</p>`}<p>${how}</p>${micLine}
+    <div class="row"><button class="btn" data-act="back">Zur\xFCck</button>${level.master ? "" : '<button class="btn" data-act="book">Was bisher geschah</button>'}${blocked ? `<button class="btn go" data-act="keys">Ohne Mikrofon: ${INSTR.pad}</button><button class="btn" data-act="go">Mikrofon nochmal versuchen</button>` : '<button class="btn go" data-act="go">Los!</button>'}</div>`, {
       back: () => map(app),
       book: () => storyBook(app, level, () => levelCard(app, level)),
       keys: () => {
@@ -5233,6 +5334,15 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     };
     render();
   }
+  function masterResult(app, level, res) {
+    const c = res.crown, next = c < 3 ? MASTER_RULES[level.type][c + 1] : null, sec2 = (x) => x.toFixed(1).replace(".", ",");
+    const mine = level.type === "regen" ? `<b>${res.correct}</b> Noten richtig \xB7 <b>${res.errors}</b> Fehler` : `Beim ersten Versuch richtig: <b>${Math.round(res.ratio * res.n)} von ${res.n}</b> \xB7 im Schnitt <b>${sec2(res.time / res.n)} Sekunden</b> pro Note`;
+    const need = !next ? "" : level.type === "regen" ? `F\xFCr ${CROWN_NAME[c + 1]}: mindestens ${next.correct} Noten und h\xF6chstens ${next.errors} Fehler.` : `F\xFCr ${CROWN_NAME[c + 1]}: mindestens ${Math.ceil(next.ratio * res.n - 1e-9)} von ${res.n} beim ersten Versuch und h\xF6chstens ${sec2(next.perNote)} Sekunden pro Note.`;
+    app.screen(`<div class="petcard"><small class="kicker">${esc(WORLDS[level.world].name)} \xB7 Meisterpr\xFCfung</small><h2>${c === 3 ? "Gold-Krone!" : c === 2 ? "Silber-Krone!" : "Bronze-Krone!"}</h2>${crown(c, "huge pop")}<p id="mMine">${mine}</p>
+    ${need ? `<p class="muted" id="mNeed">${need}</p>` : '<p class="lead">Besser geht es nicht. Du bist Meister!</p>'}${res.best > c ? `<p class="muted">Deine beste Krone bleibt: <b>${CROWN_NAME[res.best]}</b>.</p>` : res.better && c > 1 ? "<p><b>Neue beste Krone!</b></p>" : ""}
+    <div class="row"><button class="btn" data-act="map">Karte</button><button class="btn ${c === 3 ? "" : "go"}" data-act="again">Nochmal</button></div></div>`, { map: () => map(app, level.world), again: () => levelCard(app, level) });
+    app.audio.fanfare(c);
+  }
   function result(app, level, res) {
     const p = app.profile, nx = nextLevel(level), lastOfWorld = !nx || nx.world !== level.world, canNext = nx && levelUnlocked(p, nx);
     const best = res.bestTime ? `<p>Deine Zeit: <b>${fmtTime(res.time)}</b>${res.newBest ? " \u2013 neue Bestzeit!" : ` \xB7 Bestzeit ${fmtTime(res.bestTime)}`}</p>` : res.score != null ? `<p>${res.newBest ? "Neuer Rekord!" : `Dein Rekord: <b>${res.bestScore}</b> Punkte`}</p>` : "";
@@ -5351,7 +5461,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     const list = (ks) => ks.length ? ks.map((k) => `<span class="tag">${nameHtml(N(k))}</span>`).join("") : '<span class="muted">noch keine</span>';
     const conf = topConfusions(p.conf).filter((c) => safeN(c.target) && safeN(c.played));
     app.screen(`<div class="maphead"><h2>\xDCbungspass von ${esc(p.name)}</h2><button class="btn sm" data-act="back">Zur\xFCck</button></div>
-    <div class="passgrid"><div class="card"><h3>Ge\xFCbt</h3><p class="bigno" id="passStreak">${streak(p)}<small> ${streak(p) === 1 ? "Tag" : "Tage"} in Folge</small></p><p id="passDays"><span class="nw">\xDCbungstage insgesamt: <b>${practiceDays(p)}</b></span> <span class="nw">${practiced(p, dayKey()) ? "\xB7 heute schon ge\xFCbt" : "\xB7 heute noch nicht"}</span></p><p id="passMin"><span class="nw">Letzte 7 Tage: <b>${Math.floor(week / 60)} min</b></span> <span class="nw">\xB7 Insgesamt: <b>${Math.floor(total / 60)} min</b></span></p><div class="cal" role="img" aria-label="\xDCbungstage der letzten vier Wochen">${cells.join("")}</div><small class="muted">Die letzten 4 Wochen, heute unten rechts. Ein Tag z\xE4hlt ab 1 Minute.</small></div>
+    <div class="passgrid"><div class="card"><h3>Ge\xFCbt</h3><p class="bigno" id="passStreak">${streak(p)}<small> ${streak(p) === 1 ? "Tag" : "Tage"} in Folge</small></p>${crownCount(p).any ? `<p id="passCrowns"><span class="nw">Meisterpr\xFCfungen: <b>${crownCount(p).gold} von ${crownCount(p).total}</b> Gold-Kronen</span></p>` : ""}<p id="passDays"><span class="nw">\xDCbungstage insgesamt: <b>${practiceDays(p)}</b></span> <span class="nw">${practiced(p, dayKey()) ? "\xB7 heute schon ge\xFCbt" : "\xB7 heute noch nicht"}</span></p><p id="passMin"><span class="nw">Letzte 7 Tage: <b>${Math.floor(week / 60)} min</b></span> <span class="nw">\xB7 Insgesamt: <b>${Math.floor(total / 60)} min</b></span></p><div class="cal" role="img" aria-label="\xDCbungstage der letzten vier Wochen">${cells.join("")}</div><small class="muted">Die letzten 4 Wochen, heute unten rechts. Ein Tag z\xE4hlt ab 1 Minute.</small></div>
     <div class="card"><h3>Fortschritt</h3><p><b>${totalStars(p)}</b> Sterne \xB7 <b>${p.creatures.length}</b> von ${creatureTotal()} Notenwesen</p>${WORLDS.map((w, i) => `<p>${esc(w.short)}: ${doneCount(p, i)} von ${levelsOf(i).length} Leveln <span class="bar"><i style="width:${100 * doneCount(p, i) / levelsOf(i).length}%"></i></span></p>`).join("")}</div>
     <div class="card"><h3>Diese Noten sitzen sicher <small>(richtig und z\xFCgig)</small></h3><div class="tags">${list(sure)}</div><h3>Diese Noten noch \xFCben</h3><div class="tags">${list(weak)}</div>${weakNotes(p).length >= WEAK_MIN ? '<p><button class="btn sm go" data-act="weak">Diese Noten trainieren</button></p>' : ""}</div>
     <div class="card"><h3>H\xE4ufige Verwechslungen</h3>${conf.length ? conf.map((c) => `<p><b>${nameHtml(N(c.target))}</b> wird oft mit <b>${nameHtml(N(c.played))}</b> verwechselt <span class="muted">(${c.n}\xD7)</span></p>`).join("") : '<p class="muted">Bisher keine auff\xE4lligen Verwechslungen.</p>'}</div>
@@ -5371,7 +5481,19 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     <div class="card"><h3>Mikrofon</h3><p>Mikrofon: <b>${mic}</b></p><p>Kammerton: <b>${Math.round(p.a4 * 10) / 10} Hz</b></p><button class="btn sm" data-act="cal">Mikrofon testen und ${INSTR.name} einstimmen</button> <button class="btn sm" data-act="lvl">Nur Pegel anpassen</button><p class="muted">Pegel: ${(app.state.micGain || 1) > 1.2 ? `${String(app.state.micGain).replace(".", ",")}-fach verst\xE4rkt` : "normal"} (gilt f\xFCr dieses Ger\xE4t)</p><h3>Einstieg</h3><button class="btn sm" data-act="place">Einstufung machen</button> <button class="btn sm" data-act="info">Info und Datenschutz</button></div>
     ${accountsOn() ? `<div class="card"><h3>Konto</h3>${p.acct ? `<p>Angemeldet als <b>${esc(p.acct.name)}</b>.</p><p class="muted">${p.acct.expired ? "Bitte neu anmelden." : p.acct.err ? "Noch nicht gesichert \u2013 das Spiel versucht es sp\xE4ter nochmal." : `Online gesichert ${ago(p.acct.at)}.`}</p>` : "<p>Sichere deinen Spielstand online und spiele auf jedem Ger\xE4t weiter.</p>"}<button class="btn sm ${p.acct ? "" : "go"}" data-act="acc">${p.acct ? "Konto verwalten" : "Konto anlegen oder anmelden"}</button></div>` : ""}
     <div class="card"><h3>Spielstand mitnehmen</h3><p>Dein Kurzcode zum Aufschreiben:</p><p class="shortcode" aria-label="Kurzcode">${exportShort(p, worldIds(), LEVEL_SET)}</p><p class="muted">Der Kurzcode merkt sich, wie weit du bist. Alles (Name, Sterne, \xDCbungspass) steckt im QR-Code.</p><button class="btn sm" data-act="exp">QR-Code und Link</button> <button class="btn sm" data-act="imp">Code eingeben</button></div>
+    ${standalone() ? "" : `<div class="card" id="instCard"><h3>Als App aufs Ger\xE4t</h3>${window.__install ? '<p>Lege die Notenbr\xFCcke wie eine App auf deinen Startbildschirm \u2013 mit eigenem Symbol und im Vollbild.</p><button class="btn sm go" data-act="inst">Jetzt installieren</button>' : `<p>${isApple() ? "<b>iPad und iPhone:</b> In Safari auf <b>Teilen</b> tippen (K\xE4stchen mit Pfeil) und dann <b>\u201EZum Home-Bildschirm\u201C</b> w\xE4hlen." : "<b>Android und Computer:</b> Im Browser-Men\xFC <b>\u201EApp installieren\u201C</b> oder <b>\u201EZum Startbildschirm hinzuf\xFCgen\u201C</b> w\xE4hlen."}</p>`}<p class="muted">Auf iPad und iPhone beginnt die App mit leerem Spielstand. Nimm deinen Stand vorher mit dem Kurzcode oder dem QR-Code mit.</p></div>`}
     <div class="card"><h3>F\xFCr Lehrkr\xE4fte</h3>${tg("unlock", p.unlockAll, "Alle Level freischalten", "Zum gezielten \xDCben einzelner Noten")}<button class="btn sm ${app._del ? "danger" : ""}" data-act="del">${app._del ? "Wirklich l\xF6schen? Nochmal tippen" : "Dieses Profil l\xF6schen"}</button>${CONFIG.shop ? `<h3>Vollversion</h3><p>${app.licensed ? app.license.until ? `Abo aktiv bis ${app.license.until.toLocaleDateString("de-DE")}` : "Freigeschaltet (Einmalkauf)" : "Noch nicht freigeschaltet"}</p>${app.licensed ? "" : '<button class="btn sm" data-act="buy">Vollversion ansehen</button>'}` : ""}</div></div><p class="note" role="status">${msg}</p>`, {
+      inst: async () => {
+        const ev = window.__install;
+        if (!ev) return settings(app);
+        window.__install = null;
+        try {
+          ev.prompt();
+          await ev.userChoice;
+        } catch (e) {
+        }
+        settings(app);
+      },
       back: () => {
         app._del = false;
         map(app);
@@ -5558,7 +5680,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     <h3>Verantwortlich</h3><p>Die Angaben zum Anbieter werden vor der allgemeinen Ver\xF6ffentlichung erg\xE4nzt. Fragen bitte an die Lehrkraft, von der du den Link bekommen hast.</p>
     <h3>Quellen</h3><p>Schriften: Atkinson Hyperlegible und Press Start 2P (SIL Open Font License). Notenschl\xFCssel aus Noto Music (SIL Open Font License). QR-Code: qrcode-generator (MIT-Lizenz). Musik und Grafik entstanden eigens f\xFCr dieses Spiel. Die Melodien in den Leveln sind \xFCberlieferte Lieder sowie Werke von Beethoven.</p></div>`, { back }, "wide");
   }
-  var idsOf, worldIds, seenKey, esc, stars, safeN, VERSION;
+  var idsOf, worldIds, seenKey, esc, crown, CROWN_NAME, stars, safeN, standalone, isApple, VERSION;
   var init_screens = __esm({
     "src/screens.js"() {
       init_music();
@@ -5587,6 +5709,8 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       worldIds = () => idsOf(SETS[LEVEL_SET]);
       seenKey = (world) => (isGuitar() ? "g" : "") + world;
       esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+      crown = (n, cls = "") => `<span class="crown c${n} ${cls}" role="img" aria-label="${["noch keine Krone", "Bronze-Krone", "Silber-Krone", "Gold-Krone"][n]}"></span>`;
+      CROWN_NAME = ["", "Bronze", "Silber", "Gold"];
       stars = (n, cls = "") => `<span class="stars ${cls}" role="img" aria-label="${n} von 3 Sternen">${[0, 1, 2].map((i) => `<i class="${i < n ? "on" : ""}"></i>`).join("")}</span>`;
       safeN = (k) => {
         try {
@@ -5595,7 +5719,9 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
           return null;
         }
       };
-      VERSION = "2.11 \xB7 27.11.2026";
+      standalone = () => !!(navigator.standalone || window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
+      isApple = () => /iPad|iPhone|iPod/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+      VERSION = "2.12 \xB7 28.11.2026";
     }
   });
 
@@ -5746,6 +5872,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   // src/main.js
   init_pets();
   init_levels();
+  init_music();
   init_save();
   init_config();
 
@@ -6027,8 +6154,8 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       this.last = null;
       this.parts = new Particles();
       this.started = false;
-      const base = app.profile.mode === "profi" ? 30 : 20;
-      this.maxSpeed = app.profile.mode === "profi" ? 85 : 60;
+      const base = level.master ? 38 : app.profile.mode === "profi" ? 30 : 20;
+      this.maxSpeed = level.master ? 110 : app.profile.mode === "profi" ? 85 : 60;
       this.missed = 0;
       this.speed = Math.max(base, Math.min(base + 18, 0.75 * (app.profile.regenPace || 0)));
       const order = ["c", "cis", "des", "d", "dis", "es", "e", "f", "fis", "g", "gis", "as", "a", "b", "h"];
@@ -6103,8 +6230,8 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         const total = this.correct + this.wrong + this.missed || 1;
         const th = app.profile.mode === "profi" ? [12, 20, 28] : [8, 14, 20];
         const stars2 = this.correct >= th[2] ? 3 : this.correct >= th[1] ? 2 : 1;
-        app.profile.regenPace = this.missed <= 1 && this.correct >= 8 && this.wrong <= this.correct * 0.1 ? Math.round(this.speed) : 0;
-        app.finishLevel(this.level, { stars: stars2, score: this.score, freed: [], line: `<b>${this.correct}</b> Noten richtig erkannt &middot; <b>${this.score}</b> Punkte` });
+        if (!this.level.master) app.profile.regenPace = this.missed <= 1 && this.correct >= 8 && this.wrong <= this.correct * 0.1 ? Math.round(this.speed) : 0;
+        app.finishLevel(this.level, { stars: stars2, score: this.score, correct: this.correct, errors: this.wrong + this.missed, freed: [], line: `<b>${this.correct}</b> Noten richtig erkannt &middot; <b>${this.score}</b> Punkte` });
         return;
       }
       if (this.freeze > 0) {
@@ -6189,7 +6316,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       const { level } = this, stats = this.app.profile.notes, out = [];
       let last = null;
       const words = (level.words || []).slice().sort(() => Math.random() - 0.5).slice(0, 3);
-      const singles = 8 - words.length;
+      const singles = (level.master ? level.len : 8) - words.length;
       for (let i = 0; i < singles; i++) {
         last = pickNext(level.notes, stats, Math.random, last);
         out.push({ notes: [N(last)], word: null });
@@ -6254,7 +6381,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
             this.ti++;
             if (this.ti >= this.tasks.length) {
               app.audio.sfx("done");
-              app.finishLevel(this.level, { ratio: this.firstTry / this.tasks.length, freed: this.freed, line: `Beim ersten Versuch richtig: <b>${this.firstTry} von ${this.tasks.length}</b>` });
+              app.finishLevel(this.level, { ratio: this.firstTry / this.tasks.length, n: this.tasks.length, time: this.t, freed: this.freed, line: `Beim ersten Versuch richtig: <b>${this.firstTry} von ${this.tasks.length}</b>` });
             } else this.startTask();
           }, 900);
         }
@@ -7000,6 +7127,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       this.scene.enter();
     }
     finishLevel(level, res) {
+      if (level.master) return this.finishMaster(level, res);
       const p = this.profile, stars2 = res.stars != null ? res.stars : starsFor(res.ratio), prev = p.levels[level.id], rec = prev || { stars: 0 };
       const out = { ...res, stars: stars2, firstClear: !prev };
       rec.stars = Math.max(rec.stars, stars2);
@@ -7025,6 +7153,18 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       this.bubble(null);
       this.$("hud").hidden = true;
       result(this, level, out);
+    }
+    /** Ende einer Meisterprüfung: Krone ausrechnen, die beste behalten. Zählt nicht zu den Level-Sternen. */
+    finishMaster(level, res) {
+      const p = this.profile, crown2 = masterCrown(level.type, res), all = p.master = p.master || {}, prev = all[level.id] || { crown: 0, runs: 0 };
+      all[level.id] = { crown: Math.max(prev.crown || 0, crown2), runs: (prev.runs || 0) + 1 };
+      this.$("sndBtn").hidden = false;
+      this.scene.isLevel = false;
+      track("meister/" + level.id + "/" + crown2);
+      this.flush();
+      this.bubble(null);
+      this.$("hud").hidden = true;
+      masterResult(this, level, { ...res, crown: crown2, best: all[level.id].crown, better: crown2 > (prev.crown || 0) });
     }
     /** Ende einer Trainingsrunde: rechnen, Rekord eintragen, Ergebnis zeigen. */
     finishTraining(level, raw) {
@@ -7081,10 +7221,22 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       requestAnimationFrame((t) => this.loop(t));
     }
   };
+  if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1")) window.addEventListener("load", () => {
+    navigator.serviceWorker.register((window.NB_SHOP ? "../" : "./") + "sw.js").catch(() => {
+    });
+  });
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    window.__install = e;
+  });
+  window.addEventListener("appinstalled", () => {
+    window.__install = null;
+  });
   var start = () => {
     window.__nb = new App();
     window.__levels = LEVELS;
     window.__lv = levels_exports;
+    window.__mu = music_exports;
     window.__screens = screens_exports;
     window.__config = CONFIG;
     window.__train = trainui_exports;

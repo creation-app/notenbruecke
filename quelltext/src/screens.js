@@ -15,7 +15,7 @@ import { INSTR, INSTRUMENTS, isGuitar } from './instrument.js';
 import { SETS, LEVEL_SET, SKIP_KEY } from './levels.js';
 import { track } from './stats.js';
 import { classify } from './music.js';
-import { prevWorld } from './levels.js';
+import { prevWorld, masterLevels, masterOpen, findLevel, crownOf, crownCount, worldMastered, MASTER_RULES, MASTER_LEN } from './levels.js';
 import qrcode from 'qrcode-generator';
 const idsOf = set => set.worlds.map((w, i) => set.levels.filter(l => l.world === i).map(l => l.id));
 const worldIds = () => idsOf(SETS[LEVEL_SET]);
@@ -26,6 +26,9 @@ import { INTRO, WORLD_INTRO, WORLD_OUTRO, LEVEL_STORY } from './story.js';
 import { fmtTime } from './jump.js';
 
 export const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+/** Krone einer Meisterprüfung: 0 keine, 1 Bronze, 2 Silber, 3 Gold. */
+export const crown = (n, cls = '') => `<span class="crown c${n} ${cls}" role="img" aria-label="${['noch keine Krone', 'Bronze-Krone', 'Silber-Krone', 'Gold-Krone'][n]}"></span>`;
+const CROWN_NAME = ['', 'Bronze', 'Silber', 'Gold'];
 export const stars = (n, cls = '') => `<span class="stars ${cls}" role="img" aria-label="${n} von 3 Sternen">${[0, 1, 2].map(i => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}</span>`;
 const safeN = k => { try { return N(k); } catch (e) { return null; } };
 function crCanvas(key, locked, size = 64) { const n = N(key), c = makeCreature(((n.step % 7) + 7) % 7, n.alt, locked); c.style.width = c.style.height = size + 'px'; c.className = 'pix'; c.setAttribute('aria-hidden', 'true'); return c; }
@@ -128,26 +131,30 @@ export function map(app, world) {
   const W = WORLDS[world]; app.backdrop(W.theme);
   { const due = duePets(p); if (due.length) { p.pets = [...(Array.isArray(p.pets) ? p.pets : []), ...due]; if (due.includes(PEGASUS)) p.buddy = PEGASUS; app.save(); app.refreshLook(); due.forEach(id => track('tier/' + id)); return petCard(app, due, () => map(app, world)); } }
   if (!p.seenWorld[seenKey(world)]) { p.seenWorld[seenKey(world)] = 1; app.save(); return story(app, WORLD_INTRO[world], () => map(app, world), W.theme); }
-  const ls = levelsOf(world), goal = p.goal || 5, today = Math.floor((p.days[dayKey()] || 0) / 60);
+  const ls = levelsOf(world), mOpen = masterOpen(p, world), kr = crownCount(p), goal = p.goal || 5, today = Math.floor((p.days[dayKey()] || 0) / 60);
+  const mBlock = `<h3 class="mapq mq2 ${mOpen ? 'first' : ''}">Meisterprüfungen <small>${mOpen ? 'Alle Noten dieser Welt – schneller und ohne Hilfen. Hol dir die Gold-Kronen!' : 'Sie öffnen sich, wenn du alle Level dieser Welt geschafft hast.'}</small></h3>
+    <div class="nodes masters">${masterLevels(world).map(l => { const c = crownOf(p, l); return `<button class="node master t-${l.type} ${c ? 'done' : ''}" ${mOpen ? '' : 'disabled'} data-act="lvl" data-id="${l.id}"><b>${esc(l.title)}</b><small>${TYPE_LABEL[l.type]}</small>${!mOpen ? '<small class="lock">noch zu</small>' : app.locked(l) ? '<small class="lock full">Vollversion</small>' : crown(c)}</button>`; }).join('')}</div>`;
   app.screen(`<div class="maphead"><button class="chip" data-act="prof" aria-label="Profil wechseln"><span data-hero="${p.hero}" data-hat="${hatOf(p, totalStars(p))}" data-size="36"></span><b>${esc(p.name)}</b></button>
-    <div class="row tight"><span class="pill goal ${today >= goal ? 'ok' : ''}" role="img" aria-label="Tagesziel: ${today} von ${goal} Minuten">Heute geübt: ${Math.min(today, goal)} von ${goal} Minuten<i style="width:${Math.min(100, 100 * today / goal)}%"></i></span><span class="pill">${totalStars(p)} Sterne</span></div></div>
+    <div class="row tight"><span class="pill goal ${today >= goal ? 'ok' : ''}" role="img" aria-label="Tagesziel: ${today} von ${goal} Minuten">Heute geübt: ${Math.min(today, goal)} von ${goal} Minuten<i style="width:${Math.min(100, 100 * today / goal)}%"></i></span><span class="pill">${totalStars(p)} Sterne</span>${kr.any ? `<span class="pill kr">${kr.gold} von ${kr.total} Gold-Kronen</span>` : ''}</div></div>
     <h3 class="mapq">Wähle eine Welt und dann ein Level:</h3>
-    <div class="tabs" role="tablist">${WORLDS.map((w, i) => { const open = worldUnlocked(p, i); return `<button role="tab" aria-selected="${i === world}" class="tab ${i === world ? 'sel' : ''}" ${open ? '' : 'disabled'} data-act="world" data-w="${i}">${open ? esc(w.name) : `Noch im Nebel: ${WORLDS[i].need} Level in „${WORLDS[prevWorld(i)].short}“ schaffen`}</button>`; }).join('')}</div>
-    <div class="nodes">${ls.map((l, i) => { const open = levelUnlocked(p, l), rec = p.levels[l.id]; return `<button class="node t-${l.type} ${rec ? 'done' : ''}" ${open ? '' : 'disabled'} data-act="lvl" data-id="${l.id}"><span class="num">${i + 1}</span><b>${esc(l.title)}</b><small>${TYPE_LABEL[l.type]}</small>${!open ? '<small class="lock">im Nebel</small>' : app.locked(l) ? '<small class="lock full">Vollversion</small>' : stars(rec ? rec.stars : 0)}</button>`; }).join('')}</div>
+    <div class="tabs" role="tablist">${WORLDS.map((w, i) => { const open = worldUnlocked(p, i); return `<button role="tab" aria-selected="${i === world}" class="tab ${i === world ? 'sel' : ''}" ${open ? '' : 'disabled'} data-act="world" data-w="${i}">${open ? esc(w.name) + (worldMastered(p, i) ? ' ' + crown(3, 'mini') : '') : `Noch im Nebel: ${WORLDS[i].need} Level in „${WORLDS[prevWorld(i)].short}“ schaffen`}</button>`; }).join('')}</div>
+    ${mOpen ? mBlock + '<h3 class="mapq mq2">Alle Level dieser Welt</h3>' : ''}
+    <div class="nodes">${ls.map((l, i) => { const open = levelUnlocked(p, l), rec = p.levels[l.id]; return `<button class="node t-${l.type} ${rec ? 'done' : ''}" ${open ? '' : 'disabled'} data-act="lvl" data-id="${l.id}"><span class="num">${i + 1}</span><b>${esc(l.title)}</b><small>${TYPE_LABEL[l.type]}</small>${!open ? '<small class="lock">im Nebel</small>' : app.locked(l) ? '<small class="lock full">Vollversion</small>' : stars(rec ? rec.stars : 0)}</button>`; }).join('')}</div>${mOpen ? '' : mBlock}
     <nav class="mapnav" aria-label="Bereiche"><button class="btn tr" data-act="train"><b>Freies Training</b><small>Tempo üben, ohne Level</small></button><button class="btn" data-act="coll"><b>Sammlung</b><small>${p.creatures.length} von ${creatureTotal()} Wesen · Hüte</small></button><button class="btn" data-act="pass"><b>Übungspass</b><small>Dein Fortschritt</small></button><button class="btn" data-act="book"><b>Geschichte</b><small>Nachlesen</small></button><button class="btn" data-act="board"><b>Bestenliste</b><small>Auf diesem Gerät</small></button><button class="btn" data-act="set"><b>Einstellungen</b><small>${accountsOn() ? (p.acct ? 'Konto, Ton, Mikro' : 'Ton, Mikro, Konto') : 'Ton, Mikro, Code'}</small></button></nav>`, {
     prof: () => profiles(app), train: () => trainSetup(app), coll: () => collection(app), pass: () => pass(app), board: () => board(app), set: () => settings(app), book: () => storyBook(app, null, () => map(app, world)),
-    world: e => map(app, +e.dataset.w), lvl: e => levelCard(app, LEVELS.find(l => l.id === e.dataset.id)) }, 'wide');
+    world: e => map(app, +e.dataset.w), lvl: e => levelCard(app, findLevel(e.dataset.id)) }, 'wide');
 }
 
 export function levelCard(app, level) {
   if (app.locked(level)) return paywall(app, level);
   const p = app.profile, needsPiano = level.type === 'jump' || level.type === 'boss', mic = app.audio.micState, keys = app.keysOn;
-  const how = { jump: `Lies die leuchtende Note und spiele sie ${INSTR.onThe}. ${INSTR.octave}`, boss: `Spiele die Melodie Note für Note ${INSTR.onThe}.`, regen: 'Tippe den Namen der leuchtenden Note, bevor sie das Tor erreicht. 60 Sekunden!', bau: 'Schiebe die Note an die richtige Stelle und tippe auf „Setzen“.' }[level.type];
+  const rule = level.master ? MASTER_RULES[level.type][3] : null, goldLine = !level.master ? '' : level.type === 'regen' ? `Für Gold: mindestens <b>${rule.correct} Noten</b> in 60 Sekunden und höchstens <b>${rule.errors} Fehler</b>.` : `Für Gold: mindestens <b>${Math.ceil(rule.ratio * MASTER_LEN[level.type] - 1e-9)} von ${MASTER_LEN[level.type]}</b> beim ersten Versuch und im Schnitt höchstens <b>${String(rule.perNote).replace('.', ',')} Sekunden</b> pro Note.`;
+  const how = level.master ? { jump: `Lies jede Note und spiele sie ${INSTR.onThe} – es kommen <b>alle Noten dieser Welt</b>, und es gibt keine Tipps.`, regen: 'Tippe den Namen jeder Note. Es kommen <b>alle Noten dieser Welt</b>, und der Notenregen ist von Anfang an schnell.', bau: 'Setze jede Note an die richtige Stelle. Es kommen <b>alle Noten dieser Welt</b> – zügig und ohne Fehler!' }[level.type] + ' ' + goldLine : { jump: `Lies die leuchtende Note und spiele sie ${INSTR.onThe}. ${INSTR.octave}`, boss: `Spiele die Melodie Note für Note ${INSTR.onThe}.`, regen: 'Tippe den Namen der leuchtenden Note, bevor sie das Tor erreicht. 60 Sekunden!', bau: 'Schiebe die Note an die richtige Stelle und tippe auf „Setzen“.' }[level.type];
   let micLine = '';
   if (needsPiano) micLine = keys ? `<p class="note">Du spielst mit: ${INSTR.pad}.</p>` : mic === 'on' ? '<p class="note ok">Mikrofon ist an.</p>' : mic === 'off' ? `<p class="note">${INSTR.place} Das Spiel fragt gleich nach dem Mikrofon.</p>` : `<p class="note warn">${mic === 'denied' ? 'Das Mikrofon wurde nicht erlaubt.' : 'Hier gibt es kein Mikrofon.'} Öffne den Link direkt in Safari oder Chrome und erlaube dort das Mikrofon. Bis dahin kannst du ohne Mikrofon spielen (${INSTR.pad}).</p>`;
   const blocked = needsPiano && !keys && (mic === 'denied' || mic === 'unsupported');
-  app.screen(`<small class="kicker">${esc(WORLDS[level.world].name)} · ${TYPE_LABEL[level.type]}</small><h2>${esc(level.title)}</h2><p class="lead">${esc(LEVEL_STORY[level.id] || '')}</p><p>${how}</p>${micLine}
-    <div class="row"><button class="btn" data-act="back">Zurück</button><button class="btn" data-act="book">Was bisher geschah</button>${blocked ? `<button class="btn go" data-act="keys">Ohne Mikrofon: ${INSTR.pad}</button><button class="btn" data-act="go">Mikrofon nochmal versuchen</button>` : '<button class="btn go" data-act="go">Los!</button>'}</div>`, {
+  app.screen(`<small class="kicker">${esc(WORLDS[level.world].name)} · ${level.master ? 'Meisterprüfung' : TYPE_LABEL[level.type]}</small><h2>${esc(level.title)}</h2>${level.master ? `<p class="lead">${crown(crownOf(p, level))} ${crownOf(p, level) ? `Deine Krone bisher: <b>${CROWN_NAME[crownOf(p, level)]}</b>` : 'Noch keine Krone'}</p>` : `<p class="lead">${esc(LEVEL_STORY[level.id] || '')}</p>`}<p>${how}</p>${micLine}
+    <div class="row"><button class="btn" data-act="back">Zurück</button>${level.master ? '' : '<button class="btn" data-act="book">Was bisher geschah</button>'}${blocked ? `<button class="btn go" data-act="keys">Ohne Mikrofon: ${INSTR.pad}</button><button class="btn" data-act="go">Mikrofon nochmal versuchen</button>` : '<button class="btn go" data-act="go">Los!</button>'}</div>`, {
     back: () => map(app), book: () => storyBook(app, level, () => levelCard(app, level)), keys: () => { app.keysSession = true; app.runLevel(level); },
     go: async () => { app.audio.ensure(); if (needsPiano && !keys) { app.audio.micState = app.audio.micState === 'on' ? 'on' : 'off'; const r = await app.audio.startMic(); if (r !== 'on') return levelCard(app, level);
       if (!p.calibrated) return calibrate(app, () => app.runLevel(level)); } app.runLevel(level); } });
@@ -179,6 +186,16 @@ export function levelCheck(app, then) {
       msg = `Gut! Noch ${3 - peaks.length}×`; render(); },
     level(rms) { peak = Math.max(peak, rms / app.audio.gain); const m = document.getElementById('calMeter'); if (!m) return; const n = rms > 0 ? Math.max(0, Math.min(12, Math.round((Math.log10(rms / app.audio.gain * gainFor([peak || 1])) + 2.6) * 6))) : 0; [...m.children].forEach((b, i) => { b.className = i < n ? 'on' : ''; }); } };
   render();
+}
+/** Ergebnis einer Meisterprüfung: die Krone, was geklappt hat und was für die nächste fehlt. */
+export function masterResult(app, level, res) {
+  const c = res.crown, next = c < 3 ? MASTER_RULES[level.type][c + 1] : null, sec = x => x.toFixed(1).replace('.', ',');
+  const mine = level.type === 'regen' ? `<b>${res.correct}</b> Noten richtig · <b>${res.errors}</b> Fehler` : `Beim ersten Versuch richtig: <b>${Math.round(res.ratio * res.n)} von ${res.n}</b> · im Schnitt <b>${sec(res.time / res.n)} Sekunden</b> pro Note`;
+  const need = !next ? '' : level.type === 'regen' ? `Für ${CROWN_NAME[c + 1]}: mindestens ${next.correct} Noten und höchstens ${next.errors} Fehler.` : `Für ${CROWN_NAME[c + 1]}: mindestens ${Math.ceil(next.ratio * res.n - 1e-9)} von ${res.n} beim ersten Versuch und höchstens ${sec(next.perNote)} Sekunden pro Note.`;
+  app.screen(`<div class="petcard"><small class="kicker">${esc(WORLDS[level.world].name)} · Meisterprüfung</small><h2>${c === 3 ? 'Gold-Krone!' : c === 2 ? 'Silber-Krone!' : 'Bronze-Krone!'}</h2>${crown(c, 'huge pop')}<p id="mMine">${mine}</p>
+    ${need ? `<p class="muted" id="mNeed">${need}</p>` : '<p class="lead">Besser geht es nicht. Du bist Meister!</p>'}${res.best > c ? `<p class="muted">Deine beste Krone bleibt: <b>${CROWN_NAME[res.best]}</b>.</p>` : res.better && c > 1 ? '<p><b>Neue beste Krone!</b></p>' : ''}
+    <div class="row"><button class="btn" data-act="map">Karte</button><button class="btn ${c === 3 ? '' : 'go'}" data-act="again">Nochmal</button></div></div>`, { map: () => map(app, level.world), again: () => levelCard(app, level) });
+  app.audio.fanfare(c);
 }
 export function result(app, level, res) {
   const p = app.profile, nx = nextLevel(level), lastOfWorld = !nx || nx.world !== level.world, canNext = nx && levelUnlocked(p, nx);
@@ -218,7 +235,7 @@ export function pass(app) {
   const list = ks => ks.length ? ks.map(k => `<span class="tag">${nameHtml(N(k))}</span>`).join('') : '<span class="muted">noch keine</span>';
   const conf = topConfusions(p.conf).filter(c => safeN(c.target) && safeN(c.played));
   app.screen(`<div class="maphead"><h2>Übungspass von ${esc(p.name)}</h2><button class="btn sm" data-act="back">Zurück</button></div>
-    <div class="passgrid"><div class="card"><h3>Geübt</h3><p class="bigno" id="passStreak">${streak(p)}<small> ${streak(p) === 1 ? 'Tag' : 'Tage'} in Folge</small></p><p id="passDays"><span class="nw">Übungstage insgesamt: <b>${practiceDays(p)}</b></span> <span class="nw">${practiced(p, dayKey()) ? '· heute schon geübt' : '· heute noch nicht'}</span></p><p id="passMin"><span class="nw">Letzte 7 Tage: <b>${Math.floor(week / 60)} min</b></span> <span class="nw">· Insgesamt: <b>${Math.floor(total / 60)} min</b></span></p><div class="cal" role="img" aria-label="Übungstage der letzten vier Wochen">${cells.join('')}</div><small class="muted">Die letzten 4 Wochen, heute unten rechts. Ein Tag zählt ab 1 Minute.</small></div>
+    <div class="passgrid"><div class="card"><h3>Geübt</h3><p class="bigno" id="passStreak">${streak(p)}<small> ${streak(p) === 1 ? 'Tag' : 'Tage'} in Folge</small></p>${crownCount(p).any ? `<p id="passCrowns"><span class="nw">Meisterprüfungen: <b>${crownCount(p).gold} von ${crownCount(p).total}</b> Gold-Kronen</span></p>` : ''}<p id="passDays"><span class="nw">Übungstage insgesamt: <b>${practiceDays(p)}</b></span> <span class="nw">${practiced(p, dayKey()) ? '· heute schon geübt' : '· heute noch nicht'}</span></p><p id="passMin"><span class="nw">Letzte 7 Tage: <b>${Math.floor(week / 60)} min</b></span> <span class="nw">· Insgesamt: <b>${Math.floor(total / 60)} min</b></span></p><div class="cal" role="img" aria-label="Übungstage der letzten vier Wochen">${cells.join('')}</div><small class="muted">Die letzten 4 Wochen, heute unten rechts. Ein Tag zählt ab 1 Minute.</small></div>
     <div class="card"><h3>Fortschritt</h3><p><b>${totalStars(p)}</b> Sterne · <b>${p.creatures.length}</b> von ${creatureTotal()} Notenwesen</p>${WORLDS.map((w, i) => `<p>${esc(w.short)}: ${doneCount(p, i)} von ${levelsOf(i).length} Leveln <span class="bar"><i style="width:${100 * doneCount(p, i) / levelsOf(i).length}%"></i></span></p>`).join('')}</div>
     <div class="card"><h3>Diese Noten sitzen sicher <small>(richtig und zügig)</small></h3><div class="tags">${list(sure)}</div><h3>Diese Noten noch üben</h3><div class="tags">${list(weak)}</div>${weakNotes(p).length >= WEAK_MIN ? '<p><button class="btn sm go" data-act="weak">Diese Noten trainieren</button></p>' : ''}</div>
     <div class="card"><h3>Häufige Verwechslungen</h3>${conf.length ? conf.map(c => `<p><b>${nameHtml(N(c.target))}</b> wird oft mit <b>${nameHtml(N(c.played))}</b> verwechselt <span class="muted">(${c.n}×)</span></p>`).join('') : '<p class="muted">Bisher keine auffälligen Verwechslungen.</p>'}</div>
@@ -230,6 +247,9 @@ export function board(app) {
     <table class="board"><thead><tr><th>Platz</th><th>Name</th><th>Sterne</th><th>Notenwesen</th><th>Notenregen-Rekord</th><th>Training (Noten pro Minute)</th><th>Tage in Folge</th></tr></thead><tbody>${rows.map((r, i) => `<tr class="${r.p.id === app.profile.id ? 'me' : ''}"><td>${i + 1}.</td><td>${esc(r.p.name)}</td><td>${r.s}</td><td>${r.p.creatures.length}</td><td>${r.p.regenBest || '–'}</td><td>${(r.p.train && Math.max((r.p.train['play-treble-time'] || {}).best || 0, (r.p.train['play-gall-time'] || {}).best || 0)) || '–'}</td><td>${streak(r.p)}</td></tr>`).join('')}</tbody></table>
     <p class="muted">Die Liste zeigt alle Profile, die auf diesem Gerät spielen. Training: 60 Sekunden am Instrument (Klavier: Violinschlüssel, Gitarre: alle Saiten).</p>`, { back: () => map(app) }, 'wide');
 }
+/** Läuft das Spiel schon als installierte App (eigenes Fenster)? */
+export const standalone = () => !!(navigator.standalone || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches));
+const isApple = () => /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 export function settings(app, msg = '') {
   const p = app.profile, mic = { on: 'an', off: 'noch nicht eingeschaltet', denied: 'nicht erlaubt', unsupported: 'hier nicht verfügbar' }[app.audio.micState];
   const tg = (act, on, label, hint) => `<button class="toggle ${on ? 'on' : ''}" role="switch" aria-checked="${on}" data-act="${act}"><i></i><span><b>${label}</b><small>${hint}</small></span></button>`;
@@ -238,7 +258,9 @@ export function settings(app, msg = '') {
     <div class="card"><h3>Mikrofon</h3><p>Mikrofon: <b>${mic}</b></p><p>Kammerton: <b>${Math.round(p.a4 * 10) / 10} Hz</b></p><button class="btn sm" data-act="cal">Mikrofon testen und ${INSTR.name} einstimmen</button> <button class="btn sm" data-act="lvl">Nur Pegel anpassen</button><p class="muted">Pegel: ${(app.state.micGain || 1) > 1.2 ? `${String(app.state.micGain).replace('.', ',')}-fach verstärkt` : 'normal'} (gilt für dieses Gerät)</p><h3>Einstieg</h3><button class="btn sm" data-act="place">Einstufung machen</button> <button class="btn sm" data-act="info">Info und Datenschutz</button></div>
     ${accountsOn() ? `<div class="card"><h3>Konto</h3>${p.acct ? `<p>Angemeldet als <b>${esc(p.acct.name)}</b>.</p><p class="muted">${p.acct.expired ? 'Bitte neu anmelden.' : p.acct.err ? 'Noch nicht gesichert – das Spiel versucht es später nochmal.' : `Online gesichert ${ago(p.acct.at)}.`}</p>` : '<p>Sichere deinen Spielstand online und spiele auf jedem Gerät weiter.</p>'}<button class="btn sm ${p.acct ? '' : 'go'}" data-act="acc">${p.acct ? 'Konto verwalten' : 'Konto anlegen oder anmelden'}</button></div>` : ''}
     <div class="card"><h3>Spielstand mitnehmen</h3><p>Dein Kurzcode zum Aufschreiben:</p><p class="shortcode" aria-label="Kurzcode">${exportShort(p, worldIds(), LEVEL_SET)}</p><p class="muted">Der Kurzcode merkt sich, wie weit du bist. Alles (Name, Sterne, Übungspass) steckt im QR-Code.</p><button class="btn sm" data-act="exp">QR-Code und Link</button> <button class="btn sm" data-act="imp">Code eingeben</button></div>
+    ${standalone() ? '' : `<div class="card" id="instCard"><h3>Als App aufs Gerät</h3>${window.__install ? '<p>Lege die Notenbrücke wie eine App auf deinen Startbildschirm – mit eigenem Symbol und im Vollbild.</p><button class="btn sm go" data-act="inst">Jetzt installieren</button>' : `<p>${isApple() ? '<b>iPad und iPhone:</b> In Safari auf <b>Teilen</b> tippen (Kästchen mit Pfeil) und dann <b>„Zum Home-Bildschirm“</b> wählen.' : '<b>Android und Computer:</b> Im Browser-Menü <b>„App installieren“</b> oder <b>„Zum Startbildschirm hinzufügen“</b> wählen.'}</p>`}<p class="muted">Auf iPad und iPhone beginnt die App mit leerem Spielstand. Nimm deinen Stand vorher mit dem Kurzcode oder dem QR-Code mit.</p></div>`}
     <div class="card"><h3>Für Lehrkräfte</h3>${tg('unlock', p.unlockAll, 'Alle Level freischalten', 'Zum gezielten Üben einzelner Noten')}<button class="btn sm ${app._del ? 'danger' : ''}" data-act="del">${app._del ? 'Wirklich löschen? Nochmal tippen' : 'Dieses Profil löschen'}</button>${CONFIG.shop ? `<h3>Vollversion</h3><p>${app.licensed ? (app.license.until ? `Abo aktiv bis ${app.license.until.toLocaleDateString('de-DE')}` : 'Freigeschaltet (Einmalkauf)') : 'Noch nicht freigeschaltet'}</p>${app.licensed ? '' : '<button class="btn sm" data-act="buy">Vollversion ansehen</button>'}` : ''}</div></div><p class="note" role="status">${msg}</p>`, {
+    inst: async () => { const ev = window.__install; if (!ev) return settings(app); window.__install = null; try { ev.prompt(); await ev.userChoice; } catch (e) { /* abgebrochen */ } settings(app); },
     back: () => { app._del = false; map(app); }, mode: () => { p.mode = p.mode === 'profi' ? 'abenteuer' : 'profi'; app.save(); settings(app); }, keys: () => { p.keys = !p.keys; app.save(); settings(app); },
     mute: () => { app.setMuted(!app.audio.muted); settings(app); },
     instr: () => { if (isGuitar()) delete p.instr; else p.instr = 'gitarre'; p.calibrated = false; p.lastWorld = 0; app.save(); app.applyProfile(); settings(app, `Instrument: ${INSTR.name}. Dein Fortschritt für jedes Instrument bleibt getrennt erhalten.`); },
@@ -299,7 +321,7 @@ export async function shareSave(app) {
   document.getElementById('qrHere').appendChild(qrCanvas(link));
 }
 
-export const VERSION = '2.11 · 27.11.2026';
+export const VERSION = '2.12 · 28.11.2026';
 /** Info, Datenschutz und Quellen. */
 export function about(app, back) {
   app.screen(`<div class="maphead"><h2>Info und Datenschutz</h2><button class="btn sm" data-act="back">Zurück</button></div><div class="book">

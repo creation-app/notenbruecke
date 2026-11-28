@@ -18,7 +18,7 @@ export class JumpScene {
     this.plats = [{ x: 70, pos: startPos, note: null, built: true }, ...this.targets.map((n, i) => ({ x: 70 + (i + 1) * STRIDE, pos: staffPos(n, this.clef), note: n, built: false }))];
     this.idx = 0; this.firstTry = 0; this.combo = 0; this.t = 0; this.elapsed = 0; this.started = false; this.freed = [];
     this.hero = { x: 70, y: G.yOfPos(startPos) }; this.camX = 70 - heroSX(); this.phase = 'listen'; this.oopsT = 0; this.landT = 0; this.ghost = null; this.queue = null;
-    this.guard = G.makeCreature(4, 0, true); this.parts = new G.Particles(); this.accMidi = null; this.accAt = -1e9; this.hintAfter = (p.mode === 'profi' ? 3 : 2) + (this.boss ? 1 : 0);
+    this.guard = G.makeCreature(4, 0, true); this.parts = new G.Particles(); this.accMidi = null; this.accAt = -1e9; this.hintAfter = level.master ? Infinity : (p.mode === 'profi' ? 3 : 2) + (this.boss ? 1 : 0); // Meisterprüfung: keine Tipps
     app.panel.showMic(true); app.panel.keyboard(this.clef); app.hud.show(level.title, true); this.prompt(true);
   }
   buildTargets() {
@@ -30,14 +30,14 @@ export class JumpScene {
   }
   get target() { return this.targets[this.idx]; }
   prompt(first) {
-    const { app } = this, tg = this.target; this.tries = 0; const isNew = !app.profile.notes[tg.key]; this.t0 = performance.now(); this.fresh = isNew;
+    const { app } = this, tg = this.target; this.tries = 0; const isNew = !app.profile.notes[tg.key] && !this.level.master; this.t0 = performance.now(); this.fresh = isNew; // Meisterprüfung: auch unbekannte Noten ohne Hilfe
     this.hint = isNew; app.panel.setHint(isNew ? midiOf(tg) : null);
     app.panel.task(this.boss ? (app.listening ? `Spiele die Melodie Ton für Ton <b>${INSTR.on}</b>.` : `Spiele die Melodie Ton für Ton – <b>${INSTR.tapPad}</b>.`) : app.listening ? `Spiele die leuchtende Note <b>${INSTR.on}</b>.` : `Tippe die leuchtende Note <b>${INSTR.padWhere}</b>.`);
     { const pos = staffPos(tg, this.clef), from = this.idx > 0 ? staffPos(this.targets[this.idx - 1], this.clef) : 0; app.bubbleSide(pos <= -5 || from <= -5); }
     app.hud.progress(this.idx, this.targets.length);
-    app.hud.extra(app.profile.mode === 'profi' ? `<span id="jTime">0:00</span>${this.combo > 1 ? ` &middot; <b>${this.combo}×</b> Serie` : ''}` : '');
+    app.hud.extra(app.profile.mode === 'profi' || this.level.master ? `<span id="jTime">${fmtTime(this.elapsed)}</span>${this.combo > 1 ? ` &middot; <b>${this.combo}×</b> Serie` : ''}` : '');
     if (isNew) app.bubble(isGuitar() ? `Neu: <b>${nameHtml(tg)}</b> – ${describePos(staffPos(tg, this.clef), this.clef)}. Greife: ${gripText(midiOf(tg))}.` : `Neu: <b>${nameHtml(tg)}</b> – ${describePos(staffPos(tg, this.clef), this.clef)}. Die Taste leuchtet.`, 0);
-    else if (first) app.bubble(this.boss ? `Spiele die Melodie: <b>${this.level.title}</b>` : 'Welcher Ton baut die Brücke?', 4);
+    else if (first) app.bubble(this.level.master ? 'Meisterprüfung: Lies jede Note und spiele sie – ohne Tipps!' : this.boss ? `Spiele die Melodie: <b>${this.level.title}</b>` : 'Welcher Ton baut die Brücke?', 4);
     else app.bubble(null);
     if (first) app.panel.say(app.listening ? 'Ich höre …' : INSTR.pad, app.listening ? 'Ich höre noch nichts.' : '');
   }
@@ -76,7 +76,7 @@ export class JumpScene {
       }
     } else if (this.phase === 'done') {
       this.doneT += dt;
-      if (this.doneT > 1.1 && !this.reported) { this.reported = true; app.finishLevel(this.level, { ratio: this.firstTry / this.targets.length, time: this.elapsed, freed: this.freed,
+      if (this.doneT > 1.1 && !this.reported) { this.reported = true; app.finishLevel(this.level, { ratio: this.firstTry / this.targets.length, n: this.targets.length, time: this.elapsed, freed: this.freed,
         line: `Beim ersten Versuch richtig: <b>${this.firstTry} von ${this.targets.length}</b>` }); }
     }
     this.camX += (this.hero.x - heroSX() - this.camX) * Math.min(1, dt * 6);

@@ -14,6 +14,7 @@ export function mergeProfiles(a, b) {
   const ta = obj(a.train), tb = obj(b.train); out.train = {};
   for (const k of new Set([...Object.keys(ta), ...Object.keys(tb)])) { const x = obj(ta[k]), y = obj(tb[k]), bx = num(y.best) > num(x.best) ? y : x, rx = Array.isArray(x.runs) ? x.runs : [], ry = Array.isArray(y.runs) ? y.runs : [];
     out.train[k] = { ...x, ...y, best: num(bx.best), bestAcc: num(bx.bestAcc), stars: Math.max(num(x.stars), num(y.stars)), runs: ry.length >= rx.length ? ry : rx }; }
+  { const ma = obj(a.master), mb = obj(b.master); if (Object.keys(ma).length || Object.keys(mb).length) { out.master = {}; for (const k of new Set([...Object.keys(ma), ...Object.keys(mb)])) { const x = obj(ma[k]), y = obj(mb[k]); out.master[k] = { crown: Math.max(num(x.crown), num(y.crown)), runs: Math.max(num(x.runs), num(y.runs)) }; } } }
   out.regenBest = Math.max(num(a.regenBest), num(b.regenBest));
   if (Array.isArray(a.skip) || Array.isArray(b.skip)) { const sa = a.skip || [], sb = b.skip || []; out.skip = Array.from({ length: Math.max(sa.length, sb.length) }, (_, i) => Math.max(num(sa[i]), num(sb[i]))); }
   if (Array.isArray(a.skipG) || Array.isArray(b.skipG)) { const sa = a.skipG || [], sb = b.skipG || []; out.skipG = Array.from({ length: Math.max(sa.length, sb.length) }, (_, i) => Math.max(num(sa[i]), num(sb[i]))); }

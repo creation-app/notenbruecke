@@ -1,6 +1,7 @@
 // Einstieg: Spielschleife, Szenenwechsel, Speicher, HUD.
 import { petName, owns } from './pets.js';
 import * as LV from './levels.js';
+import * as MU from './music.js';
 import { load, persist, addPractice, dayKey, importPayload } from './save.js';
 import { CONFIG } from './config.js';
 import { verifyKey, isActive } from './license.js';
@@ -11,7 +12,7 @@ import { N as NN, staffPos as SP } from './music.js';
 import { GameAudio , GAIN_TARGET } from './audio.js';
 import { Panel } from './panel.js';
 import * as G from './gfx.js';
-import { starsFor, LEVELS, totalStars } from './levels.js';
+import { starsFor, LEVELS, totalStars, masterCrown } from './levels.js';
 import { JumpScene } from './jump.js';
 import { RegenScene } from './regen.js';
 import { BauScene } from './bau.js';
@@ -135,11 +136,19 @@ class App {
     const Cls = { jump: JumpScene, boss: JumpScene, regen: RegenScene, bau: BauScene, train: TrainScene }[level.type]; this.scene = new Cls(this, level); this.scene.enter();
   }
   finishLevel(level, res) {
+    if (level.master) return this.finishMaster(level, res);
     const p = this.profile, stars = res.stars != null ? res.stars : starsFor(res.ratio), prev = p.levels[level.id], rec = prev || { stars: 0 };
     const out = { ...res, stars, firstClear: !prev }; rec.stars = Math.max(rec.stars, stars);
     if (res.time != null) { const nb = !rec.time || res.time < rec.time; if (nb) rec.time = Math.round(res.time * 10) / 10; if (p.mode === 'profi') { out.newBest = nb; out.bestTime = rec.time; } }
     if (res.score != null) { out.newBest = !rec.score || res.score > rec.score; rec.score = Math.max(rec.score || 0, res.score); out.bestScore = rec.score; p.regenBest = Math.max(p.regenBest || 0, res.score); }
     p.levels[level.id] = rec; this.$('sndBtn').hidden = false; this.scene.isLevel = false; track('level/' + level.id); this.flush(); this.bubble(null); this.$('hud').hidden = true; S.result(this, level, out);
+  }
+  /** Ende einer Meisterprüfung: Krone ausrechnen, die beste behalten. Zählt nicht zu den Level-Sternen. */
+  finishMaster(level, res) {
+    const p = this.profile, crown = masterCrown(level.type, res), all = p.master = p.master || {}, prev = all[level.id] || { crown: 0, runs: 0 };
+    all[level.id] = { crown: Math.max(prev.crown || 0, crown), runs: (prev.runs || 0) + 1 };
+    this.$('sndBtn').hidden = false; this.scene.isLevel = false; track('meister/' + level.id + '/' + crown); this.flush(); this.bubble(null); this.$('hud').hidden = true;
+    S.masterResult(this, level, { ...res, crown, best: all[level.id].crown, better: crown > (prev.crown || 0) });
   }
   /** Ende einer Trainingsrunde: rechnen, Rekord eintragen, Ergebnis zeigen. */
   finishTraining(level, raw) {
@@ -161,5 +170,9 @@ class App {
     requestAnimationFrame(t => this.loop(t));
   }
 }
-const start = () => { window.__nb = new App(); window.__levels = LEVELS; window.__lv = LV; window.__screens = S; window.__config = CONFIG; window.__train = TU; window.__acc = ACC; window.__setInstr = setInstr; window.__flushStats = flushStats; };
+// Installierbar: Der Service Worker hält die zuletzt geladene Fassung für den Betrieb ohne Netz bereit (nur über https oder lokal).
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) window.addEventListener('load', () => { navigator.serviceWorker.register((window.NB_SHOP ? '../' : './') + 'sw.js').catch(() => {}); });
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); window.__install = e; });
+window.addEventListener('appinstalled', () => { window.__install = null; });
+const start = () => { window.__nb = new App(); window.__levels = LEVELS; window.__lv = LV; window.__mu = MU; window.__screens = S; window.__config = CONFIG; window.__train = TU; window.__acc = ACC; window.__setInstr = setInstr; window.__flushStats = flushStats; };
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(start, start); else start();

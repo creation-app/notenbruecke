@@ -1,11 +1,10 @@
 // Tiere, die man sich verdient: der Pegasus für die geschaffte zweite Welt und fünf wilde Tiere für die Level der letzten Welt.
-import { levelsOf, skipOf, WORLDS } from './levels.js';
+import { levelsOf, WORLDS, worldCleared } from './levels.js';
+export { worldCleared };
 export const PEGASUS = 'pegasus', PEGASUS_WORLD = 1;
 export const WILD = [['schnecke', 'Raketenschnecke'], ['krake', 'Dreiaugen-Krake'], ['eule', 'Disco-Eule'], ['drache', 'Feuerdrache'], ['phoenix', 'Feuervogel']];
 const NAMES = { [PEGASUS]: 'Pegasus', ...Object.fromEntries(WILD) };
 export function petName(id) { return NAMES[id] || null; }
-/** Welt geschafft: jedes Level gespielt – oder die Einstufung hat die ganze Welt übersprungen. */
-export function worldCleared(profile, world) { const ls = levelsOf(world); return ls.length > 0 && ((skipOf(profile)[world] || 0) >= ls.length || ls.every(l => profile.levels[l.id])); }
 /** Das Level der letzten Welt, das dieses wilde Tier freischaltet. */
 export function wildLevel(id) { const i = WILD.findIndex(w => w[0] === id); return i < 0 ? null : levelsOf(WORLDS.length - 1)[i] || null; }
 /** Was der Spielstand gerade hergibt (für das aktuelle Instrument). */
