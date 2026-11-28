@@ -249,9 +249,38 @@ const WILD_ART = {
   drache: ["..........K...K.....", ".........KGK.KGK....", "....KK...KGGKGGK....", "...KTTK.KGGGGGGGK...", "..KTTTTKKGWKGGWKGK..", "..KTTtTTKGWKGGWKGK..", "...KTtTTKGGGGGGGGK..", "....KTTKKGGKGGKGGKOY", ".....KKGGGGGGGGGGKYO", "....KLGGGGGGKKKKKKOY", "...KLGGGCCCCGGK.....", "K..KLGGCCCCCCGGK....", "KGKKLGGCCCCCCGGK....", ".KGGGGGCCCCCCGGK....", "..KKKGGKKKKKGGGK....", "....KKK.....KKK....."],
   phoenix: [".........KK.........", "........KYYK........", "..K....KYOYK....K...", ".KRK...KOROK...KRK..", "KRORK.KKRRRRKK.KRORK", "KROORKRWKRRKWRKROORK", "KRYOORRWKRRKWRROOYRK", ".KRYOORRRYYRRROOYRK.", "..KRYOORROORROOYRK..", "...KRYORRYYRROYRK...", "....KKRRRRRRRRKK....", "......KRRrrRRK......", ".....KOKRRRRKOK.....", "....KYOK.KK.KOYK....", "...KYOK..KK..KOYK...", "...KKK...KK...KKK..."]
 };
+// Tiere aus Eiern (Belohnung der Tagesaufgabe): vom kleinen Küken bis zum riesigen Sternendrachen.
+const EGG_PAL = { ...WILD_PAL, 'y': '#F2B531', 'S': '#D3E2F4', 'L': '#A5D84F', 'A': '#8FD3F4', 'a': '#5BA9D6', 'V': '#5B4BC4', 'v': '#3A2F8F', 'H': '#FFE9A6' };
+const EGG_ART = {
+  kueken: ["........KK....", ".......KyyK...", "......KYYYYK..", ".....KYYYYYYK.", "....KKYYYKYYOK", "...KYYYYYYYYOO", "..KYYYYYYYMYKK", ".KYYyyYYYYYK..", ".KYyyyyYYYYK..", ".KYyyyyYYYYK..", "..KYYYYYYYK...", "...KYYYYYK....", "....KOKKOK...."],
+  schildi: ["..................", "..................", ".....KKKKKK.......", "....KggggggK......", "...KgGGGgGGgKKKK..", "..KgGgGGGGGGgLLLK.", ".KggGGGGGGgGLLLKLK", ".KggGGGgGGGGLLLLLK", "KLKLLLLLLLLLLLLKK.", ".KKLLLLLLLLLLKKK..", "..KLLgggggLLK.....", "...KKKKKKKKK......"],
+  pinguin: ["..............", ".....KKKK.....", "....KbbbbK....", "...KbbWWbbK...", "...KbKWWKbK...", "..KbbWWWWbbK..", "..KbbWOOWbbK..", ".KKbWbObbWbKK.", "KbbbWWWWWWbbbK", ".KbbWWWWWWbbK.", ".KbbWWWWWWbbK.", ".KbbWWWWWWbbK.", "..KbWWWWWWbK..", "...KbWWWWbK...", "....KbWWbK....", "...KOOKKOOK..."],
+  flatterdino: ["........KRKK..............", ".........KRRK.............", ".K........KRKKK.........K.", "KTKKK.....KTRTTK.....KKKTK", ".KTTTKKK.KTKTTKTK.KKKTTTK.", "..KtTTTTKKTTTTTTKKTTTTtK..", "...KtttTTTTTOOTTTTTtttK...", "....KtttttTTTTTTtttttK....", ".....KttttTTCCTTttttK.....", "......KttTTCCCCTTttK......", ".......KtTTCCCCTTtK.......", "........KTTCCCCTTK........", ".........KKTCCTKK.........", "...........KTTK...........", "..........KOKKOK..........", "...........K..K..........."],
+  rex: ["..........................", "..........................", "................KKKKKK....", "...............KGGGGGGK...", "..............KGGGGGGGGK..", "..........K.KKGGGGGWKGGGK.", "........KKgKgKGGGGGGGGGgK.", ".......KgKKGKKGGGGGGGGGGK.", "......KKGGGGGGGGGGGGGGGK..", ".....KgGGGGGGGGGGGWGWGWK..", "....KKGGGGGGGGGGGKKKKKK...", "...KgGGGGLLLLLGGGGKK......", "...KGGGGLLLLLLGGGGGGK.....", "..KGGGGGLLLLLLLGGKKGGK....", "KKGGGGGGLLLLLLLGGK.KK.....", "GGGGGGGGLLLLLLLGK.........", "KKKKKKKKGGGLLGGGK.........", ".......KGGGGKGGGK.........", ".......KGGGKKGGGK.........", ".......KGGGKKGGGK.........", ".......KggggKggggK........", "........KKKK.KKKK........."],
+  wolkenwal: ["....................KWK...........", "...................KWKWK..........", "...................KKWKK..........", ".K................KSKWKSK.........", "KAK...........KKKKKKKKKK..........", ".KAK.......KKKAAAAAAAAAKKK........", ".KAAK....KKAAAAAASSSSSSSAAKK......", "..KAAK..KAASSSSSASSSSSSSAAAAK.....", "..KAAAKKAAASSSSSAAASSSAAAAWAAK....", "...KAAAAAAAAAAAAAAAAAAAAAAKAAAK...", "...KAAAAAAaAAAAAAWWWWWAAAAAAAAK...", "...KAAAAAAAAAWWWWWWWWWWWWWAAAAAK..", "...KAAAAAAAWaWWWWWWWWWWWWWWWKAK...", "...KAAAAAaWWWWWWWWWWWWWKKKKKWAK...", "..KAAAKKAAWWWWWWWWWWWWWWWWWWWK....", "..KAKK..KAAWWWWWaWWWWWWWWWWWK.....", ".KAK.....KKAAWWWaaaaaWWWWWKK......", "KAK........KKKAaaaWWWWAKKK........", ".K...........KaaKKKKKKK...........", "............KaKK.................."],
+  sternendrache: ["....K.....................KYK..KYK......", "...KVKK....................KYK.KYK......", "....KVVKK..................KYYKKYYK.....", ".....KVVVKK................KYYYVYYYK....", "......KPVVVKK..............KVVVVVVVVK...", ".......KPPVVVKKK..........KVVVVVVWKVVK..", "........KPPPVVVVKK........KVVVVVVVVVVK..", "........KYPPPPVVVVKK......KVVVVVVVVVVKOY", "..K..K...KKPPPPPVVYVKK....KVVVVVVVVVVKKO", ".KVKKPK.KK.KPPPYPPVVVVKKK.KVVVVVVVVVVVK.", "..K..KVKPPKKKPPPPPPPPVVVVKVVVKKVVKKKKK..", "......K.KVVPYPPPPPVVVVYKKVVVVK.KK.......", ".........KKKKVPVVVVVVVKKVVVVVK..........", "...........KKVVVVVVVVVVVVVVVK...........", "..........KVVVVVVVVVVVVVVVVVK...........", ".........KVVVVVVYVVVVVVVVVVVK...........", "........KVVVVVVVVVHVYVVVVVKVK...........", ".......KVVVVVVHHHHHHHHHVVVVK............", "......KVVVVVVHHHHHHHHHHYVVK.............", "K....KVVVVVVVHHHHHHHHHHHVVK.............", "YKKKKVVVVVVVVHHHHHHHHHHHVK..............", "KYYYVVVVVKKKKVVVHHHHHVVVK...............", "KYYVVVVKK...KVVVVVHVVVVVK...............", "KYKVVKK.....KVVVKKKKKVVVK...............", "KYKKK.......KVVVK...KVVVK...............", ".K..........KvvvvK..KvvvvK..............", ".............KKKK....KKKK...............", "........................................"]
+};
+/** Ein Ei. tier 0–6 (klein bis riesig), frac 0–1: wie weit es ausgebrütet ist (Risse). */
+const EGG_W = [11, 12, 13, 15, 17, 19, 23], EGG_COL = [['#FFF1D6', '#E8C99A', '#C89B62'], ['#DDF2B5', '#A5D84F', '#467C35'], ['#E6F1FB', '#A9CBEE', '#174B83'], ['#C9F3EC', '#3CC9B5', '#1F8F86'], ['#DDEFB8', '#78B833', '#FFD75E'], ['#D9F0FC', '#8FD3F4', '#FFFFFF'], ['#C9C2F2', '#5B4BC4', '#FFD75E']];
+export function makeEgg(tier = 0, frac = 0, locked = false) {
+  tier = Math.max(0, Math.min(EGG_W.length - 1, tier | 0)); const w = EGG_W[tier], h = Math.round(w * 1.3), c = cv(w + 2, h + 2), x = c.getContext('2d'), [base, shade, spot] = EGG_COL[tier];
+  const cx = (w + 1) / 2, cy = h * 0.56 + 1, ry = h * 0.56, inside = (ax, ay) => { const dy = (ay - cy) / (ay < cy ? ry : h + 1 - cy), rx = (w / 2) * (ay < cy ? 1 - 0.22 * (cy - ay) / ry : 1); return ((ax - cx) / rx) ** 2 + dy ** 2 <= 1; };
+  let seed = 77 + tier * 13; const rnd = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; };
+  for (let ay = 0; ay < h + 2; ay++) for (let ax = 0; ax < w + 2; ax++) {
+    if (inside(ax, ay)) px(x, ax, ay, locked ? '#B4BFCE' : (ax - cx) + (ay - cy) * 0.6 > w * 0.22 ? shade : base);
+    else if (inside(ax - 1, ay) || inside(ax + 1, ay) || inside(ax, ay - 1) || inside(ax, ay + 1)) px(x, ax, ay, locked ? '#7C8AA0' : C.K);
+  }
+  if (!locked) {
+    for (let i = 0; i < 3 + tier; i++) { const sx = Math.round(2 + rnd() * (w - 3)), sy = Math.round(3 + rnd() * (h - 5)); if (inside(sx, sy) && inside(sx + 1, sy) && inside(sx - 1, sy)) { px(x, sx, sy, spot); if (tier > 2) px(x, sx + 1, sy, spot); } }
+    px(x, Math.round(cx - w * 0.2), Math.round(cy - ry * 0.55), '#FFFFFF');
+    const cracks = frac >= 0.999 ? 3 : frac >= 0.6 ? 2 : frac >= 0.3 ? 1 : 0; // je weiter ausgebrütet, desto mehr Risse
+    for (let k = 0; k < cracks; k++) { const y0 = Math.round(cy - ry * 0.25 + k * (h * 0.2)); for (let ax = 1; ax <= w; ax++) { if (k === 1 && ax > w * 0.6) break; if (k === 2 && ax < w * 0.45) continue; const zy = y0 + ((ax + k) % 4 < 2 ? 0 : 1); if (inside(ax, zy) && inside(ax - 1, zy) && inside(ax + 1, zy)) px(x, ax, zy, C.K); } }
+  }
+  return c;
+}
 /** Bilder eines Tiers (Pegasus: zwei für den Flügelschlag, sonst eins). locked: nur der Umriss. */
 export function makePet(id, locked = false) {
-  if (!WILD_ART[id]) return makePegasus(locked);
-  const rows = WILD_ART[id], c = cv(rows[0].length, rows.length), x = c.getContext('2d');
-  rows.forEach((r, y) => { for (let i = 0; i < r.length; i++) if (r[i] !== '.') px(x, i, y, locked ? (r[i] === 'K' ? '#7C8AA0' : '#B4BFCE') : WILD_PAL[r[i]]); }); return [c];
+  const rows = WILD_ART[id] || EGG_ART[id]; if (!rows) return makePegasus(locked);
+  const c = cv(rows[0].length, rows.length), x = c.getContext('2d');
+  rows.forEach((r, y) => { for (let i = 0; i < r.length; i++) if (r[i] !== '.') px(x, i, y, locked ? (r[i] === 'K' ? '#7C8AA0' : '#B4BFCE') : EGG_PAL[r[i]]); }); return [c];
 }

@@ -1,6 +1,7 @@
 // Einstieg: Spielschleife, Szenenwechsel, Speicher, HUD.
 import { petName, owns } from './pets.js';
 import * as LV from './levels.js';
+import * as DU from './dailyui.js';
 import * as MU from './music.js';
 import { load, persist, addPractice, dayKey, importPayload } from './save.js';
 import { CONFIG } from './config.js';
@@ -88,7 +89,7 @@ class App {
   drawBuddy(ctx, o, tx, ty, t, hop = 0) { const bb = this.buddy; if (!bb) return; const b = Array.isArray(bb) ? bb[((Math.floor((t || 0) * 5) % bb.length) + bb.length) % bb.length] : bb; /* Tiere schlagen mit den Flügeln */ if (o.bx === undefined || Math.abs(o.bx - tx) > 140) { o.bx = tx; o.by = ty; o.bt = t; }
     const dt = Math.min(0.1, Math.max(0, t - o.bt)), k = 1 - Math.exp(-dt * 5); o.bt = t; o.bx += (tx - o.bx) * k; o.by += (ty - o.by) * k;
     const y = o.by + Math.sin(t * 3) * 2 - hop; if (this.buddySure && Math.floor(t * 6) % 3 === 0) { ctx.fillStyle = '#FFF1D6'; ctx.fillRect(G.q(o.bx - 11 + (Math.floor(t * 6) % 5)), G.q(y + 4 - (Math.floor(t * 4) % 7)), 1, 1); }
-    ctx.drawImage(b, G.q(o.bx - b.width / 2), G.q(y + 8 - b.height)); }
+    ctx.drawImage(b, Math.max(1, G.q(o.bx - b.width / 2)), Math.max(1, G.q(y + 8 - b.height))); } /* große Tiere bleiben im Bild */
   /** Figur (mit Hut) und Begleiter (mit Stufe) neu zeichnen – nach Profilwechsel und immer, wenn die Karte erscheint. */
   refreshLook() { const p = this.profile; this.heroFrames = G.makeHero(p ? p.hero : 0, p ? G.hatOf(p, totalStars(p)) : 0); this.buddy = null; this.buddySure = false;
     if (p && petName(p.buddy)) { if (owns(p, p.buddy)) { this.buddy = G.makePet(p.buddy); this.buddySure = true; } }
@@ -152,6 +153,7 @@ class App {
   }
   /** Ende einer Trainingsrunde: rechnen, Rekord eintragen, Ergebnis zeigen. */
   finishTraining(level, raw) {
+    if (level.daily) { this.$('sndBtn').hidden = false; this.scene.isLevel = false; this.flush(); this.bubble(null); this.$('hud').hidden = true; return DU.dailyDone(this, level, raw); }
     const p = this.profile, rec = T.record(p, level.cfg, raw); this.$('sndBtn').hidden = false; this.scene.isLevel = false; track('training/' + (rec.disc || 'wackelnoten')); this.flush(); this.bubble(null); this.$('hud').hidden = true;
     TU.trainResult(this, level, { ...raw, ...rec });
   }

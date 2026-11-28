@@ -290,3 +290,24 @@ test('Meisterprüfungen: Kronen-Regeln, Level-Liste, Zusammenführen', async () 
   L.setLevelSet('klavier');
   const m = mergeProfiles({ master: { x: { crown: 3, runs: 2 }, y: { crown: 1, runs: 1 } } }, { master: { x: { crown: 2, runs: 5 }, z: { crown: 2, runs: 1 } } }); assert.deepEqual(m.master, { x: { crown: 3, runs: 5 }, y: { crown: 1, runs: 1 }, z: { crown: 2, runs: 1 } }); assert.equal(mergeProfiles({}, {}).master, undefined);
 });
+test('Tagesaufgabe und Eier: einmal pro Tag, kleine Eier zuerst, nichts geht verloren', async () => {
+  const D = await import('../src/daily.js'), P = await import('../src/pets.js'), L = await import('../src/levels.js'), { mergeProfiles } = await import('../src/merge.js'); L.setLevelSet('klavier');
+  assert.deepEqual(P.EGGS.map(e => e.days), [2, 3, 4, 6, 8, 10, 14], 'Eier brauchen immer länger'); assert.equal(new Set(P.EGGS.map(e => e.pet)).size, 7); for (const e of P.EGGS) assert.equal(P.petName(e.pet), e.name);
+  const p = V.newProfile('E'), day = i => { const d = new Date(2026, 10, 1, 12); d.setDate(d.getDate() + i); return V.dayKey(d); };
+  assert.deepEqual(D.dailyState(p), { last: '', egg: 0, warm: 0, total: 0 }); assert.equal(D.dailyOpen(p), false); p.levels.h1 = p.levels.h2 = { stars: 1 }; assert.equal(D.dailyOpen(p), false); p.levels.h3 = { stars: 1 }; assert.equal(D.dailyOpen(p), true);
+  { const q = V.newProfile('S'); q.skip = [9, 0, 0, 0]; assert.equal(D.dailyOpen(q), true, 'Einstufung öffnet die Tagesaufgabe'); const u = V.newProfile('U'); u.unlockAll = true; assert.equal(D.dailyOpen(u), true); }
+  assert.deepEqual(D.nest(p), { tier: 0, days: 2, warm: 0, left: 2, pet: 'kueken', name: 'Piepmatz' });
+  let r = D.completeDaily(p, day(0)); assert.ok(r.counted && !r.hatched && r.warm === 1 && r.nest.left === 1); assert.equal(D.doneToday(p, day(0)), true); assert.equal(D.doneToday(p, day(1)), false);
+  r = D.completeDaily(p, day(0)); assert.ok(!r.counted && !r.hatched && D.dailyState(p).warm === 1 && D.dailyState(p).total === 1, 'zweimal am selben Tag zählt nur einmal');
+  r = D.completeDaily(p, day(5)); assert.ok(r.counted && r.hatched === 'kueken' && r.egg === 1 && r.warm === 0, 'Pause dazwischen: das Ei bleibt warm und schlüpft'); assert.deepEqual(p.pets, ['kueken']); assert.ok(P.owns(p, 'kueken')); assert.equal(D.nest(p).name, 'Schildi');
+  const hatched = ['kueken']; let d = 6; while (D.nest(p)) { r = D.completeDaily(p, day(d++)); if (r.hatched) hatched.push(r.hatched); assert.ok(d < 80); }
+  assert.deepEqual(hatched, P.EGGS.map(e => e.pet)); assert.equal(D.dailyState(p).total, 47, '47 Tagesaufgaben bis zum Sternendrachen'); assert.deepEqual(P.ownedPets(p).filter(x => P.EGGS.some(e => e.pet === x)), P.EGGS.map(e => e.pet));
+  r = D.completeDaily(p, day(d)); assert.ok(r.counted && !r.hatched && r.nest === null && D.dailyState(p).total === 48, 'nach dem letzten Ei geht die Tagesaufgabe weiter');
+  // Noten der Tagesaufgabe
+  const fresh = V.newProfile('F'), fp = D.dailyPool(fresh); assert.ok(fp.length >= 5 && fp.every(e => e.clef === 'treble' && L.ALL_NOTES[0].includes(e.key)), 'ohne Vorwissen: Noten der ersten Welt');
+  const tr = V.newProfile('T'); ['c1', 'd1', 'e1', 'f1', 'g1', 'a1'].forEach(k => { tr.notes[k] = { box: 1, seen: 3 }; }); const tp = D.dailyPool(tr); assert.deepEqual([...new Set(tp.map(e => e.key))].sort(), ['a1', 'c1', 'd1', 'e1', 'f1', 'g1']); assert.ok(tp.every(e => e.clef === 'treble'), 'nur Violinschlüssel, solange der Bass unbekannt ist');
+  ['c', 'H', 'A'].forEach(k => { tr.notes[k] = { box: 0, seen: 2 }; }); const bp = D.dailyPool(tr); assert.ok(bp.some(e => e.clef === 'bass' && e.key === 'A') && bp.some(e => e.clef === 'treble' && e.key === 'g1') && !bp.some(e => e.key === 'h1'), 'mit Bass-Noten: beide Schlüssel, nur Bekanntes');
+  L.setLevelSet('gitarre'); const gp = D.dailyPool(V.newProfile('G')); assert.ok(gp.length >= 5 && gp.every(e => L.ALL_NOTES[0].includes(e.key)), 'Gitarre: Noten der hohen Saiten'); L.setLevelSet('klavier');
+  // Zusammenführen: der weitere Stand gewinnt
+  assert.deepEqual(mergeProfiles({ daily: { egg: 2, warm: 1, total: 6, last: '2026-11-10' } }, { daily: { egg: 1, warm: 2, total: 9, last: '2026-11-12' } }).daily, { egg: 2, warm: 1, total: 9, last: '2026-11-12' }); assert.deepEqual(mergeProfiles({ daily: { egg: 1, warm: 1, total: 2, last: 'a' } }, { daily: { egg: 1, warm: 2, total: 3, last: 'b' } }).daily, { egg: 1, warm: 2, total: 3, last: 'b' }); assert.equal(mergeProfiles({}, {}).daily, undefined);
+});

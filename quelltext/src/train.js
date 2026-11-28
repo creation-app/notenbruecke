@@ -11,7 +11,7 @@ const ORDER = ['c', 'cis', 'des', 'd', 'dis', 'es', 'e', 'f', 'fis', 'ges', 'g',
 export class TrainScene {
   constructor(app, level) { this.app = app; this.level = level; this.cfg = level.cfg; this.isLevel = true; }
   enter() {
-    const { app, cfg, level } = this; this.pool = pool(cfg, app.profile); this.theme = level.theme; this.bg = app.background(level.theme); this.line = G.THEMES[level.theme].line;
+    const { app, cfg, level } = this; this.pool = level.pool || pool(cfg, app.profile); this.theme = level.theme; this.bg = app.background(level.theme); this.line = G.THEMES[level.theme].line;
     app.bubbleSide(this.pool.some(e => staffPos(N(e.key), e.clef) <= -5));
     this.t = 0; this.count = COUNTDOWN; this.elapsed = 0; this.done = false; this.correct = 0; this.first = 0; this.tried = 0; this.times = []; this.freed = []; this.parts = new G.Particles();
     this.slide = 1; this.hop = 0; this.shake = 0; this.accMidi = null; this.accAt = -1e9; this.cur = null; this.next = this.pick(null); this.kbClef = null;
