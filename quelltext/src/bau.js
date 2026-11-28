@@ -3,26 +3,28 @@ import { stemUp, N, note, midiOf, staffPos, nameHtml, nameStr, letterIdx, LETTER
 import { pickNext, update as srsUpdate, newStat, SLOW_WRITE_MS } from './srs.js';
 import * as G from './gfx.js';
 import { label, noteLabel } from './text.js';
+import { ENDLESS_LIVES, timeLimit, endlessHud } from './endless.js';
 
 export class BauScene {
   constructor(app, level) { this.app = app; this.level = level; this.isLevel = true; }
   enter() {
     const { app, level } = this; this.clef = level.clef; this.theme = level.theme; this.bg = app.background(level.theme); this.line = G.THEMES[level.theme].line;
     const ps = level.notes.map(k => staffPos(N(k), this.clef)); const g = this.clef === 'grand'; this.minPos = Math.max(g ? -8 : Math.min(-4, Math.min(...ps) - 1), Math.min(...ps) - 2); this.maxPos = Math.min(g ? 16 : 12, Math.max(...ps) + 2);
+    this.endless = !!level.endless; this.lives = ENDLESS_LIVES; this.over = false; this.taskMax = this.taskLeft = 0;
     this.tasks = this.buildTasks(); this.ti = 0; this.firstTry = 0; this.t = 0; this.parts = new G.Particles(); this.freed = [];
     app.panel.showMic(false); app.panel.bau(!!level.accidentals, { move: d => this.move(d), acc: a => this.setAcc(this.alt === a ? 0 : a), place: () => this.place() });
     app.hud.show(level.title, true); app.panel.task('Schiebe die Note mit <b>▲ ▼</b> an die richtige Stelle und tippe <b>Setzen</b>.'); this.startTask();
   }
   buildTasks() {
     const { level } = this, stats = this.app.profile.notes, out = []; let last = null; const words = (level.words || []).slice().sort(() => Math.random() - 0.5).slice(0, 3);
-    const singles = (level.master ? level.len : 8) - words.length; for (let i = 0; i < singles; i++) { last = pickNext(level.notes, stats, Math.random, last); out.push({ notes: [N(last)], word: null }); }
+    const singles = (level.master || level.endless ? level.len : 8) - words.length; for (let i = 0; i < singles; i++) { last = pickNext(level.notes, stats, Math.random, last); out.push({ notes: [N(last)], word: null }); }
     words.forEach((w, i) => out.splice(2 + i * 2, 0, { word: w, notes: null }));
     return out;
   }
   startTask() {
     const tk = this.tasks[this.ti], { app } = this; this.slot = 0; this.placed = []; this.pos = Math.max(this.minPos, Math.min(this.maxPos, 4)); this.alt = 0; this.tries = 0; this.t0 = performance.now(); this.taskClean = true; this.wrongT = 0; this.msg = null; app.panel.setAcc(0);
     this.n = tk.word ? tk.word.length : 1; this.xs = Array.from({ length: this.n }, (_, i) => G.VIEW_W / 2 + 16 + (i - (this.n - 1) / 2) * 40);
-    app.hud.progress(this.ti, this.tasks.length);
+    app.hud.progress(this.endless ? 0 : this.ti, this.endless ? 0 : this.tasks.length); if (this.endless) { this.taskMax = this.taskLeft = timeLimit('bau', this.ti); app.hud.extra(endlessHud(this.lives, this.ti, 'eBar')); }
     app.bubble(tk.word ? `Schreibe das Wort <b>${tk.word}</b> – Note für Note.` : `Setze die Note <b>${nameHtml(tk.notes[0])}</b> ins System.`, 0);
   }
   move(d) { this.pos = Math.max(this.minPos, Math.min(this.maxPos, this.pos + d)); this.msg = null; }
@@ -39,12 +41,20 @@ export class BauScene {
       if (this.slot >= this.n) { if (this.taskClean) this.firstTry++; this.locked = true; app.bubble('Richtig!', 1);
         setTimeout(() => { this.locked = false; this.ti++; if (this.ti >= this.tasks.length) { app.audio.sfx('done'); app.finishLevel(this.level, { ratio: this.firstTry / this.tasks.length, n: this.tasks.length, time: this.t, freed: this.freed, line: `Beim ersten Versuch richtig: <b>${this.firstTry} von ${this.tasks.length}</b>` }); } else this.startTask(); }, 900); }
     } else {
-      this.tries++; this.taskClean = false; this.wrongT = 0.5; const want = tk.word ? tk.word[this.slot].toLowerCase() : null;
+      this.tries++; this.taskClean = false; this.wrongT = 0.5; if (this.endless) this.loseLife(); const want = tk.word ? tk.word[this.slot].toLowerCase() : null;
       if (!tk.word) { const ck = `${tk.notes[0].key}>${cand.key}`; p.conf[ck] = (p.conf[ck] || 0) + 1; p.notes[tk.notes[0].key] = srsUpdate(p.notes[tk.notes[0].key] || newStat(), false); }
-      app.bubble(`Das ist <b>${nameHtml(cand)}</b> (${describePos(this.pos, this.clef)}). Gesucht ist <b>${tk.word ? want : nameHtml(tk.notes[0])}</b>.`, 0);
+      if (!this.over) app.bubble(`Das ist <b>${nameHtml(cand)}</b> (${describePos(this.pos, this.clef)}). Gesucht ist <b>${tk.word ? want : nameHtml(tk.notes[0])}</b>.`, 0);
     }
   }
-  update(dt) { this.t += dt; this.parts.update(dt); if (this.wrongT > 0) this.wrongT -= dt; }
+  /** Endlos: ein Leben weniger; beim letzten ist Schluss. */
+  loseLife() {
+    if (this.over) return; this.lives--; this.app.hud.extra(endlessHud(this.lives, this.ti, 'eBar')); this.taskLeft = this.taskMax;
+    if (this.lives <= 0) { this.over = true; this.locked = true; this.app.audio.sfx('done'); setTimeout(() => { this.app.bubble(null); this.app.finishLevel(this.level, { score: this.ti, freed: this.freed }); }, 1200); }
+  }
+  update(dt) {
+    this.t += dt; this.parts.update(dt); if (this.wrongT > 0) this.wrongT -= dt;
+    if (this.endless && !this.locked && !this.over) { this.taskLeft -= dt; const bar = document.getElementById('eBar'); if (bar) bar.style.width = Math.max(0, 100 * this.taskLeft / this.taskMax) + '%'; if (this.taskLeft <= 0) { this.app.audio.sfx('oops'); this.app.bubble('Zu langsam! Die Zeit für diese Note ist um.', 2); this.loseLife(); } }
+  }
   draw(ctx, tx) {
     const line = this.line, tk = this.tasks[Math.min(this.ti, this.tasks.length - 1)]; G.drawBackground(ctx, this.bg, this.t * 3, this.t); G.drawStaff(ctx, line, 4, G.VIEW_W - 4, this.clef); G.drawClef(ctx, this.clef, 6, line);
     const dark = this.theme === 'himmel' ? G.C.K : G.C.CREAM;
@@ -52,7 +62,7 @@ export class BauScene {
       if (i < this.placed.length) { const n = this.placed[i], pos = staffPos(n, this.clef); G.drawLedgers(ctx, x - 9, 19, ledgerPositions(pos, this.clef), line); G.drawNote(ctx, x, G.yOfPos(pos), { style: 'ok', up: stemUp(pos, this.clef), alt: n.alt, line: G.C.K }); }
       else if (i === this.slot && !this.locked) { const sx = x + (this.wrongT > 0 ? Math.round(Math.sin(this.wrongT * 50) * 2) : 0), y = G.yOfPos(this.pos);
         G.drawLedgers(ctx, x - 9, 19, ledgerPositions(this.pos, this.clef), line); G.drawGlow(ctx, sx, y, 0.55 + 0.25 * Math.sin(this.t * 5)); G.drawNote(ctx, sx, y, { style: 'gold', halo: '#FFF1D6', up: stemUp(this.pos, this.clef), alt: this.alt, line: G.C.K });
-        if (this.tries >= 2 && !tk.word) { const tp = staffPos(tk.notes[0], this.clef); ctx.globalAlpha = 0.45; G.drawNote(ctx, x, G.yOfPos(tp), { style: 'ghost', stem: false, line: G.C.G2 }); ctx.globalAlpha = 1; } }
+        if (this.tries >= 2 && !tk.word && !this.endless) { const tp = staffPos(tk.notes[0], this.clef); ctx.globalAlpha = 0.45; G.drawNote(ctx, x, G.yOfPos(tp), { style: 'ghost', stem: false, line: G.C.G2 }); ctx.globalAlpha = 1; } }
       if (tk.word) label(tx, tk.word[i], x, 126, { size: 30, color: i < this.placed.length ? '#B4EB6B' : '#FFFFFF', stroke: G.C.K }); }
     this.app.drawBuddy(ctx, this, 18, 38, this.t, Math.abs(Math.sin(this.t * 4)) * 2); this.parts.draw(ctx);
   }

@@ -2,6 +2,8 @@
 import { petName, owns } from './pets.js';
 import * as LV from './levels.js';
 import * as DU from './dailyui.js';
+import * as EU from './endlessui.js';
+import { recordEndless } from './endless.js';
 import * as MU from './music.js';
 import { load, persist, addPractice, dayKey, importPayload } from './save.js';
 import { CONFIG } from './config.js';
@@ -138,6 +140,7 @@ class App {
   }
   finishLevel(level, res) {
     if (level.master) return this.finishMaster(level, res);
+    if (level.endless) { const r = recordEndless(this.profile, level.type, res.score); this.$('sndBtn').hidden = false; this.scene.isLevel = false; track('endlos/' + level.type); this.flush(); this.bubble(null); this.$('hud').hidden = true; return EU.endlessResult(this, level, { ...r, freed: res.freed || [] }); }
     const p = this.profile, stars = res.stars != null ? res.stars : starsFor(res.ratio), prev = p.levels[level.id], rec = prev || { stars: 0 };
     const out = { ...res, stars, firstClear: !prev }; rec.stars = Math.max(rec.stars, stars);
     if (res.time != null) { const nb = !rec.time || res.time < rec.time; if (nb) rec.time = Math.round(res.time * 10) / 10; if (p.mode === 'profi') { out.newBest = nb; out.bestTime = rec.time; } }

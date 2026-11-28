@@ -153,12 +153,12 @@ textarea{width:100%;font:16px/1.3 ui-monospace,monospace;border:4px solid var(--
 .tick{position:absolute;right:4px;top:4px;width:14px;height:14px;background:var(--g1);border:2px solid var(--k)}
 .collwrap{display:flex;gap:20px;align-items:flex-start}.coll{flex:1}.crgrid{display:flex;flex-wrap:wrap;gap:8px}
 .crdetail{width:300px;flex:none;background:#fff;border:4px solid var(--k);padding:14px;text-align:center;position:sticky;top:0}
-.staffpic{width:280px;height:320px;background:var(--cream);border:2px solid var(--k)}.crdetail .staffpic{width:210px;height:240px}
+.staffpic{width:280px;height:320px;background:var(--cream);border:2px solid var(--k);object-fit:contain}.crdetail .staffpic{width:210px;height:240px}
 .bar{display:inline-block;vertical-align:middle;width:140px;height:16px;background:#C9B79C;border:2px solid var(--k)}.bar i{display:block;height:100%;background:var(--g1)}
 .passgrid,.setgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .card{background:#fff;border:4px solid var(--k);padding:12px 16px}.card h3{margin-top:2px}
 .bigno{font-family:"Press Start 2P",monospace;font-size:40px;margin:4px 0}.bigno small{font-family:"Atkinson Hyperlegible",sans-serif;font-size:22px;font-weight:700}
-.nw{white-space:nowrap}.dailybar{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#FFF7DD;border:4px solid var(--k);box-shadow:4px 4px 0 var(--k);padding:8px 12px;margin:12px 0 2px;font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}.dailybar *{pointer-events:none}.dailybar.done{background:#E7F5D0}.dailybar:disabled{background:#F1ECE0;cursor:default}.dailybar:disabled .eggpic{opacity:.5}.dailybar .dtxt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.dailybar b{font-size:21px}.dailybar small{font-size:16px;line-height:1.2}.cta{font-style:normal;font-weight:700;background:var(--ye);border:3px solid var(--k);padding:6px 14px;font-size:19px;white-space:nowrap}.cta.ok{background:var(--g1,#78B833);color:#fff}.eggpic{display:inline-flex;flex:none}.eggdots{display:flex;gap:4px;flex-wrap:wrap;max-width:132px;justify-content:center}.eggdots i{width:13px;height:13px;border:2px solid var(--k);background:#fff}.eggdots i.on{background:#FF9A3D}.nest{display:flex;gap:18px;align-items:center;margin:8px 0 12px;flex-wrap:wrap}.nest>div{flex:1;min-width:220px}.nest .eggdots{justify-content:flex-start;max-width:none;margin:6px 0}.petcard .eggdots{max-width:260px}@keyframes wiggle{0%,100%{transform:rotate(0)}20%{transform:rotate(-9deg)}40%{transform:rotate(9deg)}60%{transform:rotate(-6deg)}80%{transform:rotate(6deg)}}.eggpic.wiggle canvas{animation:wiggle .45s ease-in-out infinite;transform-origin:50% 90%}@keyframes eggwarm{0%{transform:scale(.9)}60%{transform:scale(1.08)}100%{transform:scale(1)}}.eggpic.warm canvas{animation:eggwarm .6s ease-out}.hatchpet canvas{animation:eggwarm .7s ease-out}.crown{display:inline-block;width:34px;height:24px;vertical-align:-4px;background:#D9CDB4;clip-path:polygon(0 100%,0 18%,24% 56%,50% 0,76% 56%,100% 18%,100% 100%);flex:none}.crown.c1{background:#C8813A}.crown.c2{background:#AEBBCB}.crown.c3{background:#FFC83D}.crown.mini{width:22px;height:16px;vertical-align:-2px}.crown.huge{width:150px;height:104px;margin:6px 0}.mq2{margin-top:16px}.mq2.first{margin-top:10px}.mq2 small{display:block;font-family:inherit;font-size:17px;font-weight:400;letter-spacing:0;text-transform:none;margin-top:4px}.nodes.masters{grid-template-columns:repeat(3,minmax(0,1fr))}.node.master{border-color:#8A6412;box-shadow:4px 4px 0 #8A6412;background:#FFF7DD;min-height:92px}.node.master:disabled{border-color:var(--k);box-shadow:4px 4px 0 var(--k);background:#fff}.pill.kr{background:#8A6412;color:#fff}.cal{display:grid;grid-template-columns:repeat(7,26px);gap:5px;margin:8px 0 4px}.cal i{width:26px;height:26px;background:#E3D5B8}.cal .l1{background:#B9DE7A}.cal .l2{background:var(--g1)}.cal .l3{background:var(--g2)}
+.nw{white-space:nowrap}.bars{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0 2px}.bars .dailybar{margin:0}#stage.port .bars{grid-template-columns:1fr;gap:8px}#stage.port.phone .dailybar{padding:5px 10px;gap:10px;min-height:70px}#stage.port.phone .dailybar small{display:none}#stage.port.phone .dailybar:disabled small{display:block}#stage.port.phone .dailybar .eggpic canvas{height:34px !important;width:auto !important}#stage.port.phone .inf{font-size:20px;width:34px}.endbar{background:#E6ECFB}.inf{font-family:"Press Start 2P",monospace;font-size:26px;width:44px;text-align:center;flex:none;color:#3A2F8F}.endgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:12px 0}#stage.port .endgrid{grid-template-columns:1fr}.btn.end{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;min-height:120px;border-left-width:14px}.btn.end.t-jump{border-left-color:var(--g1)}.btn.end.t-regen{border-left-color:#2998E8}.btn.end.t-bau{border-left-color:#FF9A3D}.btn.end b{font-size:24px}.btn.end .rec{margin-top:auto;font-size:18px}.hearts{letter-spacing:2px;white-space:nowrap}.hearts i{font-style:normal;color:#5A6478;opacity:.45}.hearts i.on{color:#EF5350;opacity:1}.tbar{display:inline-block;width:86px;height:10px;border:2px solid currentColor;vertical-align:1px;margin-left:6px}.tbar i{display:block;height:100%;width:100%;background:#FFD75E}.dailybar{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#FFF7DD;border:4px solid var(--k);box-shadow:4px 4px 0 var(--k);padding:8px 12px;margin:12px 0 2px;font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}.dailybar *{pointer-events:none}.dailybar.done{background:#E7F5D0}.dailybar:disabled{background:#F1ECE0;cursor:default}.dailybar:disabled .eggpic{opacity:.5}.dailybar .dtxt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.dailybar b{font-size:21px}.dailybar small{font-size:16px;line-height:1.2}.cta{font-style:normal;font-weight:700;background:var(--ye);border:3px solid var(--k);padding:6px 14px;font-size:19px;white-space:nowrap}.cta.ok{background:var(--g1,#78B833);color:#fff}.eggpic{display:inline-flex;flex:none}.eggdots{display:flex;gap:4px;flex-wrap:wrap;max-width:132px;justify-content:center}.eggdots i{width:13px;height:13px;border:2px solid var(--k);background:#fff}.eggdots i.on{background:#FF9A3D}.nest{display:flex;gap:18px;align-items:center;margin:8px 0 12px;flex-wrap:wrap}.nest>div{flex:1;min-width:220px}.nest .eggdots{justify-content:flex-start;max-width:none;margin:6px 0}.petcard .eggdots{max-width:260px}@keyframes wiggle{0%,100%{transform:rotate(0)}20%{transform:rotate(-9deg)}40%{transform:rotate(9deg)}60%{transform:rotate(-6deg)}80%{transform:rotate(6deg)}}.eggpic.wiggle canvas{animation:wiggle .45s ease-in-out infinite;transform-origin:50% 90%}@keyframes eggwarm{0%{transform:scale(.9)}60%{transform:scale(1.08)}100%{transform:scale(1)}}.eggpic.warm canvas{animation:eggwarm .6s ease-out}.hatchpet canvas{animation:eggwarm .7s ease-out}.crown{display:inline-block;width:34px;height:24px;vertical-align:-4px;background:#D9CDB4;clip-path:polygon(0 100%,0 18%,24% 56%,50% 0,76% 56%,100% 18%,100% 100%);flex:none}.crown.c1{background:#C8813A}.crown.c2{background:#AEBBCB}.crown.c3{background:#FFC83D}.crown.mini{width:22px;height:16px;vertical-align:-2px}.crown.huge{width:150px;height:104px;margin:6px 0}.mq2{margin-top:16px}.mq2.first{margin-top:10px}.mq2 small{display:block;font-family:inherit;font-size:17px;font-weight:400;letter-spacing:0;text-transform:none;margin-top:4px}.nodes.masters{grid-template-columns:repeat(3,minmax(0,1fr))}.node.master{border-color:#8A6412;box-shadow:4px 4px 0 #8A6412;background:#FFF7DD;min-height:92px}.node.master:disabled{border-color:var(--k);box-shadow:4px 4px 0 var(--k);background:#fff}.pill.kr{background:#8A6412;color:#fff}.cal{display:grid;grid-template-columns:repeat(7,26px);gap:5px;margin:8px 0 4px}.cal i{width:26px;height:26px;background:#E3D5B8}.cal .l1{background:#B9DE7A}.cal .l2{background:var(--g1)}.cal .l3{background:var(--g2)}
 .tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.tag{background:var(--k);color:var(--cream);padding:3px 10px;font-weight:700}
 .board{width:100%;border-collapse:collapse;font-size:22px;background:#fff}.board th,.board td{border:3px solid var(--k);padding:8px 12px;text-align:left}.board th{background:var(--k);color:var(--cream)}.board .me{background:#FFE9A8;font-weight:700}
 .shortcode{font-family:"Press Start 2P",monospace;font-size:26px;letter-spacing:1px;background:#F3E3C3;padding:12px 8px;text-align:center;user-select:text;-webkit-user-select:text;margin:6px 0}
@@ -200,7 +200,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
 #stage.port .nodes{grid-template-columns:repeat(3,minmax(0,1fr))}#stage.port.phone .nodes{grid-template-columns:repeat(2,minmax(0,1fr))}
 #stage.port .mapnav{grid-template-columns:repeat(3,minmax(0,1fr))}#stage.port.phone .mapnav{gap:8px}#stage.port.phone .mapnav .btn{padding:6px 8px;font-size:18px;min-height:58px}#stage.port.phone .mapnav small{font-size:13px}
 #stage.port .segrow.c4{grid-template-columns:1fr 1fr}#stage.port .passgrid,#stage.port .setgrid{grid-template-columns:minmax(0,1fr)}#stage.port .card.span2{grid-column:auto}
-#stage.port .collwrap{flex-direction:column-reverse}#stage.port .crdetail{width:auto;align-self:stretch}#stage.phone .crdetail,#stage.port .crdetail{position:static}#stage.port .place{flex-direction:column;gap:8px}#stage.port .place p{min-width:0}#stage.port .heroes{flex-wrap:wrap}
+#stage.port .collwrap{flex-direction:column-reverse}#stage.port .crdetail{width:auto;align-self:stretch}#stage.phone .crdetail,#stage.port .crdetail{position:static}#stage.port .place{flex-direction:column;gap:8px}#stage.port .place p{min-width:0}#stage.phone:not(.port) .place{margin:2px 0 8px}#stage.phone:not(.port) .place .staffpic{width:158px;height:180px}#stage.phone:not(.port) #screen .answers.small .btn.ans{min-height:62px;font-size:30px}#stage.port.phone .place{flex-direction:row;align-items:flex-start;gap:12px;margin:4px 0 8px}#stage.port.phone .place .staffpic{width:168px;height:192px;flex:none}#stage.port.phone .place .muted{font-size:15px;line-height:1.25;margin:4px 0 0}#stage.port.phone .place .note{margin:6px 0}#stage.port #screen .answers.small{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;width:100%}#stage.port #screen .answers.small .btn.ans{min-width:0;width:auto;min-height:66px;font-size:30px;padding:0}#stage.port .heroes{flex-wrap:wrap}
 #stage.port .board{display:block;overflow-x:auto;font-size:18px}#stage.port .board th,#stage.port .board td{padding:6px 8px}#stage.port .trow{flex-wrap:wrap}
 #stage.port .trnums .bigno{font-size:46px}#stage.port .trstars{flex-wrap:wrap}
 </style>
@@ -2669,6 +2669,16 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         out.daily = { egg: num(ahead.egg), warm: num(ahead.warm), total: Math.max(num(da2.total), num(db2.total)), last: la2 > lb2 ? la2 : lb2 };
       }
     }
+    {
+      const ea = obj(a.endless), eb = obj(b.endless);
+      if (Object.keys(ea).length || Object.keys(eb).length) {
+        out.endless = {};
+        for (const k of /* @__PURE__ */ new Set([...Object.keys(ea), ...Object.keys(eb)])) {
+          const x = obj(ea[k]), y = obj(eb[k]);
+          out.endless[k] = { best: Math.max(num(x.best), num(y.best)), runs: Math.max(num(x.runs), num(y.runs)) };
+        }
+      }
+    }
     out.regenBest = Math.max(num(a.regenBest), num(b.regenBest));
     if (Array.isArray(a.skip) || Array.isArray(b.skip)) {
       const sa = a.skip || [], sb = b.skip || [];
@@ -3098,6 +3108,90 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       init_music();
       init_pets();
       DAILY_MIN_LEVELS = 3;
+    }
+  });
+
+  // src/endless.js
+  function endlessKey(type) {
+    return (LEVEL_SET === "gitarre" ? "g-" : "") + type;
+  }
+  function endlessBest(profile, type) {
+    const e = (profile.endless || {})[endlessKey(type)];
+    return e ? e.best || 0 : 0;
+  }
+  function endlessTop(profile) {
+    return Math.max(0, ...Object.values(profile.endless || {}).map((e) => e && e.best || 0));
+  }
+  function timeLimit(type, done) {
+    return type === "bau" ? Math.max(5, 12 - 0.15 * done) : Math.max(3.5, 9 - 0.12 * done);
+  }
+  function endlessLevel(profile, type) {
+    const pool2 = dailyPool(profile), notes = [...new Set(pool2.map((e) => e.key))], grand = pool2.some((e) => e.clef === "bass");
+    return { id: "endlos-" + type, type, endless: true, title: ENDLESS_TITLE[type], notes, fresh: [], len: type === "bau" ? 300 : 400, clef: grand ? "grand" : "treble", theme: "abend", accidentals: notes.some((k) => N(k).alt !== 0) };
+  }
+  function recordEndless(profile, type, score) {
+    const key = endlessKey(type), all = profile.endless = profile.endless || {}, prev = all[key] || { best: 0, runs: 0 };
+    score = Math.max(0, score | 0);
+    all[key] = { best: Math.max(prev.best || 0, score), runs: (prev.runs || 0) + 1 };
+    return { score, best: all[key].best, prevBest: prev.best || 0, newBest: score > (prev.best || 0), runs: all[key].runs };
+  }
+  function nextGoal(score) {
+    return GOALS.find((g) => g > score) || null;
+  }
+  function endlessHud(lives, score, id) {
+    return `<span class="hearts" role="img" aria-label="${lives} von ${ENDLESS_LIVES} Leben">${'<i class="on">\u2665</i>'.repeat(Math.max(0, lives))}${"<i>\u2665</i>".repeat(Math.max(0, ENDLESS_LIVES - lives))}</span> <b id="eScore">${score}</b>${id ? ` <i class="tbar"><i id="${id}"></i></i>` : ""}`;
+  }
+  var ENDLESS_TYPES, ENDLESS_LIVES, ENDLESS_TITLE, GOALS;
+  var init_endless = __esm({
+    "src/endless.js"() {
+      init_levels();
+      init_daily();
+      init_music();
+      ENDLESS_TYPES = ["jump", "regen", "bau"];
+      ENDLESS_LIVES = 3;
+      ENDLESS_TITLE = { jump: "Endlos-Springen", regen: "Endlos-Notenregen", bau: "Endlos-Br\xFCckenbauer" };
+      GOALS = [10, 25, 50, 75, 100, 150, 200, 300];
+    }
+  });
+
+  // src/endlessui.js
+  function endlessBar(p) {
+    const open = dailyOpen(p), top = Math.max(0, ...ENDLESS_TYPES.map((t) => endlessBest(p, t)));
+    return `<button class="dailybar endbar" data-act="endless" ${open ? "" : "disabled"}><span class="inf" aria-hidden="true">\u221E</span><span class="dtxt"><b>Endlos-Modus</b><small>${!open ? `\xD6ffnet sich nach ${DAILY_MIN_LEVELS} Leveln` : top ? `Drei Leben, immer schneller. Dein Rekord: <b>${top}</b>` : "Drei Leben, immer schneller. Wie weit kommst du?"}</small></span>${open ? '<i class="cta">Los!</i>' : ""}</button>`;
+  }
+  function endlessCard(app) {
+    const p = app.profile, W = WHAT();
+    app.screen(
+      `<div class="maphead"><div><small class="kicker">Drei Leben \xB7 es wird immer schneller</small><h2>Endlos-Modus</h2></div><button class="btn sm" data-act="back">Zur\xFCck</button></div>
+    <p class="lead">Wie weit kommst du? Es kommen alle Noten dran, die du schon kennst. Jeder Fehler kostet ein Leben \u2013 und wer zu lange braucht, verliert auch eins.</p>
+    <div class="endgrid">${ENDLESS_TYPES.map((t) => {
+        const b = endlessBest(p, t);
+        return `<button class="btn opt end t-${t}" data-act="pick" data-v="${t}"><b>${W[t][0]}</b><small>${W[t][1]}</small><span class="rec">${b ? `Rekord: <b>${b}</b>` : "Noch kein Rekord"}</span></button>`;
+      }).join("")}</div>`,
+      { back: () => map(app), pick: (e) => levelCard(app, endlessLevel(p, e.dataset.v)) },
+      "wide"
+    );
+  }
+  function endlessResult(app, level, r) {
+    const p = app.profile, goal = nextGoal(r.best), unit = r.score === 1 ? "Note" : "Noten";
+    app.screen(
+      `<div class="petcard"><small class="kicker">${ENDLESS_TITLE[level.type]}</small><h2>${r.newBest ? "Neuer Rekord!" : r.score >= r.best * 0.8 && r.score > 0 ? "Stark gespielt!" : "Keine Leben mehr!"}</h2><p class="bigno" id="eRes">${r.score}<small> ${unit}</small></p>
+    <p id="eRec">${r.newBest ? r.prevBest ? `Vorher waren es ${r.prevBest} \u2013 du hast dich um <b>${r.score - r.prevBest}</b> verbessert.` : "Das ist dein erster Rekord in dieser Spielart." : `Dein Rekord: <b>${r.best}</b> ${r.best === 1 ? "Note" : "Noten"}.${r.best - r.score <= 3 && r.score > 0 ? " Ganz knapp!" : ""}`}</p>
+    ${goal ? `<p class="muted" id="eGoal">N\xE4chstes Ziel: <b>${goal}</b> Noten.</p>` : ""}${r.freed.length ? `<p class="muted">Neu in deiner Sammlung: ${r.freed.map((n) => `<b>${nameHtml(n)}</b>`).join(", ")}</p>` : ""}
+    <div class="row"><button class="btn" data-act="map">Karte</button><button class="btn" data-act="other">Andere Spielart</button><button class="btn go" data-act="again">Nochmal</button></div></div>`,
+      { map: () => map(app), other: () => endlessCard(app), again: () => levelCard(app, endlessLevel(p, level.type)) }
+    );
+    app.audio.fanfare(r.newBest ? 3 : 1);
+  }
+  var WHAT;
+  var init_endlessui = __esm({
+    "src/endlessui.js"() {
+      init_screens();
+      init_instrument();
+      init_daily();
+      init_endless();
+      init_music();
+      WHAT = () => ({ jump: ["Springen", `Noten ${INSTR.onThe} spielen`], regen: ["Notenregen", "Namen antippen"], bau: ["Br\xFCckenbauer", "Noten ins System setzen"] });
     }
   });
 
@@ -4799,6 +4893,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       init_gfx();
       init_instrument();
       init_text();
+      init_endless();
       STRIDE = 84;
       PW = 46;
       JUMP_S = 0.42;
@@ -4837,7 +4932,11 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
           this.parts = new Particles();
           this.accMidi = null;
           this.accAt = -1e9;
-          this.hintAfter = level.master ? Infinity : (p.mode === "profi" ? 3 : 2) + (this.boss ? 1 : 0);
+          this.endless = !!level.endless;
+          this.lives = ENDLESS_LIVES;
+          this.noteMax = this.noteLeft = 0;
+          this.over = false;
+          this.hintAfter = level.master || level.endless ? Infinity : (p.mode === "profi" ? 3 : 2) + (this.boss ? 1 : 0);
           app.panel.showMic(true);
           app.panel.keyboard(this.clef);
           app.hud.show(level.title, true);
@@ -4860,7 +4959,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         prompt(first) {
           const { app } = this, tg = this.target;
           this.tries = 0;
-          const isNew = !app.profile.notes[tg.key] && !this.level.master;
+          const isNew = !app.profile.notes[tg.key] && !this.level.master && !this.endless;
           this.t0 = performance.now();
           this.fresh = isNew;
           this.hint = isNew;
@@ -4870,10 +4969,13 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
             const pos = staffPos(tg, this.clef), from = this.idx > 0 ? staffPos(this.targets[this.idx - 1], this.clef) : 0;
             app.bubbleSide(pos <= -5 || from <= -5);
           }
-          app.hud.progress(this.idx, this.targets.length);
-          app.hud.extra(app.profile.mode === "profi" || this.level.master ? `<span id="jTime">${fmtTime(this.elapsed)}</span>${this.combo > 1 ? ` &middot; <b>${this.combo}\xD7</b> Serie` : ""}` : "");
+          app.hud.progress(this.endless ? 0 : this.idx, this.endless ? 0 : this.targets.length);
+          if (this.endless) {
+            this.noteMax = this.noteLeft = timeLimit("jump", this.idx);
+            app.hud.extra(endlessHud(this.lives, this.idx, "eBar"));
+          } else app.hud.extra(app.profile.mode === "profi" || this.level.master ? `<span id="jTime">${fmtTime(this.elapsed)}</span>${this.combo > 1 ? ` &middot; <b>${this.combo}\xD7</b> Serie` : ""}` : "");
           if (isNew) app.bubble(isGuitar() ? `Neu: <b>${nameHtml(tg)}</b> \u2013 ${describePos(staffPos(tg, this.clef), this.clef)}. Greife: ${gripText(midiOf(tg))}.` : `Neu: <b>${nameHtml(tg)}</b> \u2013 ${describePos(staffPos(tg, this.clef), this.clef)}. Die Taste leuchtet.`, 0);
-          else if (first) app.bubble(this.level.master ? "Meisterpr\xFCfung: Lies jede Note und spiele sie \u2013 ohne Tipps!" : this.boss ? `Spiele die Melodie: <b>${this.level.title}</b>` : "Welcher Ton baut die Br\xFCcke?", 4);
+          else if (first) app.bubble(this.endless ? "Endlos: Wie weit kommst du? Du hast drei Leben!" : this.level.master ? "Meisterpr\xFCfung: Lies jede Note und spiele sie \u2013 ohne Tipps!" : this.boss ? `Spiele die Melodie: <b>${this.level.title}</b>` : "Welcher Ton baut die Br\xFCcke?", 4);
           else app.bubble(null);
           if (first) app.panel.say(app.listening ? "Ich h\xF6re \u2026" : INSTR.pad, app.listening ? "Ich h\xF6re noch nichts." : "");
         }
@@ -4921,11 +5023,27 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
             app.panel.flash(midi, "bad");
             if (cls === "wrong") app.panel.say(app.listening ? "Ich h\xF6re \u2026" : INSTR.pad, `Das war <b>${nameHtml(heard)}</b>. Versuch es noch einmal!`, "warn");
             else app.panel.say(app.listening ? "Ich h\xF6re \u2026" : INSTR.pad, `Das ist ein <b>${letterName(tg)}</b>, aber eine Oktave zu ${cls === "octave-high" ? "hoch" : "tief"}${isGuitar() ? " \u2013 eine andere Saite" : ""}.`, "warn");
+            if (this.endless && cls === "wrong") this.loseLife();
             if (this.tries >= this.hintAfter && !this.hint) {
               this.hint = true;
               app.panel.setHint(tm);
               app.bubble(isGuitar() ? `Tipp: ${gripText(tm)}.` : "Tipp: Die leuchtende Taste ist richtig.", isGuitar() ? 6 : 4);
             }
+          }
+        }
+        /** Endlos: ein Leben weniger; beim letzten ist Schluss. */
+        loseLife() {
+          if (this.over) return;
+          this.lives--;
+          this.app.hud.extra(endlessHud(this.lives, this.idx, "eBar"));
+          this.noteLeft = this.noteMax;
+          if (this.lives <= 0) {
+            this.over = true;
+            this.phase = "done";
+            this.doneT = 0;
+            this.app.audio.sfx("miss");
+            this.app.bubble("Keine Leben mehr!", 2);
+            this.app.panel.setHint(null);
           }
         }
         update(dt) {
@@ -4940,6 +5058,16 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
             if (el) el.textContent = fmtTime(this.elapsed);
           }
           if (this.ghost && (this.ghost.t += dt) > 2.2) this.ghost = null;
+          if (this.endless && this.phase === "listen" && this.started && !this.over) {
+            this.noteLeft -= dt;
+            const bar = document.getElementById("eBar");
+            if (bar) bar.style.width = Math.max(0, 100 * this.noteLeft / this.noteMax) + "%";
+            if (this.noteLeft <= 0) {
+              app.audio.sfx("oops");
+              app.panel.say(app.listening ? "Ich h\xF6re \u2026" : INSTR.pad, "Zu langsam! Die Zeit f\xFCr diese Note ist um.", "warn");
+              this.loseLife();
+            }
+          }
           if (this.phase === "jump") {
             this.jumpT += dt / JUMP_S;
             const u = Math.min(1, this.jumpT), to = this.plats[this.idx + 1], ty = yOfPos(to.pos);
@@ -4977,7 +5105,10 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
             }
           } else if (this.phase === "done") {
             this.doneT += dt;
-            if (this.doneT > 1.1 && !this.reported) {
+            if (this.doneT > 1.1 && !this.reported && this.endless) {
+              this.reported = true;
+              app.finishLevel(this.level, { score: this.idx, freed: this.freed });
+            } else if (this.doneT > 1.1 && !this.reported) {
               this.reported = true;
               app.finishLevel(this.level, {
                 ratio: this.firstTry / this.targets.length,
@@ -5098,6 +5229,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     result: () => result,
     settings: () => settings,
     shareSave: () => shareSave,
+    staffCanvas: () => staffCanvas,
     standalone: () => standalone,
     stars: () => stars,
     startPlacement: () => startPlacement,
@@ -5453,7 +5585,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     }).join("")}</div>`;
     app.screen(`<div class="maphead"><button class="chip" data-act="prof" aria-label="Profil wechseln"><span data-hero="${p.hero}" data-hat="${hatOf(p, totalStars(p))}" data-size="36"></span><b>${esc(p.name)}</b></button>
     <div class="row tight"><span class="pill goal ${today >= goal ? "ok" : ""}" role="img" aria-label="Tagesziel: ${today} von ${goal} Minuten">Heute ge\xFCbt: ${Math.min(today, goal)} von ${goal} Minuten<i style="width:${Math.min(100, 100 * today / goal)}%"></i></span><span class="pill">${totalStars(p)} Sterne</span>${kr.any ? `<span class="pill kr">${kr.gold} von ${kr.total} Gold-Kronen</span>` : ""}</div></div>
-    ${dailyBar(p)}
+    <div class="bars">${dailyBar(p)}${endlessBar(p)}</div>
     <h3 class="mapq">W\xE4hle eine Welt und dann ein Level:</h3>
     <div class="tabs" role="tablist">${WORLDS.map((w, i) => {
       const open = worldUnlocked(p, i);
@@ -5467,6 +5599,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     <nav class="mapnav" aria-label="Bereiche"><button class="btn tr" data-act="train"><b>Freies Training</b><small>Tempo \xFCben, ohne Level</small></button><button class="btn" data-act="coll"><b>Sammlung</b><small>${p.creatures.length} von ${creatureTotal()} Wesen \xB7 H\xFCte</small></button><button class="btn" data-act="pass"><b>\xDCbungspass</b><small>Dein Fortschritt</small></button><button class="btn" data-act="book"><b>Geschichte</b><small>Nachlesen</small></button><button class="btn" data-act="board"><b>Bestenliste</b><small>Auf diesem Ger\xE4t</small></button><button class="btn" data-act="set"><b>Einstellungen</b><small>${accountsOn() ? p.acct ? "Konto, Ton, Mikro" : "Ton, Mikro, Konto" : "Ton, Mikro, Code"}</small></button></nav>`, {
       prof: () => profiles(app),
       daily: () => dailyCard(app),
+      endless: () => endlessCard(app),
       train: () => trainSetup(app),
       coll: () => collection(app),
       pass: () => pass(app),
@@ -5481,13 +5614,14 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     if (app.locked(level)) return paywall(app, level);
     const p = app.profile, needsPiano = level.type === "jump" || level.type === "boss", mic = app.audio.micState, keys = app.keysOn;
     const rule = level.master ? MASTER_RULES[level.type][3] : null, goldLine = !level.master ? "" : level.type === "regen" ? `F\xFCr Gold: mindestens <b>${rule.correct} Noten</b> in 60 Sekunden und h\xF6chstens <b>${rule.errors} Fehler</b>.` : `F\xFCr Gold: mindestens <b>${Math.ceil(rule.ratio * MASTER_LEN[level.type] - 1e-9)} von ${MASTER_LEN[level.type]}</b> beim ersten Versuch und im Schnitt h\xF6chstens <b>${String(rule.perNote).replace(".", ",")} Sekunden</b> pro Note.`;
-    const how = level.master ? { jump: `Lies jede Note und spiele sie ${INSTR.onThe} \u2013 es kommen <b>alle Noten dieser Welt</b>, und es gibt keine Tipps.`, regen: "Tippe den Namen jeder Note. Es kommen <b>alle Noten dieser Welt</b>, und der Notenregen ist von Anfang an schnell.", bau: "Setze jede Note an die richtige Stelle. Es kommen <b>alle Noten dieser Welt</b> \u2013 z\xFCgig und ohne Fehler!" }[level.type] + " " + goldLine : { jump: `Lies die leuchtende Note und spiele sie ${INSTR.onThe}. ${INSTR.octave}`, boss: `Spiele die Melodie Note f\xFCr Note ${INSTR.onThe}.`, regen: "Tippe den Namen der leuchtenden Note, bevor sie das Tor erreicht. 60 Sekunden!", bau: "Schiebe die Note an die richtige Stelle und tippe auf \u201ESetzen\u201C." }[level.type];
+    const eBest = level.endless ? endlessBest(p, level.type) : 0;
+    const how = level.endless ? { jump: `Lies jede Note und spiele sie ${INSTR.onThe}. F\xFCr jede Note hast du nur begrenzt Zeit \u2013 und es wird immer knapper.`, regen: "Tippe den Namen jeder Note, bevor sie das Tor erreicht. Der Notenregen wird immer schneller.", bau: "Setze jede Note an die richtige Stelle. F\xFCr jede Note hast du nur begrenzt Zeit \u2013 und es wird immer knapper." }[level.type] + " Du hast <b>drei Leben</b>." : level.master ? { jump: `Lies jede Note und spiele sie ${INSTR.onThe} \u2013 es kommen <b>alle Noten dieser Welt</b>, und es gibt keine Tipps.`, regen: "Tippe den Namen jeder Note. Es kommen <b>alle Noten dieser Welt</b>, und der Notenregen ist von Anfang an schnell.", bau: "Setze jede Note an die richtige Stelle. Es kommen <b>alle Noten dieser Welt</b> \u2013 z\xFCgig und ohne Fehler!" }[level.type] + " " + goldLine : { jump: `Lies die leuchtende Note und spiele sie ${INSTR.onThe}. ${INSTR.octave}`, boss: `Spiele die Melodie Note f\xFCr Note ${INSTR.onThe}.`, regen: "Tippe den Namen der leuchtenden Note, bevor sie das Tor erreicht. 60 Sekunden!", bau: "Schiebe die Note an die richtige Stelle und tippe auf \u201ESetzen\u201C." }[level.type];
     let micLine = "";
     if (needsPiano) micLine = keys ? `<p class="note">Du spielst mit: ${INSTR.pad}.</p>` : mic === "on" ? '<p class="note ok">Mikrofon ist an.</p>' : mic === "off" ? `<p class="note">${INSTR.place} Das Spiel fragt gleich nach dem Mikrofon.</p>` : `<p class="note warn">${mic === "denied" ? "Das Mikrofon wurde nicht erlaubt." : "Hier gibt es kein Mikrofon."} \xD6ffne den Link direkt in Safari oder Chrome und erlaube dort das Mikrofon. Bis dahin kannst du ohne Mikrofon spielen (${INSTR.pad}).</p>`;
     const blocked = needsPiano && !keys && (mic === "denied" || mic === "unsupported");
-    app.screen(`<small class="kicker">${esc(WORLDS[level.world].name)} \xB7 ${level.master ? "Meisterpr\xFCfung" : TYPE_LABEL[level.type]}</small><h2>${esc(level.title)}</h2>${level.master ? `<p class="lead">${crown(crownOf(p, level))} ${crownOf(p, level) ? `Deine Krone bisher: <b>${CROWN_NAME[crownOf(p, level)]}</b>` : "Noch keine Krone"}</p>` : `<p class="lead">${esc(LEVEL_STORY[level.id] || "")}</p>`}<p>${how}</p>${micLine}
-    <div class="row"><button class="btn" data-act="back">Zur\xFCck</button>${level.master ? "" : '<button class="btn" data-act="book">Was bisher geschah</button>'}${blocked ? `<button class="btn go" data-act="keys">Ohne Mikrofon: ${INSTR.pad}</button><button class="btn" data-act="go">Mikrofon nochmal versuchen</button>` : '<button class="btn go" data-act="go">Los!</button>'}</div>`, {
-      back: () => map(app),
+    app.screen(`<small class="kicker">${level.endless ? "Endlos-Modus \xB7 " + TYPE_LABEL[level.type] : esc(WORLDS[level.world].name) + " \xB7 " + (level.master ? "Meisterpr\xFCfung" : TYPE_LABEL[level.type])}</small><h2>${esc(level.title)}</h2>${level.endless ? `<p class="lead">${eBest ? `Dein Rekord: <b>${eBest}</b> ${eBest === 1 ? "Note" : "Noten"}` : "Noch kein Rekord \u2013 leg einen vor!"}</p>` : level.master ? `<p class="lead">${crown(crownOf(p, level))} ${crownOf(p, level) ? `Deine Krone bisher: <b>${CROWN_NAME[crownOf(p, level)]}</b>` : "Noch keine Krone"}</p>` : `<p class="lead">${esc(LEVEL_STORY[level.id] || "")}</p>`}<p>${how}</p>${micLine}
+    <div class="row"><button class="btn" data-act="back">Zur\xFCck</button>${level.master || level.endless ? "" : '<button class="btn" data-act="book">Was bisher geschah</button>'}${blocked ? `<button class="btn go" data-act="keys">Ohne Mikrofon: ${INSTR.pad}</button><button class="btn" data-act="go">Mikrofon nochmal versuchen</button>` : '<button class="btn go" data-act="go">Los!</button>'}</div>`, {
+      back: () => level.endless ? endlessCard(app) : map(app),
       book: () => storyBook(app, level, () => levelCard(app, level)),
       keys: () => {
         app.keysSession = true;
@@ -5661,9 +5795,10 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     });
   }
   function staffCanvas(n, clef) {
-    const c = cv(70, 80), x = c.getContext("2d");
-    x.translate(0, -35);
-    const pos = staffPos(n, clef);
+    const pos = staffPos(n, clef), ny = yOfPos(pos), up0 = pos < 4, top = Math.min(34, ny - (up0 ? 24 : 9)), bot = Math.max(124, ny + (up0 ? 9 : 24)), c = cv(70, bot - top), x = c.getContext("2d");
+    c.dataset.top = top;
+    c.dataset.key = n.key;
+    x.translate(0, -top);
     drawStaff(x, C.K, 2, 68);
     drawClef(x, clef, 3, C.K);
     drawLedgers(x, 39, 19, ledgerPositions(pos, clef), C.K);
@@ -5741,7 +5876,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     const list = (ks) => ks.length ? ks.map((k) => `<span class="tag">${nameHtml(N(k))}</span>`).join("") : '<span class="muted">noch keine</span>';
     const conf = topConfusions(p.conf).filter((c) => safeN(c.target) && safeN(c.played));
     app.screen(`<div class="maphead"><h2>\xDCbungspass von ${esc(p.name)}</h2><button class="btn sm" data-act="back">Zur\xFCck</button></div>
-    <div class="passgrid"><div class="card"><h3>Ge\xFCbt</h3><p class="bigno" id="passStreak">${streak(p)}<small> ${streak(p) === 1 ? "Tag" : "Tage"} in Folge</small></p>${crownCount(p).any ? `<p id="passCrowns"><span class="nw">Meisterpr\xFCfungen: <b>${crownCount(p).gold} von ${crownCount(p).total}</b> Gold-Kronen</span></p>` : ""}<p id="passDays"><span class="nw">\xDCbungstage insgesamt: <b>${practiceDays(p)}</b></span> <span class="nw">${practiced(p, dayKey()) ? "\xB7 heute schon ge\xFCbt" : "\xB7 heute noch nicht"}</span></p><p id="passMin"><span class="nw">Letzte 7 Tage: <b>${Math.floor(week / 60)} min</b></span> <span class="nw">\xB7 Insgesamt: <b>${Math.floor(total / 60)} min</b></span></p><div class="cal" role="img" aria-label="\xDCbungstage der letzten vier Wochen">${cells.join("")}</div><small class="muted">Die letzten 4 Wochen, heute unten rechts. Ein Tag z\xE4hlt ab 1 Minute.</small></div>
+    <div class="passgrid"><div class="card"><h3>Ge\xFCbt</h3><p class="bigno" id="passStreak">${streak(p)}<small> ${streak(p) === 1 ? "Tag" : "Tage"} in Folge</small></p>${crownCount(p).any ? `<p id="passCrowns"><span class="nw">Meisterpr\xFCfungen: <b>${crownCount(p).gold} von ${crownCount(p).total}</b> Gold-Kronen</span></p>` : ""}${ENDLESS_TYPES.some((t) => endlessBest(p, t)) ? `<p id="passEndless">Endlos-Rekorde: ${ENDLESS_TYPES.map((t) => `<span class="nw">${{ jump: "Springen", regen: "Notenregen", bau: "Br\xFCckenbauer" }[t]} <b>${endlessBest(p, t) || "\u2013"}</b></span>`).join(" \xB7 ")}</p>` : ""}<p id="passDays"><span class="nw">\xDCbungstage insgesamt: <b>${practiceDays(p)}</b></span> <span class="nw">${practiced(p, dayKey()) ? "\xB7 heute schon ge\xFCbt" : "\xB7 heute noch nicht"}</span></p><p id="passMin"><span class="nw">Letzte 7 Tage: <b>${Math.floor(week / 60)} min</b></span> <span class="nw">\xB7 Insgesamt: <b>${Math.floor(total / 60)} min</b></span></p><div class="cal" role="img" aria-label="\xDCbungstage der letzten vier Wochen">${cells.join("")}</div><small class="muted">Die letzten 4 Wochen, heute unten rechts. Ein Tag z\xE4hlt ab 1 Minute.</small></div>
     <div class="card"><h3>Fortschritt</h3><p><b>${totalStars(p)}</b> Sterne \xB7 <b>${p.creatures.length}</b> von ${creatureTotal()} Notenwesen</p>${WORLDS.map((w, i) => `<p>${esc(w.short)}: ${doneCount(p, i)} von ${levelsOf(i).length} Leveln <span class="bar"><i style="width:${100 * doneCount(p, i) / levelsOf(i).length}%"></i></span></p>`).join("")}</div>
     <div class="card"><h3>Diese Noten sitzen sicher <small>(richtig und z\xFCgig)</small></h3><div class="tags">${list(sure)}</div><h3>Diese Noten noch \xFCben</h3><div class="tags">${list(weak)}</div>${weakNotes(p).length >= WEAK_MIN ? '<p><button class="btn sm go" data-act="weak">Diese Noten trainieren</button></p>' : ""}</div>
     <div class="card"><h3>H\xE4ufige Verwechslungen</h3>${conf.length ? conf.map((c) => `<p><b>${nameHtml(N(c.target))}</b> wird oft mit <b>${nameHtml(N(c.played))}</b> verwechselt <span class="muted">(${c.n}\xD7)</span></p>`).join("") : '<p class="muted">Bisher keine auff\xE4lligen Verwechslungen.</p>'}</div>
@@ -5750,7 +5885,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   function board(app) {
     const rows = app.state.profiles.map((p) => ({ p, s: totalStars(p) })).sort((a, b) => b.s - a.s || b.p.regenBest - a.p.regenBest);
     app.screen(`<div class="maphead"><h2>Bestenliste auf diesem Ger\xE4t</h2><button class="btn sm" data-act="back">Zur\xFCck</button></div>
-    <table class="board"><thead><tr><th>Platz</th><th>Name</th><th>Sterne</th><th>Notenwesen</th><th>Notenregen-Rekord</th><th>Training (Noten pro Minute)</th><th>Tage in Folge</th></tr></thead><tbody>${rows.map((r, i) => `<tr class="${r.p.id === app.profile.id ? "me" : ""}"><td>${i + 1}.</td><td>${esc(r.p.name)}</td><td>${r.s}</td><td>${r.p.creatures.length}</td><td>${r.p.regenBest || "\u2013"}</td><td>${r.p.train && Math.max((r.p.train["play-treble-time"] || {}).best || 0, (r.p.train["play-gall-time"] || {}).best || 0) || "\u2013"}</td><td>${streak(r.p)}</td></tr>`).join("")}</tbody></table>
+    <table class="board"><thead><tr><th>Platz</th><th>Name</th><th>Sterne</th><th>Notenwesen</th><th>Notenregen-Rekord</th><th>Training (Noten pro Minute)</th><th>Endlos-Rekord</th><th>Tage in Folge</th></tr></thead><tbody>${rows.map((r, i) => `<tr class="${r.p.id === app.profile.id ? "me" : ""}"><td>${i + 1}.</td><td>${esc(r.p.name)}</td><td>${r.s}</td><td>${r.p.creatures.length}</td><td>${r.p.regenBest || "\u2013"}</td><td>${r.p.train && Math.max((r.p.train["play-treble-time"] || {}).best || 0, (r.p.train["play-gall-time"] || {}).best || 0) || "\u2013"}</td><td>${endlessTop(r.p) || "\u2013"}</td><td>${streak(r.p)}</td></tr>`).join("")}</tbody></table>
     <p class="muted">Die Liste zeigt alle Profile, die auf diesem Ger\xE4t spielen. Training: 60 Sekunden am Instrument (Klavier: Violinschl\xFCssel, Gitarre: alle Saiten).</p>`, { back: () => map(app) }, "wide");
   }
   function settings(app, msg = "") {
@@ -5980,6 +6115,8 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       init_stats();
       init_music();
       init_dailyui();
+      init_endlessui();
+      init_endless();
       init_daily();
       init_pets();
       init_levels();
@@ -6004,7 +6141,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       };
       standalone = () => !!(navigator.standalone || window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
       isApple = () => /iPad|iPhone|iPod/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
-      VERSION = "2.13 \xB7 28.11.2026";
+      VERSION = "2.14 \xB7 28.11.2026";
     }
   });
 
@@ -6100,6 +6237,8 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   init_pets();
   init_levels();
   init_dailyui();
+  init_endlessui();
+  init_endless();
   init_music();
   init_save();
   init_config();
@@ -6356,6 +6495,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   init_srs();
   init_gfx();
   init_text();
+  init_endless();
   var GATE = 52;
   var SPACING = 74;
   var DURATION = 60;
@@ -6371,9 +6511,11 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       this.theme = level.theme;
       this.bg = app.background(level.theme);
       this.line = THEMES[level.theme].line;
+      this.endless = !!level.endless;
+      this.lives = ENDLESS_LIVES;
       this.notes = [];
       this.t = 0;
-      this.left = DURATION;
+      this.left = this.endless ? Infinity : DURATION;
       this.correct = 0;
       this.wrong = 0;
       this.combo = 0;
@@ -6382,18 +6524,18 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       this.last = null;
       this.parts = new Particles();
       this.started = false;
-      const base = level.master ? 38 : app.profile.mode === "profi" ? 30 : 20;
-      this.maxSpeed = level.master ? 110 : app.profile.mode === "profi" ? 85 : 60;
+      const base = level.endless ? 24 : level.master ? 38 : app.profile.mode === "profi" ? 30 : 20;
+      this.maxSpeed = level.endless ? 150 : level.master ? 110 : app.profile.mode === "profi" ? 85 : 60;
       this.missed = 0;
-      this.speed = Math.max(base, Math.min(base + 18, 0.75 * (app.profile.regenPace || 0)));
+      this.speed = level.endless || level.master ? base : Math.max(base, Math.min(base + 18, 0.75 * (app.profile.regenPace || 0)));
       const order = ["c", "cis", "des", "d", "dis", "es", "e", "f", "fis", "g", "gis", "as", "a", "b", "h"];
       const names = [...new Set(level.notes.map((k) => letterName(N(k))))].sort((a, b) => order.indexOf(a) - order.indexOf(b));
       app.panel.showMic(false);
       app.panel.answers(names, (l, btn) => this.answer(l, btn));
-      app.panel.task("Tippe <b>unten den Namen</b> der Note an, bevor sie das rote Tor erreicht.");
+      app.panel.task(this.endless ? "Tippe <b>unten den Namen</b> jeder Note. Falsch oder zu sp\xE4t kostet ein Leben!" : "Tippe <b>unten den Namen</b> der Note an, bevor sie das rote Tor erreicht.");
       app.hud.show(level.title, true);
       app.hud.progress(0, 0);
-      app.bubble("Tippe den Namen der leuchtenden Note, bevor sie das Tor erreicht!", 5);
+      app.bubble(this.endless ? "Endlos: Wie viele Noten schaffst du? Du hast drei Leben!" : "Tippe den Namen der leuchtenden Note, bevor sie das Tor erreicht!", 5);
       for (let i = 0; i < 5; i++) this.spawn(VIEW_W + 20 + i * SPACING);
       this.hudUpdate();
     }
@@ -6407,6 +6549,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       return this.notes[0];
     }
     hudUpdate() {
+      if (this.endless) return this.app.hud.extra(endlessHud(this.lives, this.correct));
       this.app.hud.extra(`<b>${this.score}</b> Punkte${this.combo > 1 ? ` &middot; ${this.combo}\xD7 Serie` : ""} &middot; <span id="rTime">${Math.ceil(this.left)}</span> s`);
     }
     answer(l, btn) {
@@ -6425,6 +6568,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         this.notes.shift();
         this.spawn(this.notes[this.notes.length - 1].x + SPACING);
       } else {
+        if (!a.tried && this.endless) this.lives--;
         if (!a.tried) {
           a.tried = true;
           this.wrong++;
@@ -6437,6 +6581,15 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         setTimeout(() => btn.classList.remove("shake"), 350);
       }
       this.hudUpdate();
+      this.checkOver();
+    }
+    /** Endlos: keine Leben mehr – Schluss. */
+    checkOver() {
+      if (!this.endless || this.done || this.lives > 0) return;
+      this.done = true;
+      this.app.audio.sfx("done");
+      this.app.bubble("Keine Leben mehr!", 2);
+      setTimeout(() => this.app.finishLevel(this.level, { score: this.correct, freed: [] }), 1100);
     }
     /** Schmaler Bildschirm (hochkant): Der Weg bis zum Tor ist kürzer – die Noten fliegen entsprechend langsamer, damit gleich viel Zeit zum Lesen bleibt. */
     narrow() {
@@ -6478,11 +6631,13 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         this.freeze = 1.3;
         this.combo = 0;
         this.missed++;
+        if (this.endless) this.lives--;
         this.speed = Math.max(16, this.speed * 0.82);
         app.profile.notes[a.n.key] = update(app.profile.notes[a.n.key] || newStat(), false);
         app.audio.sfx("miss");
         app.bubble(`Das war <b>${nameHtml(a.n)}</b>.`, 1.3);
         this.hudUpdate();
+        this.checkOver();
       }
     }
     draw(ctx, tx) {
@@ -6512,6 +6667,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   init_srs();
   init_gfx();
   init_text();
+  init_endless();
   var BauScene = class {
     constructor(app, level) {
       this.app = app;
@@ -6528,6 +6684,10 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       const g = this.clef === "grand";
       this.minPos = Math.max(g ? -8 : Math.min(-4, Math.min(...ps) - 1), Math.min(...ps) - 2);
       this.maxPos = Math.min(g ? 16 : 12, Math.max(...ps) + 2);
+      this.endless = !!level.endless;
+      this.lives = ENDLESS_LIVES;
+      this.over = false;
+      this.taskMax = this.taskLeft = 0;
       this.tasks = this.buildTasks();
       this.ti = 0;
       this.firstTry = 0;
@@ -6544,7 +6704,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       const { level } = this, stats = this.app.profile.notes, out = [];
       let last = null;
       const words = (level.words || []).slice().sort(() => Math.random() - 0.5).slice(0, 3);
-      const singles = (level.master ? level.len : 8) - words.length;
+      const singles = (level.master || level.endless ? level.len : 8) - words.length;
       for (let i = 0; i < singles; i++) {
         last = pickNext(level.notes, stats, Math.random, last);
         out.push({ notes: [N(last)], word: null });
@@ -6566,7 +6726,11 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       app.panel.setAcc(0);
       this.n = tk.word ? tk.word.length : 1;
       this.xs = Array.from({ length: this.n }, (_, i) => VIEW_W / 2 + 16 + (i - (this.n - 1) / 2) * 40);
-      app.hud.progress(this.ti, this.tasks.length);
+      app.hud.progress(this.endless ? 0 : this.ti, this.endless ? 0 : this.tasks.length);
+      if (this.endless) {
+        this.taskMax = this.taskLeft = timeLimit("bau", this.ti);
+        app.hud.extra(endlessHud(this.lives, this.ti, "eBar"));
+      }
       app.bubble(tk.word ? `Schreibe das Wort <b>${tk.word}</b> \u2013 Note f\xFCr Note.` : `Setze die Note <b>${nameHtml(tk.notes[0])}</b> ins System.`, 0);
     }
     move(d) {
@@ -6617,19 +6781,46 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         this.tries++;
         this.taskClean = false;
         this.wrongT = 0.5;
+        if (this.endless) this.loseLife();
         const want = tk.word ? tk.word[this.slot].toLowerCase() : null;
         if (!tk.word) {
           const ck = `${tk.notes[0].key}>${cand.key}`;
           p.conf[ck] = (p.conf[ck] || 0) + 1;
           p.notes[tk.notes[0].key] = update(p.notes[tk.notes[0].key] || newStat(), false);
         }
-        app.bubble(`Das ist <b>${nameHtml(cand)}</b> (${describePos(this.pos, this.clef)}). Gesucht ist <b>${tk.word ? want : nameHtml(tk.notes[0])}</b>.`, 0);
+        if (!this.over) app.bubble(`Das ist <b>${nameHtml(cand)}</b> (${describePos(this.pos, this.clef)}). Gesucht ist <b>${tk.word ? want : nameHtml(tk.notes[0])}</b>.`, 0);
+      }
+    }
+    /** Endlos: ein Leben weniger; beim letzten ist Schluss. */
+    loseLife() {
+      if (this.over) return;
+      this.lives--;
+      this.app.hud.extra(endlessHud(this.lives, this.ti, "eBar"));
+      this.taskLeft = this.taskMax;
+      if (this.lives <= 0) {
+        this.over = true;
+        this.locked = true;
+        this.app.audio.sfx("done");
+        setTimeout(() => {
+          this.app.bubble(null);
+          this.app.finishLevel(this.level, { score: this.ti, freed: this.freed });
+        }, 1200);
       }
     }
     update(dt) {
       this.t += dt;
       this.parts.update(dt);
       if (this.wrongT > 0) this.wrongT -= dt;
+      if (this.endless && !this.locked && !this.over) {
+        this.taskLeft -= dt;
+        const bar = document.getElementById("eBar");
+        if (bar) bar.style.width = Math.max(0, 100 * this.taskLeft / this.taskMax) + "%";
+        if (this.taskLeft <= 0) {
+          this.app.audio.sfx("oops");
+          this.app.bubble("Zu langsam! Die Zeit f\xFCr diese Note ist um.", 2);
+          this.loseLife();
+        }
+      }
     }
     draw(ctx, tx) {
       const line2 = this.line, tk = this.tasks[Math.min(this.ti, this.tasks.length - 1)];
@@ -6648,7 +6839,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
           drawLedgers(ctx, x - 9, 19, ledgerPositions(this.pos, this.clef), line2);
           drawGlow(ctx, sx, y, 0.55 + 0.25 * Math.sin(this.t * 5));
           drawNote(ctx, sx, y, { style: "gold", halo: "#FFF1D6", up: stemUp(this.pos, this.clef), alt: this.alt, line: C.K });
-          if (this.tries >= 2 && !tk.word) {
+          if (this.tries >= 2 && !tk.word && !this.endless) {
             const tp = staffPos(tk.notes[0], this.clef);
             ctx.globalAlpha = 0.45;
             drawNote(ctx, x, yOfPos(tp), { style: "ghost", stem: false, line: C.G2 });
@@ -7357,6 +7548,16 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     }
     finishLevel(level, res) {
       if (level.master) return this.finishMaster(level, res);
+      if (level.endless) {
+        const r = recordEndless(this.profile, level.type, res.score);
+        this.$("sndBtn").hidden = false;
+        this.scene.isLevel = false;
+        track("endlos/" + level.type);
+        this.flush();
+        this.bubble(null);
+        this.$("hud").hidden = true;
+        return endlessResult(this, level, { ...r, freed: res.freed || [] });
+      }
       const p = this.profile, stars2 = res.stars != null ? res.stars : starsFor(res.ratio), prev = p.levels[level.id], rec = prev || { stars: 0 };
       const out = { ...res, stars: stars2, firstClear: !prev };
       rec.stars = Math.max(rec.stars, stars2);

@@ -4,6 +4,7 @@ import { pickNext, update as srsUpdate, newStat, SLOW_PLAY_MS } from './srs.js';
 import * as G from './gfx.js';
 import { INSTR, isGuitar, gripText } from './instrument.js';
 import { label, noteLabel } from './text.js';
+import { ENDLESS_LIVES, timeLimit, endlessHud } from './endless.js';
 
 const STRIDE = 84, PW = 46, JUMP_S = 0.42;
 /** Wo die Figur auf dem Bildschirm steht. Auf schmalen (hochkant) Bildschirmen weiter links, damit die nächste Plattform ganz zu sehen ist. */
@@ -18,7 +19,8 @@ export class JumpScene {
     this.plats = [{ x: 70, pos: startPos, note: null, built: true }, ...this.targets.map((n, i) => ({ x: 70 + (i + 1) * STRIDE, pos: staffPos(n, this.clef), note: n, built: false }))];
     this.idx = 0; this.firstTry = 0; this.combo = 0; this.t = 0; this.elapsed = 0; this.started = false; this.freed = [];
     this.hero = { x: 70, y: G.yOfPos(startPos) }; this.camX = 70 - heroSX(); this.phase = 'listen'; this.oopsT = 0; this.landT = 0; this.ghost = null; this.queue = null;
-    this.guard = G.makeCreature(4, 0, true); this.parts = new G.Particles(); this.accMidi = null; this.accAt = -1e9; this.hintAfter = level.master ? Infinity : (p.mode === 'profi' ? 3 : 2) + (this.boss ? 1 : 0); // Meisterprüfung: keine Tipps
+    this.guard = G.makeCreature(4, 0, true); this.parts = new G.Particles(); this.accMidi = null; this.accAt = -1e9; this.endless = !!level.endless; this.lives = ENDLESS_LIVES; this.noteMax = this.noteLeft = 0; this.over = false;
+    this.hintAfter = level.master || level.endless ? Infinity : (p.mode === 'profi' ? 3 : 2) + (this.boss ? 1 : 0); // Meisterprüfung: keine Tipps
     app.panel.showMic(true); app.panel.keyboard(this.clef); app.hud.show(level.title, true); this.prompt(true);
   }
   buildTargets() {
@@ -30,14 +32,15 @@ export class JumpScene {
   }
   get target() { return this.targets[this.idx]; }
   prompt(first) {
-    const { app } = this, tg = this.target; this.tries = 0; const isNew = !app.profile.notes[tg.key] && !this.level.master; this.t0 = performance.now(); this.fresh = isNew; // Meisterprüfung: auch unbekannte Noten ohne Hilfe
+    const { app } = this, tg = this.target; this.tries = 0; const isNew = !app.profile.notes[tg.key] && !this.level.master && !this.endless; this.t0 = performance.now(); this.fresh = isNew; // Meisterprüfung: auch unbekannte Noten ohne Hilfe
     this.hint = isNew; app.panel.setHint(isNew ? midiOf(tg) : null);
     app.panel.task(this.boss ? (app.listening ? `Spiele die Melodie Ton für Ton <b>${INSTR.on}</b>.` : `Spiele die Melodie Ton für Ton – <b>${INSTR.tapPad}</b>.`) : app.listening ? `Spiele die leuchtende Note <b>${INSTR.on}</b>.` : `Tippe die leuchtende Note <b>${INSTR.padWhere}</b>.`);
     { const pos = staffPos(tg, this.clef), from = this.idx > 0 ? staffPos(this.targets[this.idx - 1], this.clef) : 0; app.bubbleSide(pos <= -5 || from <= -5); }
-    app.hud.progress(this.idx, this.targets.length);
-    app.hud.extra(app.profile.mode === 'profi' || this.level.master ? `<span id="jTime">${fmtTime(this.elapsed)}</span>${this.combo > 1 ? ` &middot; <b>${this.combo}×</b> Serie` : ''}` : '');
+    app.hud.progress(this.endless ? 0 : this.idx, this.endless ? 0 : this.targets.length);
+    if (this.endless) { this.noteMax = this.noteLeft = timeLimit('jump', this.idx); app.hud.extra(endlessHud(this.lives, this.idx, 'eBar')); }
+    else app.hud.extra(app.profile.mode === 'profi' || this.level.master ? `<span id="jTime">${fmtTime(this.elapsed)}</span>${this.combo > 1 ? ` &middot; <b>${this.combo}×</b> Serie` : ''}` : '');
     if (isNew) app.bubble(isGuitar() ? `Neu: <b>${nameHtml(tg)}</b> – ${describePos(staffPos(tg, this.clef), this.clef)}. Greife: ${gripText(midiOf(tg))}.` : `Neu: <b>${nameHtml(tg)}</b> – ${describePos(staffPos(tg, this.clef), this.clef)}. Die Taste leuchtet.`, 0);
-    else if (first) app.bubble(this.level.master ? 'Meisterprüfung: Lies jede Note und spiele sie – ohne Tipps!' : this.boss ? `Spiele die Melodie: <b>${this.level.title}</b>` : 'Welcher Ton baut die Brücke?', 4);
+    else if (first) app.bubble(this.endless ? 'Endlos: Wie weit kommst du? Du hast drei Leben!' : this.level.master ? 'Meisterprüfung: Lies jede Note und spiele sie – ohne Tipps!' : this.boss ? `Spiele die Melodie: <b>${this.level.title}</b>` : 'Welcher Ton baut die Brücke?', 4);
     else app.bubble(null);
     if (first) app.panel.say(app.listening ? 'Ich höre …' : INSTR.pad, app.listening ? 'Ich höre noch nichts.' : '');
   }
@@ -58,13 +61,20 @@ export class JumpScene {
       this.ghost = { note: heard, pos: staffPos(heard, this.clef), t: 0 }; this.oopsT = 0.5; app.audio.sfx('oops'); app.panel.flash(midi, 'bad');
       if (cls === 'wrong') app.panel.say(app.listening ? 'Ich höre …' : INSTR.pad, `Das war <b>${nameHtml(heard)}</b>. Versuch es noch einmal!`, 'warn');
       else app.panel.say(app.listening ? 'Ich höre …' : INSTR.pad, `Das ist ein <b>${letterName(tg)}</b>, aber eine Oktave zu ${cls === 'octave-high' ? 'hoch' : 'tief'}${isGuitar() ? ' – eine andere Saite' : ''}.`, 'warn');
+      if (this.endless && cls === 'wrong') this.loseLife(); // Oktav-Verwechslungen kosten kein Leben
       if (this.tries >= this.hintAfter && !this.hint) { this.hint = true; app.panel.setHint(tm); app.bubble(isGuitar() ? `Tipp: ${gripText(tm)}.` : 'Tipp: Die leuchtende Taste ist richtig.', isGuitar() ? 6 : 4); }
     }
+  }
+  /** Endlos: ein Leben weniger; beim letzten ist Schluss. */
+  loseLife() {
+    if (this.over) return; this.lives--; this.app.hud.extra(endlessHud(this.lives, this.idx, 'eBar')); this.noteLeft = this.noteMax;
+    if (this.lives <= 0) { this.over = true; this.phase = 'done'; this.doneT = 0; this.app.audio.sfx('miss'); this.app.bubble('Keine Leben mehr!', 2); this.app.panel.setHint(null); }
   }
   update(dt) {
     const { app } = this; this.t += dt; this.parts.update(dt); if (this.oopsT > 0) this.oopsT -= dt; if (this.landT > 0) this.landT -= dt;
     if (this.started && this.phase !== 'done') { this.elapsed += dt; const el = document.getElementById('jTime'); if (el) el.textContent = fmtTime(this.elapsed); }
     if (this.ghost && (this.ghost.t += dt) > 2.2) this.ghost = null;
+    if (this.endless && this.phase === 'listen' && this.started && !this.over) { this.noteLeft -= dt; const bar = document.getElementById('eBar'); if (bar) bar.style.width = Math.max(0, 100 * this.noteLeft / this.noteMax) + '%'; if (this.noteLeft <= 0) { app.audio.sfx('oops'); app.panel.say(app.listening ? 'Ich höre …' : INSTR.pad, 'Zu langsam! Die Zeit für diese Note ist um.', 'warn'); this.loseLife(); } }
     if (this.phase === 'jump') {
       this.jumpT += dt / JUMP_S; const u = Math.min(1, this.jumpT), to = this.plats[this.idx + 1], ty = G.yOfPos(to.pos);
       this.hero.x = this.from.x + (to.x - this.from.x) * u; this.hero.y = this.from.y + (ty - this.from.y) * u - Math.sin(Math.PI * u) * 22;
@@ -76,7 +86,8 @@ export class JumpScene {
       }
     } else if (this.phase === 'done') {
       this.doneT += dt;
-      if (this.doneT > 1.1 && !this.reported) { this.reported = true; app.finishLevel(this.level, { ratio: this.firstTry / this.targets.length, n: this.targets.length, time: this.elapsed, freed: this.freed,
+      if (this.doneT > 1.1 && !this.reported && this.endless) { this.reported = true; app.finishLevel(this.level, { score: this.idx, freed: this.freed }); }
+      else if (this.doneT > 1.1 && !this.reported) { this.reported = true; app.finishLevel(this.level, { ratio: this.firstTry / this.targets.length, n: this.targets.length, time: this.elapsed, freed: this.freed,
         line: `Beim ersten Versuch richtig: <b>${this.firstTry} von ${this.targets.length}</b>` }); }
     }
     this.camX += (this.hero.x - heroSX() - this.camX) * Math.min(1, dt * 6);
