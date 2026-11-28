@@ -1,7 +1,7 @@
 // Tagesaufgabe und Eier: Leiste auf der Karte, Karte vor dem Start, Ergebnis mit Ei, Schlüpfen.
 import { map, calibrate, esc } from './screens.js';
 import { INSTR } from './instrument.js';
-import { dailyOpen, doneToday, nest, dailyPool, completeDaily, dailyState, DAILY_MIN_LEVELS } from './daily.js';
+import { dailyOpen, doneToday, nest, dailyPool, completeDaily, dailyState, eggAtRisk, coolEgg, coldDays, DAILY_MIN_LEVELS } from './daily.js';
 import { EGGS, petName } from './pets.js';
 import { metrics, TRAIN_COUNT } from './training.js';
 import { track } from './stats.js';
@@ -13,17 +13,17 @@ export function dailyLevel(profile, input) { return { id: 'tagesaufgabe', type: 
 
 /** Die Leiste oben auf der Karte. */
 export function dailyBar(p) {
-  const open = dailyOpen(p), done = doneToday(p), n = nest(p);
-  const sub = !open ? `Öffnet sich nach ${DAILY_MIN_LEVELS} Leveln` : done ? 'Heute geschafft! Morgen geht es weiter.' : n ? `${TRAIN_COUNT} Noten – dann wird dein Ei wärmer. Noch ${days(n.left)}!` : `${TRAIN_COUNT} Noten – bleib in Übung!`;
-  return `<button class="dailybar ${done ? 'done' : ''}" data-act="daily" ${open ? '' : 'disabled'}>${n ? egg(n, 44) : '<span data-pet="sternendrache" data-size="52"></span>'}<span class="dtxt"><b>Tagesaufgabe</b><small>${sub}</small></span>${n && open ? dots(n) : ''}${!open ? '' : done ? '<i class="cta ok">geschafft</i>' : '<i class="cta">Los!</i>'}</button>`;
+  coolEgg(p); const open = dailyOpen(p), done = doneToday(p), n = nest(p), cold = coldDays(p), risk = eggAtRisk(p);
+  const sub = !open ? `Öffnet sich nach ${DAILY_MIN_LEVELS} Leveln` : done ? 'Heute geschafft! Morgen wieder – sonst wird dein Ei kalt.' : cold && n ? 'Dein Ei ist kalt geworden. Ein neues liegt im Nest – wärme es heute!' : risk ? `Heute spielen, sonst wird dein Ei kalt! Noch ${days(n.left)}.` : n ? `${TRAIN_COUNT} Noten – dann wird dein Ei wärmer. Noch ${days(n.left)}!` : `${TRAIN_COUNT} Noten – bleib in Übung!`;
+  return `<button class="dailybar ${done ? 'done' : ''} ${risk && !done ? 'risk' : ''} ${cold && !done ? 'cold' : ''}" data-act="daily" ${open ? '' : 'disabled'}>${n ? egg(n, 44) : '<span data-pet="sternendrache" data-size="52"></span>'}<span class="dtxt"><b>Tagesaufgabe</b><small>${sub}</small></span>${n && open ? dots(n) : ''}${!open ? '' : done ? '<i class="cta ok">geschafft</i>' : '<i class="cta">Los!</i>'}</button>`;
 }
 
 /** Karte vor dem Start: das Nest, worum es geht, und die Wahl zwischen Spielen und Namen antippen. */
 export function dailyCard(app, msg = '') {
-  const p = app.profile, n = nest(p), done = doneToday(p), st = dailyState(p), mic = app.audio.micState, noMic = !app.keysOn && (mic === 'denied' || mic === 'unsupported');
+  coolEgg(app.profile); const p = app.profile, n = nest(p), done = doneToday(p), st = dailyState(p), cold = coldDays(p), risk = eggAtRisk(p), mic = app.audio.micState, noMic = !app.keysOn && (mic === 'denied' || mic === 'unsupported');
   const start = input => { app.runLevel(dailyLevel(p, input)); };
   const play = async keys => { app.audio.ensure(); if (keys) app.keysSession = true; if (!app.keysOn) { app.audio.micState = app.audio.micState === 'on' ? 'on' : 'off'; const r = await app.audio.startMic(); if (r !== 'on') return dailyCard(app, 'Das Mikrofon ist gerade nicht verfügbar.'); if (!p.calibrated) return calibrate(app, () => start('play')); } start('play'); };
-  const nestHtml = n ? `<div class="nest">${egg(n, 132)}<div><p class="lead">${done ? `Dein Ei ist für heute warm: <b>Tag ${n.warm} von ${n.days}</b>.` : n.warm ? `Dein Ei ist schon <b>${days(n.warm)}</b> warm. Es braucht <b>${days(n.days)}</b>.` : `In deinem Nest liegt ${st.egg ? 'ein neues Ei' : 'ein Ei'}. Es braucht <b>${days(n.days)}</b> Wärme.`}</p>${dots(n)}<p class="muted">${n.tier < 2 ? 'Kleine Eier schlüpfen schnell. Später kommen große Eier mit riesigen Tieren!' : n.tier < 5 ? 'Je größer das Ei, desto größer das Tier – und desto länger braucht es.' : 'Ein riesiges Ei! Darin wächst etwas ganz Besonderes.'}</p></div></div>`
+  const nestHtml = n ? `<div class="nest">${egg(n, 132)}<div><p class="lead">${cold && !done ? `Dein Ei ist kalt geworden – es war schon ${days(cold)} warm. Im Nest liegt ein neues Ei: Es braucht <b>${days(n.days)}</b> Wärme.` : done ? `Dein Ei ist für heute warm: <b>Tag ${n.warm} von ${n.days}</b>.` : n.warm ? `Dein Ei ist schon <b>${days(n.warm)}</b> warm. Es braucht <b>${days(n.days)}</b>.` : `In deinem Nest liegt ${st.egg ? 'ein neues Ei' : 'ein Ei'}. Es braucht <b>${days(n.days)}</b> Wärme.`}</p>${dots(n)}<p class="${risk || cold ? 'note warn' : 'muted'}" id="eggRule">Ein Ei muss <b>jeden Tag</b> gewärmt werden. Wer einen Tag auslässt, verliert es.</p><p class="muted">${n.tier < 2 ? 'Kleine Eier schlüpfen schnell. Später kommen große Eier mit riesigen Tieren!' : n.tier < 5 ? 'Je größer das Ei, desto größer das Tier – und desto länger braucht es.' : 'Ein riesiges Ei! Darin wächst etwas ganz Besonderes.'}</p></div></div>`
     : `<div class="nest"><span data-pet="sternendrache" data-size="132"></span><div><p class="lead">Alle ${EGGS.length} Eier sind geschlüpft. Du hast sie alle!</p><p class="muted">Die Tagesaufgabe hält dich weiter in Übung.</p></div></div>`;
   app.screen(`<div class="maphead"><div><small class="kicker">Jeden Tag einmal · etwa 2 Minuten</small><h2>Tagesaufgabe</h2></div><button class="btn sm" data-act="back">Zurück</button></div>${nestHtml}
     <p>${done ? 'Du hast die Tagesaufgabe heute schon geschafft. Du kannst nochmal üben – fürs Ei zählt es erst morgen wieder.' : `<b>${TRAIN_COUNT} Noten</b> aus allem, was du schon kennst. Was noch wackelt, kommt öfter dran.`}</p>${msg ? `<p class="note warn" role="status">${esc(msg)}</p>` : ''}
@@ -38,7 +38,7 @@ export function dailyDone(app, level, raw) {
   if (r.hatched) return hatch(app, before, r, raw);
   const n = r.nest;
   app.screen(`<div class="petcard"><small class="kicker">Tagesaufgabe</small><h2>${r.counted ? 'Geschafft!' : 'Gut geübt!'}</h2>${n ? egg(n, 150, r.counted ? 'warm' : '') : '<span data-pet="sternendrache" data-size="150"></span>'}
-    ${n ? `<p class="lead" id="dEgg">${r.counted ? `Dein Ei ist einen Tag wärmer: <b>Tag ${n.warm} von ${n.days}</b>.` : `Dein Ei war heute schon warm: <b>Tag ${n.warm} von ${n.days}</b>.`}</p>${dots(n)}<p>${r.counted ? `Noch ${days(n.left)}, dann schlüpft es. Komm morgen wieder!` : 'Morgen kannst du es weiter wärmen.'}</p>` : '<p class="lead">Stark – du bleibst in Übung!</p>'}
+    ${n ? `<p class="lead" id="dEgg">${r.counted ? `Dein Ei ist einen Tag wärmer: <b>Tag ${n.warm} von ${n.days}</b>.` : `Dein Ei war heute schon warm: <b>Tag ${n.warm} von ${n.days}</b>.`}</p>${dots(n)}<p>${r.counted ? `Noch ${days(n.left)}, dann schlüpft es. Komm morgen wieder – sonst wird es kalt!` : 'Morgen musst du es weiter wärmen, sonst wird es kalt.'}</p>` : '<p class="lead">Stark – du bleibst in Übung!</p>'}
     <p class="muted" id="dLine">${line(raw)}</p><div class="row"><button class="btn go big" data-act="map">Weiter</button></div></div>`, { map: () => map(app) });
   app.audio.fanfare(r.counted ? 2 : 1);
 }

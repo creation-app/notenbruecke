@@ -114,13 +114,16 @@ const hm = (i, j) => j >= 0 && j < 9 && i >= 0 && i < 11 && HEAD_MAP[j][i] === '
 /** Viertelnote; (x,y) = Mitte des Notenkopfs. style: 'gold' | 'ink' | 'ghost' | 'ok' */
 export function drawNote(ctx, x, y, o = {}) {
   const st = o.style || 'ink', line = o.line || C.K;
+  const b = o.beats || 1, hollow = b >= 2, dotted = Math.abs(b - 1.5) < 0.01 || Math.abs(b - 3) < 0.01, flag = b <= 0.5, noStem = b >= 4;
   const fill = st === 'gold' ? [C.YE, C.OR] : st === 'ok' ? [C.GL, C.G1] : st === 'ghost' ? [null, null] : [line, line];
   for (let j = 0; j < 9; j++) for (let i = 0; i < 11; i++) if (hm(i, j)) {
     const edge = !(hm(i - 1, j) && hm(i + 1, j) && hm(i, j - 1) && hm(i, j + 1));
-    const col = edge ? line : (i + j > 11 ? fill[1] : fill[0]); if (col) px(ctx, x - 5 + i, y - 4 + j, col);
+    const col = edge ? line : hollow ? (st === 'gold' ? '#FFF1D6' : st === 'ok' ? '#E3F5C4' : null) : (i + j > 11 ? fill[1] : fill[0]); if (col) px(ctx, x - 5 + i, y - 4 + j, col);
   }
   if (st === 'gold') { px(ctx, x - 3, y - 2, '#FFF'); px(ctx, x - 2, y - 2, '#FFF'); px(ctx, x - 3, y - 1, '#FFF'); }
-  if (o.stem !== false) { ctx.fillStyle = line; if (o.up !== false) ctx.fillRect(x + 5, y - 28, 1, 27); else ctx.fillRect(x - 5, y + 2, 1, 27); }
+  if (o.stem !== false && !noStem) { ctx.fillStyle = line; const sl = o.stemLen || 27; if (o.up !== false) ctx.fillRect(x + 5, y - 1 - sl, 1, sl); else ctx.fillRect(x - 5, y + 2, 1, sl);
+    if (flag) { if (o.up !== false) for (let k = 0; k < 6; k++) ctx.fillRect(x + 6 + Math.min(k, 3), y - 1 - sl + k * 2, k < 4 ? 2 : 1, 2); else for (let k = 0; k < 6; k++) ctx.fillRect(x - 4 + Math.min(k, 3), y + sl - k * 2, k < 4 ? 2 : 1, 2); } }
+  if (dotted) { ctx.fillStyle = line; ctx.fillRect(x + 8, y - (Math.abs(y - STAFF_BOTTOM) % 10 === 0 ? 3 : 1), 2, 2); }
   if (o.alt) { if (o.halo) for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [1, -1], [-1, 1], [1, 1]]) drawAccidental(ctx, x - 13 + dx, y + dy, o.alt, o.halo); drawAccidental(ctx, x - 13, y, o.alt, line); } // halo: heller Rand, damit das Vorzeichen auf jedem Hintergrund lesbar ist
 }
 const SHARP = ['..X..X.', '..X..XX', '..XXXX.', 'XXX..X.', '..X..X.', '..X..XX', '..XXXX.', 'XXX..X.', '..X..X.'];

@@ -61,7 +61,7 @@ export class JumpScene {
       this.ghost = { note: heard, pos: staffPos(heard, this.clef), t: 0 }; this.oopsT = 0.5; app.audio.sfx('oops'); app.panel.flash(midi, 'bad');
       if (cls === 'wrong') app.panel.say(app.listening ? 'Ich höre …' : INSTR.pad, `Das war <b>${nameHtml(heard)}</b>. Versuch es noch einmal!`, 'warn');
       else app.panel.say(app.listening ? 'Ich höre …' : INSTR.pad, `Das ist ein <b>${letterName(tg)}</b>, aber eine Oktave zu ${cls === 'octave-high' ? 'hoch' : 'tief'}${isGuitar() ? ' – eine andere Saite' : ''}.`, 'warn');
-      if (this.endless && cls === 'wrong') this.loseLife(); // Oktav-Verwechslungen kosten kein Leben
+      if (this.endless) this.loseLife(); // jeder falsche Ton kostet ein Leben, auch eine Oktav-Verwechslung
       if (this.tries >= this.hintAfter && !this.hint) { this.hint = true; app.panel.setHint(tm); app.bubble(isGuitar() ? `Tipp: ${gripText(tm)}.` : 'Tipp: Die leuchtende Taste ist richtig.', isGuitar() ? 6 : 4); }
     }
   }

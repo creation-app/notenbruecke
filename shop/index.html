@@ -158,7 +158,7 @@ textarea{width:100%;font:16px/1.3 ui-monospace,monospace;border:4px solid var(--
 .passgrid,.setgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .card{background:#fff;border:4px solid var(--k);padding:12px 16px}.card h3{margin-top:2px}
 .bigno{font-family:"Press Start 2P",monospace;font-size:40px;margin:4px 0}.bigno small{font-family:"Atkinson Hyperlegible",sans-serif;font-size:22px;font-weight:700}
-.nw{white-space:nowrap}.bars{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0 2px}.bars .dailybar{margin:0}#stage.port .bars{grid-template-columns:1fr;gap:8px}#stage.port.phone .dailybar{padding:5px 10px;gap:10px;min-height:70px}#stage.port.phone .dailybar small{display:none}#stage.port.phone .dailybar:disabled small{display:block}#stage.port.phone .dailybar .eggpic canvas{height:34px !important;width:auto !important}#stage.port.phone .inf{font-size:20px;width:34px}.endbar{background:#E6ECFB}.inf{font-family:"Press Start 2P",monospace;font-size:26px;width:44px;text-align:center;flex:none;color:#3A2F8F}.endgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:12px 0}#stage.port .endgrid{grid-template-columns:1fr}.btn.end{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;min-height:120px;border-left-width:14px}.btn.end.t-jump{border-left-color:var(--g1)}.btn.end.t-regen{border-left-color:#2998E8}.btn.end.t-bau{border-left-color:#FF9A3D}.btn.end b{font-size:24px}.btn.end .rec{margin-top:auto;font-size:18px}.hearts{letter-spacing:2px;white-space:nowrap}.hearts i{font-style:normal;color:#5A6478;opacity:.45}.hearts i.on{color:#EF5350;opacity:1}.tbar{display:inline-block;width:86px;height:10px;border:2px solid currentColor;vertical-align:1px;margin-left:6px}.tbar i{display:block;height:100%;width:100%;background:#FFD75E}.dailybar{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#FFF7DD;border:4px solid var(--k);box-shadow:4px 4px 0 var(--k);padding:8px 12px;margin:12px 0 2px;font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}.dailybar *{pointer-events:none}.dailybar.done{background:#E7F5D0}.dailybar:disabled{background:#F1ECE0;cursor:default}.dailybar:disabled .eggpic{opacity:.5}.dailybar .dtxt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.dailybar b{font-size:21px}.dailybar small{font-size:16px;line-height:1.2}.cta{font-style:normal;font-weight:700;background:var(--ye);border:3px solid var(--k);padding:6px 14px;font-size:19px;white-space:nowrap}.cta.ok{background:var(--g1,#78B833);color:#fff}.eggpic{display:inline-flex;flex:none}.eggdots{display:flex;gap:4px;flex-wrap:wrap;max-width:132px;justify-content:center}.eggdots i{width:13px;height:13px;border:2px solid var(--k);background:#fff}.eggdots i.on{background:#FF9A3D}.nest{display:flex;gap:18px;align-items:center;margin:8px 0 12px;flex-wrap:wrap}.nest>div{flex:1;min-width:220px}.nest .eggdots{justify-content:flex-start;max-width:none;margin:6px 0}.petcard .eggdots{max-width:260px}@keyframes wiggle{0%,100%{transform:rotate(0)}20%{transform:rotate(-9deg)}40%{transform:rotate(9deg)}60%{transform:rotate(-6deg)}80%{transform:rotate(6deg)}}.eggpic.wiggle canvas{animation:wiggle .45s ease-in-out infinite;transform-origin:50% 90%}@keyframes eggwarm{0%{transform:scale(.9)}60%{transform:scale(1.08)}100%{transform:scale(1)}}.eggpic.warm canvas{animation:eggwarm .6s ease-out}.hatchpet canvas{animation:eggwarm .7s ease-out}.crown{display:inline-block;width:34px;height:24px;vertical-align:-4px;background:#D9CDB4;clip-path:polygon(0 100%,0 18%,24% 56%,50% 0,76% 56%,100% 18%,100% 100%);flex:none}.crown.c1{background:#C8813A}.crown.c2{background:#AEBBCB}.crown.c3{background:#FFC83D}.crown.mini{width:22px;height:16px;vertical-align:-2px}.crown.huge{width:150px;height:104px;margin:6px 0}.mq2{margin-top:16px}.mq2.first{margin-top:10px}.mq2 small{display:block;font-family:inherit;font-size:17px;font-weight:400;letter-spacing:0;text-transform:none;margin-top:4px}.nodes.masters{grid-template-columns:repeat(3,minmax(0,1fr))}.node.master{border-color:#8A6412;box-shadow:4px 4px 0 #8A6412;background:#FFF7DD;min-height:92px}.node.master:disabled{border-color:var(--k);box-shadow:4px 4px 0 var(--k);background:#fff}.pill.kr{background:#8A6412;color:#fff}.cal{display:grid;grid-template-columns:repeat(7,26px);gap:5px;margin:8px 0 4px}.cal i{width:26px;height:26px;background:#E3D5B8}.cal .l1{background:#B9DE7A}.cal .l2{background:var(--g1)}.cal .l3{background:var(--g2)}
+.nw{white-space:nowrap}.bars{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:12px;margin:12px 0 2px}.bars .dailybar{margin:0}#stage.phone:not(.port) .bars{gap:8px}#stage.phone:not(.port) .bars .cta{display:none}#stage.phone:not(.port) .dailybar{padding:6px 8px;gap:8px}#stage.phone:not(.port) .dailybar b{font-size:19px}#stage.phone:not(.port) .dailybar small{font-size:14px}#stage.phone:not(.port) .eggdots{max-width:60px}#stage.port .bars{grid-template-columns:1fr 1fr;gap:8px}#stage.port .bars .dailybar:first-child{grid-column:1 / -1}#stage.port .bars .endbar .cta,#stage.port .bars .songbar .cta{display:none}#stage.port.phone .bars .endbar small,#stage.port.phone .bars .songbar small{display:none}#stage.port.phone .dailybar{padding:5px 10px;gap:10px;min-height:70px}#stage.port.phone .dailybar small{display:none}#stage.port.phone .dailybar:disabled small{display:block}#stage.port.phone .dailybar .eggpic canvas{height:34px !important;width:auto !important}#stage.port.phone .inf{font-size:20px;width:34px}.endbar{background:#E6ECFB}.songbar{background:#FCE9EF}.songbar .inf{color:#B93A3A}.nodes.songs{grid-template-columns:repeat(3,minmax(0,1fr))}#stage.port .nodes.songs{grid-template-columns:repeat(2,minmax(0,1fr))}#stage.port.phone .nodes.songs{grid-template-columns:1fr}.node.song{min-height:128px;border-left-color:#B93A3A}.node.song .srow{display:flex;align-items:center;gap:8px;justify-content:space-between;width:100%}.node.song .srow small{font-size:15px}.songmodes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:10px 0}#stage.port .songmodes{grid-template-columns:1fr}.songmodes .card{display:flex;flex-direction:column;gap:8px;align-items:flex-start}.songmodes .card p{margin:0;flex:1}.songmodes .card.off{opacity:.7}.songmodes h3{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0}.btn.seg small{font-weight:400}#stage.phone .songmodes .btn:not(.sm){min-height:72px}#stage.phone .songmodes .btn.sm{min-height:62px}.inf{font-family:"Press Start 2P",monospace;font-size:26px;width:44px;text-align:center;flex:none;color:#3A2F8F}.endgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:12px 0}#stage.port .endgrid{grid-template-columns:1fr}.btn.end{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;min-height:120px;border-left-width:14px}.btn.end.t-jump{border-left-color:var(--g1)}.btn.end.t-regen{border-left-color:#2998E8}.btn.end.t-bau{border-left-color:#FF9A3D}.btn.end b{font-size:24px}.btn.end .rec{margin-top:auto;font-size:18px}.hearts{letter-spacing:2px;white-space:nowrap}.hearts i{font-style:normal;color:#5A6478;opacity:.45}.hearts i.on{color:#EF5350;opacity:1}.tbar{display:inline-block;width:86px;height:10px;border:2px solid currentColor;vertical-align:1px;margin-left:6px}.tbar i{display:block;height:100%;width:100%;background:#FFD75E}.dailybar{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#FFF7DD;border:4px solid var(--k);box-shadow:4px 4px 0 var(--k);padding:8px 12px;margin:12px 0 2px;font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}.dailybar *{pointer-events:none}.dailybar.done{background:#E7F5D0}.dailybar.risk{background:#FFE3B8;border-color:#B95F12;box-shadow:4px 4px 0 #B95F12}.dailybar.cold{background:#E3ECF7}.dailybar.cold .eggpic{filter:grayscale(.8)}.dailybar:disabled{background:#F1ECE0;cursor:default}.dailybar:disabled .eggpic{opacity:.5}.dailybar .dtxt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.dailybar b{font-size:21px}.dailybar small{font-size:16px;line-height:1.2}.cta{font-style:normal;font-weight:700;background:var(--ye);border:3px solid var(--k);padding:6px 14px;font-size:19px;white-space:nowrap}.cta.ok{background:var(--g1,#78B833);color:#fff}.eggpic{display:inline-flex;flex:none}.eggdots{display:flex;gap:4px;flex-wrap:wrap;max-width:132px;justify-content:center}.eggdots i{width:13px;height:13px;border:2px solid var(--k);background:#fff}.eggdots i.on{background:#FF9A3D}.nest{display:flex;gap:18px;align-items:center;margin:8px 0 12px;flex-wrap:wrap}.nest>div{flex:1;min-width:220px}.nest .eggdots{justify-content:flex-start;max-width:none;margin:6px 0}.petcard .eggdots{max-width:260px}@keyframes wiggle{0%,100%{transform:rotate(0)}20%{transform:rotate(-9deg)}40%{transform:rotate(9deg)}60%{transform:rotate(-6deg)}80%{transform:rotate(6deg)}}.eggpic.wiggle canvas{animation:wiggle .45s ease-in-out infinite;transform-origin:50% 90%}@keyframes eggwarm{0%{transform:scale(.9)}60%{transform:scale(1.08)}100%{transform:scale(1)}}.eggpic.warm canvas{animation:eggwarm .6s ease-out}.hatchpet canvas{animation:eggwarm .7s ease-out}.crown{display:inline-block;width:34px;height:24px;vertical-align:-4px;background:#D9CDB4;clip-path:polygon(0 100%,0 18%,24% 56%,50% 0,76% 56%,100% 18%,100% 100%);flex:none}.crown.c1{background:#C8813A}.crown.c2{background:#AEBBCB}.crown.c3{background:#FFC83D}.crown.mini{width:22px;height:16px;vertical-align:-2px}.crown.huge{width:150px;height:104px;margin:6px 0}.mq2{margin-top:16px}.mq2.first{margin-top:10px}.mq2 small{display:block;font-family:inherit;font-size:17px;font-weight:400;letter-spacing:0;text-transform:none;margin-top:4px}.nodes.masters{grid-template-columns:repeat(3,minmax(0,1fr))}.node.master{border-color:#8A6412;box-shadow:4px 4px 0 #8A6412;background:#FFF7DD;min-height:92px}.node.master:disabled{border-color:var(--k);box-shadow:4px 4px 0 var(--k);background:#fff}.pill.kr{background:#8A6412;color:#fff}.cal{display:grid;grid-template-columns:repeat(7,26px);gap:5px;margin:8px 0 4px}.cal i{width:26px;height:26px;background:#E3D5B8}.cal .l1{background:#B9DE7A}.cal .l2{background:var(--g1)}.cal .l3{background:var(--g2)}
 .tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.tag{background:var(--k);color:var(--cream);padding:3px 10px;font-weight:700}
 .board{width:100%;border-collapse:collapse;font-size:22px;background:#fff}.board th,.board td{border:3px solid var(--k);padding:8px 12px;text-align:left}.board th{background:var(--k);color:var(--cream)}.board .me{background:#FFE9A8;font-weight:700}
 .shortcode{font-family:"Press Start 2P",monospace;font-size:26px;letter-spacing:1px;background:#F3E3C3;padding:12px 8px;text-align:center;user-select:text;-webkit-user-select:text;margin:6px 0}
@@ -742,6 +742,43 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   });
 
   // src/gfx.js
+  var gfx_exports = {};
+  __export(gfx_exports, {
+    BUDDY_STAGE: () => BUDDY_STAGE,
+    C: () => C,
+    HATS: () => HATS,
+    HEROES: () => HEROES,
+    HERO_H: () => HERO_H,
+    HERO_W: () => HERO_W,
+    Particles: () => Particles,
+    STAFF_BOTTOM: () => STAFF_BOTTOM,
+    STEP_PX: () => STEP_PX,
+    THEMES: () => THEMES,
+    VIEW_H: () => VIEW_H,
+    VIEW_W: () => VIEW_W,
+    buddyStage: () => buddyStage,
+    cv: () => cv,
+    drawAccidental: () => drawAccidental,
+    drawBackground: () => drawBackground,
+    drawClef: () => drawClef,
+    drawGlow: () => drawGlow,
+    drawLedgers: () => drawLedgers,
+    drawNote: () => drawNote,
+    drawPlatform: () => drawPlatform,
+    drawStaff: () => drawStaff,
+    fromMap: () => fromMap,
+    hatOf: () => hatOf,
+    makeBackground: () => makeBackground,
+    makeBuddy: () => makeBuddy,
+    makeCreature: () => makeCreature,
+    makeEgg: () => makeEgg,
+    makeHero: () => makeHero,
+    makePegasus: () => makePegasus,
+    makePet: () => makePet,
+    q: () => q,
+    setViewW: () => setViewW,
+    yOfPos: () => yOfPos
+  });
   function setViewW(w) {
     VIEW_W = w;
   }
@@ -940,10 +977,11 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   }
   function drawNote(ctx, x, y, o = {}) {
     const st = o.style || "ink", line2 = o.line || C.K;
+    const b = o.beats || 1, hollow = b >= 2, dotted = Math.abs(b - 1.5) < 0.01 || Math.abs(b - 3) < 0.01, flag = b <= 0.5, noStem = b >= 4;
     const fill2 = st === "gold" ? [C.YE, C.OR] : st === "ok" ? [C.GL, C.G1] : st === "ghost" ? [null, null] : [line2, line2];
     for (let j = 0; j < 9; j++) for (let i = 0; i < 11; i++) if (hm(i, j)) {
       const edge = !(hm(i - 1, j) && hm(i + 1, j) && hm(i, j - 1) && hm(i, j + 1));
-      const col = edge ? line2 : i + j > 11 ? fill2[1] : fill2[0];
+      const col = edge ? line2 : hollow ? st === "gold" ? "#FFF1D6" : st === "ok" ? "#E3F5C4" : null : i + j > 11 ? fill2[1] : fill2[0];
       if (col) px(ctx, x - 5 + i, y - 4 + j, col);
     }
     if (st === "gold") {
@@ -951,10 +989,19 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       px(ctx, x - 2, y - 2, "#FFF");
       px(ctx, x - 3, y - 1, "#FFF");
     }
-    if (o.stem !== false) {
+    if (o.stem !== false && !noStem) {
       ctx.fillStyle = line2;
-      if (o.up !== false) ctx.fillRect(x + 5, y - 28, 1, 27);
-      else ctx.fillRect(x - 5, y + 2, 1, 27);
+      const sl = o.stemLen || 27;
+      if (o.up !== false) ctx.fillRect(x + 5, y - 1 - sl, 1, sl);
+      else ctx.fillRect(x - 5, y + 2, 1, sl);
+      if (flag) {
+        if (o.up !== false) for (let k = 0; k < 6; k++) ctx.fillRect(x + 6 + Math.min(k, 3), y - 1 - sl + k * 2, k < 4 ? 2 : 1, 2);
+        else for (let k = 0; k < 6; k++) ctx.fillRect(x - 4 + Math.min(k, 3), y + sl - k * 2, k < 4 ? 2 : 1, 2);
+      }
+    }
+    if (dotted) {
+      ctx.fillStyle = line2;
+      ctx.fillRect(x + 8, y - (Math.abs(y - STAFF_BOTTOM) % 10 === 0 ? 3 : 1), 2, 2);
     }
     if (o.alt) {
       if (o.halo) for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [1, -1], [-1, 1], [1, 1]]) drawAccidental(ctx, x - 13 + dx, y + dy, o.alt, o.halo);
@@ -1935,10 +1982,10 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         get heard() {
           return this.micState === "on" && !this.gated ? this.tracker.current : null;
         }
-        tone(freq, at, dur, type = "square", vol = 0.06) {
+        tone(freq2, at, dur, type = "square", vol = 0.06) {
           const c = this.ctx, o = c.createOscillator(), g = c.createGain();
           o.type = type;
-          o.frequency.value = freq;
+          o.frequency.value = freq2;
           g.gain.setValueAtTime(0, at);
           g.gain.linearRampToValueAtTime(vol, at + 8e-3);
           g.gain.exponentialRampToValueAtTime(8e-4, at + dur);
@@ -1962,10 +2009,10 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
           this.gateUntil = Math.max(this.gateUntil, performance.now() + end * 1e3 + 140);
         }
         /** Stimme für die Musik: läuft über einen eigenen Lautstärkeregler mit etwas Hall. */
-        voice(freq, at, dur, type, vol, slide) {
+        voice(freq2, at, dur, type, vol, slide) {
           const c = this.ctx, o = c.createOscillator(), g = c.createGain();
           o.type = type;
-          o.frequency.setValueAtTime(freq, at);
+          o.frequency.setValueAtTime(freq2, at);
           if (slide) o.frequency.exponentialRampToValueAtTime(slide, at + dur);
           g.gain.setValueAtTime(0, at);
           g.gain.linearRampToValueAtTime(vol, at + 0.012);
@@ -2129,8 +2176,8 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   }
   function topConfusions(conf, max = 5) {
     return Object.entries(conf || {}).map(([k, n]) => {
-      const [target, played] = k.split(">");
-      return { target, played, n };
+      const [target, played2] = k.split(">");
+      return { target, played: played2, n };
     }).filter((c) => c.n >= 2).sort((a, b) => b.n - a.n).slice(0, max);
   }
   var WEIGHT, MASTERED_BOX, SLOW_PLAY_MS, SLOW_WRITE_MS;
@@ -2679,6 +2726,16 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         }
       }
     }
+    {
+      const sa2 = obj(a.songs), sb2 = obj(b.songs);
+      if (Object.keys(sa2).length || Object.keys(sb2).length) {
+        out.songs = {};
+        for (const k of /* @__PURE__ */ new Set([...Object.keys(sa2), ...Object.keys(sb2)])) {
+          const x = obj(sa2[k]), y = obj(sb2[k]);
+          out.songs[k] = { step: Math.max(num(x.step), num(y.step)), tempo: Math.max(num(x.tempo), num(y.tempo)), bpm: Math.max(num(x.bpm), num(y.bpm)), runs: Math.max(num(x.runs), num(y.runs)) };
+        }
+      }
+    }
     out.regenBest = Math.max(num(a.regenBest), num(b.regenBest));
     if (Array.isArray(a.skip) || Array.isArray(b.skip)) {
       const sa = a.skip || [], sb = b.skip || [];
@@ -3053,6 +3110,23 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   function dailyOpen(profile) {
     return !!profile.unlockAll || LEVELS.filter((l) => profile.levels[l.id]).length >= DAILY_MIN_LEVELS || skipOf(profile).some((s) => s > 1);
   }
+  function daysSince(profile, day = dayKey()) {
+    const a = dayNo(dailyState(profile).last), b = dayNo(day);
+    return a == null || b == null ? null : b - a;
+  }
+  function eggAtRisk(profile, day = dayKey()) {
+    const s = dailyState(profile);
+    return s.warm > 0 && daysSince(profile, day) === 1;
+  }
+  function coolEgg(profile, day = dayKey()) {
+    const s = dailyState(profile), gap = daysSince(profile, day);
+    if (!(s.warm > 0 && gap != null && gap >= 2)) return false;
+    profile.daily = { ...s, warm: 0, cold: s.warm, lost: ((profile.daily || {}).lost | 0) + 1 };
+    return true;
+  }
+  function coldDays(profile) {
+    return (profile && profile.daily || {}).cold | 0;
+  }
   function doneToday(profile, day = dayKey()) {
     return dailyState(profile).last === day;
   }
@@ -3081,7 +3155,8 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     return all.filter((e) => first.includes(e.key) && e.clef === "treble");
   }
   function completeDaily(profile, day = dayKey()) {
-    const s = dailyState(profile);
+    coolEgg(profile, day);
+    const s = dailyState(profile), lost = (profile.daily || {}).lost | 0;
     if (s.last === day) return { counted: false, hatched: null, ...s, nest: nest(profile) };
     s.last = day;
     s.total++;
@@ -3096,10 +3171,10 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
         s.warm = 0;
       }
     }
-    profile.daily = s;
+    profile.daily = lost ? { ...s, lost } : s;
     return { counted: true, hatched, ...s, nest: nest(profile) };
   }
-  var DAILY_MIN_LEVELS;
+  var DAILY_MIN_LEVELS, dayNo;
   var init_daily = __esm({
     "src/daily.js"() {
       init_save();
@@ -3108,6 +3183,10 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       init_music();
       init_pets();
       DAILY_MIN_LEVELS = 3;
+      dayNo = (k) => {
+        const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(k || "");
+        return m ? Math.round(Date.UTC(+m[1], +m[2] - 1, +m[3]) / 864e5) : null;
+      };
     }
   });
 
@@ -3192,6 +3271,157 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       init_endless();
       init_music();
       WHAT = () => ({ jump: ["Springen", `Noten ${INSTR.onThe} spielen`], regen: ["Notenregen", "Namen antippen"], bau: ["Br\xFCckenbauer", "Noten ins System setzen"] });
+    }
+  });
+
+  // src/songs.js
+  function songs() {
+    return SETS2[LEVEL_SET] || SETS2.klavier;
+  }
+  function songById(id) {
+    return songs().find((s) => s.id === id) || null;
+  }
+  function songKey(id) {
+    return (LEVEL_SET === "gitarre" ? "g-" : "") + id;
+  }
+  function songRec(profile, id) {
+    const r = (profile.songs || {})[songKey(id)] || {};
+    return { step: r.step || 0, tempo: r.tempo || 0, bpm: r.bpm || 0, runs: r.runs || 0 };
+  }
+  function missingNotes(profile, song2) {
+    const st = profile.notes || {};
+    return profile.unlockAll ? [] : song2.keys.filter((k) => !(st[k] && st[k].seen >= 1));
+  }
+  function songOpen(profile, song2) {
+    return missingNotes(profile, song2).length === 0;
+  }
+  function songStars(mode, ratio) {
+    return mode === "tempo" ? ratio >= 0.9 ? 3 : ratio >= 0.75 ? 2 : ratio >= 0.5 ? 1 : 0 : ratio >= 0.9 ? 3 : ratio >= 0.7 ? 2 : 1;
+  }
+  function recordSong(profile, id, mode, ratio, bpm) {
+    const all = profile.songs = profile.songs || {}, key = songKey(id), r = all[key] || (all[key] = { step: 0, tempo: 0, bpm: 0, runs: 0 }), stars2 = songStars(mode, ratio), prev = r[mode] || 0;
+    r.runs = (r.runs || 0) + 1;
+    r[mode] = Math.max(prev, stars2);
+    if (mode === "tempo" && stars2 > 0) r.bpm = Math.max(r.bpm || 0, Math.round(bpm));
+    return { stars: stars2, best: r[mode], better: stars2 > prev };
+  }
+  function songStarTotal(profile) {
+    return songs().reduce((a, s) => {
+      const r = songRec(profile, s.id);
+      return a + r.step + r.tempo;
+    }, 0);
+  }
+  var RAW, TO_G, parse, build, SETS2, TEMPOS;
+  var init_songs = __esm({
+    "src/songs.js"() {
+      init_music();
+      init_levels();
+      RAW = [
+        ["auclair", "Au clair de la lune", "Volkslied aus Frankreich", 4, 76, "c1 c1 c1 d1 | e1:2 d1:2 | c1 e1 d1 d1 | c1:4 | c1 c1 c1 d1 | e1:2 d1:2 | c1 e1 d1 d1 | c1:4"],
+        ["lamm", "Mary hat ein kleines Lamm", "Kinderlied aus den USA", 4, 84, "e1 d1 c1 d1 | e1 e1 e1:2 | d1 d1 d1:2 | e1 g1 g1:2 | e1 d1 c1 d1 | e1 e1 e1 e1 | d1 d1 e1 d1 | c1:4"],
+        ["entchen", "Alle meine Entchen", "Kinderlied aus Deutschland", 4, 84, "c1 d1 e1 f1 | g1:2 g1:2 | a1 a1 a1 a1 | g1:4 | a1 a1 a1 a1 | g1:4 | f1 f1 f1 f1 | e1:2 e1:2 | g1 g1 g1 g1 | c1:4"],
+        ["haenschen", "H\xE4nschen klein", "Kinderlied aus Deutschland", 4, 88, "g1 e1 e1:2 | f1 d1 d1:2 | c1 d1 e1 f1 | g1 g1 g1:2 | g1 e1 e1:2 | f1 d1 d1:2 | c1 e1 g1 g1 | c1:4"],
+        ["summ", "Summ, summ, summ", "Kinderlied aus B\xF6hmen", 4, 88, "g1 f1 e1:2 | d1 e1 f1 d1 | c1:4 | e1 f1 g1 e1 | d1 e1 f1 d1 | e1 f1 g1 e1 | d1 e1 f1 d1 | g1 f1 e1:2 | d1 e1 f1 d1 | c1:4"],
+        ["weihnachtsmann", "Morgen kommt der Weihnachtsmann", "Melodie aus Frankreich", 4, 92, "c1 c1 g1 g1 | a1 a1 g1:2 | f1 f1 e1 e1 | d1 d1 c1:2 | g1 g1 f1 f1 | e1 e1 d1:2 | g1 g1 f1 f1 | e1 e1 d1:2 | c1 c1 g1 g1 | a1 a1 g1:2 | f1 f1 e1 e1 | d1 d1 c1:2"],
+        ["fuchs", "Fuchs, du hast die Gans gestohlen", "Kinderlied aus Deutschland", 4, 96, "c1 d1 e1 f1 | g1 g1 g1 g1 | a1 f1 c2 a1 | g1:4 | a1 f1 c2 a1 | g1:4 | g1 f1 f1 f1 | f1 e1 e1 e1 | e1 d1 e1 d1 | c1:4"],
+        ["freude", "Freude sch\xF6ner G\xF6tterfunken", "Ludwig van Beethoven", 4, 92, "e1 e1 f1 g1 | g1 f1 e1 d1 | c1 c1 d1 e1 | e1:1.5 d1:0.5 d1:2 | e1 e1 f1 g1 | g1 f1 e1 d1 | c1 c1 d1 e1 | d1:1.5 c1:0.5 c1:2"],
+        ["jingle", "Jingle Bells", "James Lord Pierpont", 4, 100, "e1 e1 e1:2 | e1 e1 e1:2 | e1 g1 c1:1.5 d1:0.5 | e1:4 | f1 f1 f1:1.5 f1:0.5 | f1 e1 e1 e1:0.5 e1:0.5 | e1 d1 d1 e1 | d1:2 g1:2 | e1 e1 e1:2 | e1 e1 e1:2 | e1 g1 c1:1.5 d1:0.5 | e1:4 | f1 f1 f1:1.5 f1:0.5 | f1 e1 e1 e1:0.5 e1:0.5 | g1 g1 f1 d1 | c1:4"]
+      ];
+      TO_G = { c1: "g1", d1: "a1", e1: "h1", f1: "c2", g1: "d2", a1: "e2", c2: "g2" };
+      parse = (text, map2) => text.split(/\s+/).filter((t) => t && t !== "|").map((t) => {
+        const [k, d] = t.split(":"), key = map2 ? map2[k] : k;
+        if (!key) throw new Error("Note " + k + " l\xE4sst sich nicht f\xFCr die Gitarre setzen");
+        N(key);
+        return { key, beats: d ? +d : 1 };
+      });
+      build = (map2) => RAW.map(([id, title2, from, meter, bpm, text]) => {
+        const notes = parse(text, map2);
+        let t = 0;
+        for (const n of notes) {
+          n.t0 = t;
+          t += n.beats;
+        }
+        return { id, title: title2, from, meter, bpm, notes, beats: t, keys: [...new Set(notes.map((n) => n.key))].sort((a, b) => midiOf(N(a)) - midiOf(N(b))) };
+      });
+      SETS2 = { klavier: build(null), gitarre: build(TO_G) };
+      TEMPOS = [["langsam", 0.7], ["mittel", 0.85], ["Original", 1]];
+    }
+  });
+
+  // src/songui.js
+  function songLevel(song2, mode, bpm) {
+    return { id: "lied-" + song2.id, type: "song", song: song2, mode, bpm: bpm || song2.bpm, title: song2.title, theme: "abend", clef: "treble", notes: song2.keys, fresh: [] };
+  }
+  function songBar(p) {
+    const all = songs(), open = all.filter((s) => songOpen(p, s)).length, done = played(p);
+    return `<button class="dailybar songbar" data-act="songs"><span class="inf" aria-hidden="true">\u266A</span><span class="dtxt"><b>Liederbuch</b><small>${done ? `<b>${done}</b> von ${all.length} Liedern gespielt` : open ? `Echte Lieder vom Blatt spielen \u2013 ${open === 1 ? "1 Lied ist" : open + " Lieder sind"} offen` : "Echte Lieder vom Blatt \u2013 lerne noch ein paar Noten"}</small></span><i class="cta">${open ? "Los!" : "Ansehen"}</i></button>`;
+  }
+  function songBook(app) {
+    const p = app.profile;
+    app.backdrop("abend");
+    app.screen(
+      `<div class="maphead"><div><small class="kicker">Echte Lieder vom Blatt \xB7 ${songStarTotal(p)} von ${songs().length * 6} Sternen</small><h2>Liederbuch</h2></div><button class="btn sm" data-act="back">Zur\xFCck</button></div>
+    <p class="lead">Ein Lied \xF6ffnet sich, sobald du alle seine Noten kennst. Erst <b>Note f\xFCr Note</b>, dann <b>im Tempo</b>.</p>
+    <div class="nodes songs">${songs().map((s, i) => {
+        const r = songRec(p, s.id), miss = missingNotes(p, s), open = !miss.length;
+        return `<button class="node song ${r.step ? "done" : ""}" ${open ? "" : "disabled"} data-act="song" data-id="${s.id}"><span class="num">${i + 1}</span><b>${esc(s.title)}</b><small>${esc(s.from)}</small>${open ? `<span class="srow"><small>Note f\xFCr Note</small>${stars(r.step)}</span><span class="srow"><small>Im Tempo</small>${stars(r.tempo)}</span>` : `<small class="lock">Daf\xFCr fehlt dir noch: ${miss.slice(0, 4).map((k) => nameHtml(N(k))).join(", ")}${miss.length > 4 ? " \u2026" : ""}</small>`}</button>`;
+      }).join("")}</div>`,
+      { back: () => map(app), song: (e) => songCard(app, songById(e.dataset.id)) },
+      "wide"
+    );
+  }
+  function songCard(app, song2, msg = "") {
+    const p = app.profile, r = songRec(p, song2.id), mic = app.audio.micState, noMic = !app.keysOn && (mic === "denied" || mic === "unsupported");
+    let tempo = app._songTempo == null ? 0 : app._songTempo;
+    const run = (mode, bpm) => app.runLevel(songLevel(song2, mode, bpm));
+    const play = async (mode, keys) => {
+      app.audio.ensure();
+      if (keys) app.keysSession = true;
+      const bpm = song2.bpm * TEMPOS[tempo][1];
+      if (!app.keysOn) {
+        app.audio.micState = app.audio.micState === "on" ? "on" : "off";
+        const res = await app.audio.startMic();
+        if (res !== "on") return songCard(app, song2, "Das Mikrofon ist gerade nicht verf\xFCgbar.");
+        if (!p.calibrated) return calibrate(app, () => run(mode, bpm));
+      }
+      run(mode, bpm);
+    };
+    const render = () => app.screen(`<div class="maphead"><div><small class="kicker">Liederbuch \xB7 ${esc(song2.from)}</small><h2>${esc(song2.title)}</h2></div><button class="btn sm" data-act="back">Zur\xFCck</button></div>
+    <p class="lead">Noten in diesem Lied: ${song2.keys.map((k) => `<b>${nameHtml(N(k))}</b>`).join(", ")} \xB7 ${song2.notes.length} Noten im ${song2.meter}/4-Takt</p>${msg ? `<p class="note warn" role="status">${esc(msg)}</p>` : ""}
+    <div class="songmodes">
+      <div class="card"><h3>1. Anh\xF6ren</h3><p>H\xF6r dir das Lied an und lies mit.</p><button class="btn" data-act="listen">Anh\xF6ren</button></div>
+      <div class="card"><h3>2. Note f\xFCr Note ${stars(r.step)}</h3><p>Spiele das Lied in deinem Tempo. Wenn eine Note nicht stimmt, bekommst du Hilfe.</p><button class="btn go" data-act="${noMic ? "stepkeys" : "step"}">${noMic ? `Ohne Mikrofon: ${INSTR.pad}` : `Spielen ${INSTR.at}`}</button></div>
+      <div class="card ${r.step ? "" : "off"}"><h3>3. Im Tempo ${stars(r.tempo)}</h3>${r.step ? `<p>Spiele im Takt \u2013 wie in echter Musik.${r.bpm ? ` Dein schnellstes Tempo: <b>${r.bpm}</b>.` : ""}</p><div class="row tight" role="group" aria-label="Tempo">${TEMPOS.map(([nm, f], i) => `<button class="btn sm seg ${i === tempo ? "sel" : ""}" data-act="tempo" data-v="${i}" aria-pressed="${i === tempo}">${nm} <small>${Math.round(song2.bpm * f)}</small></button>`).join("")}</div><button class="btn go" data-act="${noMic ? "tempokeys" : "playtempo"}">${noMic ? `Ohne Mikrofon: ${INSTR.pad}` : "Im Tempo spielen"}</button>` : '<p class="muted">\xD6ffnet sich, wenn du das Lied einmal Note f\xFCr Note gespielt hast.</p>'}</div>
+    </div>`, { back: () => songBook(app), listen: () => {
+      app.audio.ensure();
+      run("listen", song2.bpm);
+    }, step: () => play("step", false), stepkeys: () => play("step", true), playtempo: () => play("tempo", false), tempokeys: () => play("tempo", true), tempo: (e) => {
+      tempo = +e.dataset.v;
+      app._songTempo = tempo;
+      render();
+    } }, "wide");
+    render();
+  }
+  function songResult(app, level, r) {
+    const song2 = level.song, tempo = level.mode === "tempo", next = songs()[songs().indexOf(song2) + 1], p = app.profile;
+    const head = tempo ? r.stars === 3 ? "Wie ein Profi!" : r.stars === 2 ? "Sch\xF6n im Takt!" : r.stars === 1 ? "Geschafft!" : "Noch nicht ganz \u2026" : r.stars === 3 ? "Wundersch\xF6n gespielt!" : r.stars === 2 ? "Gut gespielt!" : "Lied geschafft!";
+    app.screen(
+      `<div class="petcard"><small class="kicker">${esc(song2.title)} \xB7 ${tempo ? `im Tempo (${Math.round(level.bpm)})` : "Note f\xFCr Note"}</small><h2>${head}</h2>${stars(r.stars, "huge pop")}
+    <p id="sLine">${tempo ? `<b>${r.hits} von ${r.n}</b> Noten im Takt gespielt` : `Beim ersten Versuch richtig: <b>${r.hits} von ${r.n}</b>`}</p>
+    <p class="muted" id="sHint">${tempo ? r.stars === 0 ? "Probier es mit einem langsameren Tempo \u2013 oder nochmal Note f\xFCr Note." : r.stars < 3 ? "F\xFCr drei Sterne: mindestens 9 von 10 Noten im Takt." : level.bpm < song2.bpm - 1 ? "Stark! Schaffst du es auch schneller?" : "Besser geht es nicht!" : r.first ? "Jetzt kannst du das Lied auch <b>im Tempo</b> spielen." : r.stars < 3 ? "F\xFCr drei Sterne: mindestens 9 von 10 Noten beim ersten Versuch." : "Alles richtig gelesen!"}</p>
+    <div class="row"><button class="btn" data-act="book">Liederbuch</button><button class="btn" data-act="again">Nochmal</button>${!tempo ? '<button class="btn go" data-act="tempo">Im Tempo spielen</button>' : next && songOpen(p, next) && r.stars > 0 ? '<button class="btn go" data-act="next">N\xE4chstes Lied</button>' : ""}</div></div>`,
+      { book: () => songBook(app), again: () => songCard(app, song2), tempo: () => songCard(app, song2), next: () => songCard(app, next) }
+    );
+    app.audio.fanfare(Math.max(1, r.stars));
+  }
+  var played;
+  var init_songui = __esm({
+    "src/songui.js"() {
+      init_screens();
+      init_instrument();
+      init_music();
+      init_songs();
+      played = (p) => songs().filter((s) => songRec(p, s.id).step > 0).length;
     }
   });
 
@@ -5023,7 +5253,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
             app.panel.flash(midi, "bad");
             if (cls === "wrong") app.panel.say(app.listening ? "Ich h\xF6re \u2026" : INSTR.pad, `Das war <b>${nameHtml(heard)}</b>. Versuch es noch einmal!`, "warn");
             else app.panel.say(app.listening ? "Ich h\xF6re \u2026" : INSTR.pad, `Das ist ein <b>${letterName(tg)}</b>, aber eine Oktave zu ${cls === "octave-high" ? "hoch" : "tief"}${isGuitar() ? " \u2013 eine andere Saite" : ""}.`, "warn");
-            if (this.endless && cls === "wrong") this.loseLife();
+            if (this.endless) this.loseLife();
             if (this.tries >= this.hintAfter && !this.hint) {
               this.hint = true;
               app.panel.setHint(tm);
@@ -5585,7 +5815,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     }).join("")}</div>`;
     app.screen(`<div class="maphead"><button class="chip" data-act="prof" aria-label="Profil wechseln"><span data-hero="${p.hero}" data-hat="${hatOf(p, totalStars(p))}" data-size="36"></span><b>${esc(p.name)}</b></button>
     <div class="row tight"><span class="pill goal ${today >= goal ? "ok" : ""}" role="img" aria-label="Tagesziel: ${today} von ${goal} Minuten">Heute ge\xFCbt: ${Math.min(today, goal)} von ${goal} Minuten<i style="width:${Math.min(100, 100 * today / goal)}%"></i></span><span class="pill">${totalStars(p)} Sterne</span>${kr.any ? `<span class="pill kr">${kr.gold} von ${kr.total} Gold-Kronen</span>` : ""}</div></div>
-    <div class="bars">${dailyBar(p)}${endlessBar(p)}</div>
+    <div class="bars">${dailyBar(p)}${endlessBar(p)}${songBar(p)}</div>
     <h3 class="mapq">W\xE4hle eine Welt und dann ein Level:</h3>
     <div class="tabs" role="tablist">${WORLDS.map((w, i) => {
       const open = worldUnlocked(p, i);
@@ -5600,6 +5830,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       prof: () => profiles(app),
       daily: () => dailyCard(app),
       endless: () => endlessCard(app),
+      songs: () => songBook(app),
       train: () => trainSetup(app),
       coll: () => collection(app),
       pass: () => pass(app),
@@ -5615,7 +5846,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     const p = app.profile, needsPiano = level.type === "jump" || level.type === "boss", mic = app.audio.micState, keys = app.keysOn;
     const rule = level.master ? MASTER_RULES[level.type][3] : null, goldLine = !level.master ? "" : level.type === "regen" ? `F\xFCr Gold: mindestens <b>${rule.correct} Noten</b> in 60 Sekunden und h\xF6chstens <b>${rule.errors} Fehler</b>.` : `F\xFCr Gold: mindestens <b>${Math.ceil(rule.ratio * MASTER_LEN[level.type] - 1e-9)} von ${MASTER_LEN[level.type]}</b> beim ersten Versuch und im Schnitt h\xF6chstens <b>${String(rule.perNote).replace(".", ",")} Sekunden</b> pro Note.`;
     const eBest = level.endless ? endlessBest(p, level.type) : 0;
-    const how = level.endless ? { jump: `Lies jede Note und spiele sie ${INSTR.onThe}. F\xFCr jede Note hast du nur begrenzt Zeit \u2013 und es wird immer knapper.`, regen: "Tippe den Namen jeder Note, bevor sie das Tor erreicht. Der Notenregen wird immer schneller.", bau: "Setze jede Note an die richtige Stelle. F\xFCr jede Note hast du nur begrenzt Zeit \u2013 und es wird immer knapper." }[level.type] + " Du hast <b>drei Leben</b>." : level.master ? { jump: `Lies jede Note und spiele sie ${INSTR.onThe} \u2013 es kommen <b>alle Noten dieser Welt</b>, und es gibt keine Tipps.`, regen: "Tippe den Namen jeder Note. Es kommen <b>alle Noten dieser Welt</b>, und der Notenregen ist von Anfang an schnell.", bau: "Setze jede Note an die richtige Stelle. Es kommen <b>alle Noten dieser Welt</b> \u2013 z\xFCgig und ohne Fehler!" }[level.type] + " " + goldLine : { jump: `Lies die leuchtende Note und spiele sie ${INSTR.onThe}. ${INSTR.octave}`, boss: `Spiele die Melodie Note f\xFCr Note ${INSTR.onThe}.`, regen: "Tippe den Namen der leuchtenden Note, bevor sie das Tor erreicht. 60 Sekunden!", bau: "Schiebe die Note an die richtige Stelle und tippe auf \u201ESetzen\u201C." }[level.type];
+    const how = level.endless ? { jump: `Lies jede Note und spiele sie ${INSTR.onThe}. F\xFCr jede Note hast du nur begrenzt Zeit \u2013 und es wird immer knapper.${keys ? "" : " <b>Achte auf eine ruhige Umgebung:</b> Jeder falsche Ton, den das Mikrofon h\xF6rt, kostet ein Leben."}`, regen: "Tippe den Namen jeder Note, bevor sie das Tor erreicht. Der Notenregen wird immer schneller.", bau: "Setze jede Note an die richtige Stelle. F\xFCr jede Note hast du nur begrenzt Zeit \u2013 und es wird immer knapper." }[level.type] + " Du hast <b>drei Leben</b>." : level.master ? { jump: `Lies jede Note und spiele sie ${INSTR.onThe} \u2013 es kommen <b>alle Noten dieser Welt</b>, und es gibt keine Tipps.`, regen: "Tippe den Namen jeder Note. Es kommen <b>alle Noten dieser Welt</b>, und der Notenregen ist von Anfang an schnell.", bau: "Setze jede Note an die richtige Stelle. Es kommen <b>alle Noten dieser Welt</b> \u2013 z\xFCgig und ohne Fehler!" }[level.type] + " " + goldLine : { jump: `Lies die leuchtende Note und spiele sie ${INSTR.onThe}. ${INSTR.octave}`, boss: `Spiele die Melodie Note f\xFCr Note ${INSTR.onThe}.`, regen: "Tippe den Namen der leuchtenden Note, bevor sie das Tor erreicht. 60 Sekunden!", bau: "Schiebe die Note an die richtige Stelle und tippe auf \u201ESetzen\u201C." }[level.type];
     let micLine = "";
     if (needsPiano) micLine = keys ? `<p class="note">Du spielst mit: ${INSTR.pad}.</p>` : mic === "on" ? '<p class="note ok">Mikrofon ist an.</p>' : mic === "off" ? `<p class="note">${INSTR.place} Das Spiel fragt gleich nach dem Mikrofon.</p>` : `<p class="note warn">${mic === "denied" ? "Das Mikrofon wurde nicht erlaubt." : "Hier gibt es kein Mikrofon."} \xD6ffne den Link direkt in Safari oder Chrome und erlaube dort das Mikrofon. Bis dahin kannst du ohne Mikrofon spielen (${INSTR.pad}).</p>`;
     const blocked = needsPiano && !keys && (mic === "denied" || mic === "unsupported");
@@ -5876,7 +6107,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     const list = (ks) => ks.length ? ks.map((k) => `<span class="tag">${nameHtml(N(k))}</span>`).join("") : '<span class="muted">noch keine</span>';
     const conf = topConfusions(p.conf).filter((c) => safeN(c.target) && safeN(c.played));
     app.screen(`<div class="maphead"><h2>\xDCbungspass von ${esc(p.name)}</h2><button class="btn sm" data-act="back">Zur\xFCck</button></div>
-    <div class="passgrid"><div class="card"><h3>Ge\xFCbt</h3><p class="bigno" id="passStreak">${streak(p)}<small> ${streak(p) === 1 ? "Tag" : "Tage"} in Folge</small></p>${crownCount(p).any ? `<p id="passCrowns"><span class="nw">Meisterpr\xFCfungen: <b>${crownCount(p).gold} von ${crownCount(p).total}</b> Gold-Kronen</span></p>` : ""}${ENDLESS_TYPES.some((t) => endlessBest(p, t)) ? `<p id="passEndless">Endlos-Rekorde: ${ENDLESS_TYPES.map((t) => `<span class="nw">${{ jump: "Springen", regen: "Notenregen", bau: "Br\xFCckenbauer" }[t]} <b>${endlessBest(p, t) || "\u2013"}</b></span>`).join(" \xB7 ")}</p>` : ""}<p id="passDays"><span class="nw">\xDCbungstage insgesamt: <b>${practiceDays(p)}</b></span> <span class="nw">${practiced(p, dayKey()) ? "\xB7 heute schon ge\xFCbt" : "\xB7 heute noch nicht"}</span></p><p id="passMin"><span class="nw">Letzte 7 Tage: <b>${Math.floor(week / 60)} min</b></span> <span class="nw">\xB7 Insgesamt: <b>${Math.floor(total / 60)} min</b></span></p><div class="cal" role="img" aria-label="\xDCbungstage der letzten vier Wochen">${cells.join("")}</div><small class="muted">Die letzten 4 Wochen, heute unten rechts. Ein Tag z\xE4hlt ab 1 Minute.</small></div>
+    <div class="passgrid"><div class="card"><h3>Ge\xFCbt</h3><p class="bigno" id="passStreak">${streak(p)}<small> ${streak(p) === 1 ? "Tag" : "Tage"} in Folge</small></p>${crownCount(p).any ? `<p id="passCrowns"><span class="nw">Meisterpr\xFCfungen: <b>${crownCount(p).gold} von ${crownCount(p).total}</b> Gold-Kronen</span></p>` : ""}${ENDLESS_TYPES.some((t) => endlessBest(p, t)) ? `<p id="passEndless">Endlos-Rekorde: ${ENDLESS_TYPES.map((t) => `<span class="nw">${{ jump: "Springen", regen: "Notenregen", bau: "Br\xFCckenbauer" }[t]} <b>${endlessBest(p, t) || "\u2013"}</b></span>`).join(" \xB7 ")}</p>` : ""}${songs().some((s) => songRec(p, s.id).step) ? `<p id="passSongs"><span class="nw">Liederbuch: <b>${songs().filter((s) => songRec(p, s.id).step).length} von ${songs().length}</b> Liedern gespielt</span> <span class="nw">\xB7 <b>${songs().filter((s) => songRec(p, s.id).tempo).length}</b> im Tempo</span></p>` : ""}<p id="passDays"><span class="nw">\xDCbungstage insgesamt: <b>${practiceDays(p)}</b></span> <span class="nw">${practiced(p, dayKey()) ? "\xB7 heute schon ge\xFCbt" : "\xB7 heute noch nicht"}</span></p><p id="passMin"><span class="nw">Letzte 7 Tage: <b>${Math.floor(week / 60)} min</b></span> <span class="nw">\xB7 Insgesamt: <b>${Math.floor(total / 60)} min</b></span></p><div class="cal" role="img" aria-label="\xDCbungstage der letzten vier Wochen">${cells.join("")}</div><small class="muted">Die letzten 4 Wochen, heute unten rechts. Ein Tag z\xE4hlt ab 1 Minute.</small></div>
     <div class="card"><h3>Fortschritt</h3><p><b>${totalStars(p)}</b> Sterne \xB7 <b>${p.creatures.length}</b> von ${creatureTotal()} Notenwesen</p>${WORLDS.map((w, i) => `<p>${esc(w.short)}: ${doneCount(p, i)} von ${levelsOf(i).length} Leveln <span class="bar"><i style="width:${100 * doneCount(p, i) / levelsOf(i).length}%"></i></span></p>`).join("")}</div>
     <div class="card"><h3>Diese Noten sitzen sicher <small>(richtig und z\xFCgig)</small></h3><div class="tags">${list(sure)}</div><h3>Diese Noten noch \xFCben</h3><div class="tags">${list(weak)}</div>${weakNotes(p).length >= WEAK_MIN ? '<p><button class="btn sm go" data-act="weak">Diese Noten trainieren</button></p>' : ""}</div>
     <div class="card"><h3>H\xE4ufige Verwechslungen</h3>${conf.length ? conf.map((c) => `<p><b>${nameHtml(N(c.target))}</b> wird oft mit <b>${nameHtml(N(c.played))}</b> verwechselt <span class="muted">(${c.n}\xD7)</span></p>`).join("") : '<p class="muted">Bisher keine auff\xE4lligen Verwechslungen.</p>'}</div>
@@ -6116,6 +6347,8 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       init_music();
       init_dailyui();
       init_endlessui();
+      init_songui();
+      init_songs();
       init_endless();
       init_daily();
       init_pets();
@@ -6141,7 +6374,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       };
       standalone = () => !!(navigator.standalone || window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
       isApple = () => /iPad|iPhone|iPod/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
-      VERSION = "2.14 \xB7 28.11.2026";
+      VERSION = "2.15 \xB7 28.11.2026";
     }
   });
 
@@ -6150,12 +6383,14 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     return { id: "tagesaufgabe", type: "train", daily: true, title: "Tagesaufgabe", cfg: { input, range: "daily", acc: false, len: "count", weak: false }, pool: dailyPool(profile), theme: "himmel", clef: "treble", notes: [] };
   }
   function dailyBar(p) {
-    const open = dailyOpen(p), done = doneToday(p), n = nest(p);
-    const sub = !open ? `\xD6ffnet sich nach ${DAILY_MIN_LEVELS} Leveln` : done ? "Heute geschafft! Morgen geht es weiter." : n ? `${TRAIN_COUNT} Noten \u2013 dann wird dein Ei w\xE4rmer. Noch ${days(n.left)}!` : `${TRAIN_COUNT} Noten \u2013 bleib in \xDCbung!`;
-    return `<button class="dailybar ${done ? "done" : ""}" data-act="daily" ${open ? "" : "disabled"}>${n ? egg(n, 44) : '<span data-pet="sternendrache" data-size="52"></span>'}<span class="dtxt"><b>Tagesaufgabe</b><small>${sub}</small></span>${n && open ? dots(n) : ""}${!open ? "" : done ? '<i class="cta ok">geschafft</i>' : '<i class="cta">Los!</i>'}</button>`;
+    coolEgg(p);
+    const open = dailyOpen(p), done = doneToday(p), n = nest(p), cold = coldDays(p), risk = eggAtRisk(p);
+    const sub = !open ? `\xD6ffnet sich nach ${DAILY_MIN_LEVELS} Leveln` : done ? "Heute geschafft! Morgen wieder \u2013 sonst wird dein Ei kalt." : cold && n ? "Dein Ei ist kalt geworden. Ein neues liegt im Nest \u2013 w\xE4rme es heute!" : risk ? `Heute spielen, sonst wird dein Ei kalt! Noch ${days(n.left)}.` : n ? `${TRAIN_COUNT} Noten \u2013 dann wird dein Ei w\xE4rmer. Noch ${days(n.left)}!` : `${TRAIN_COUNT} Noten \u2013 bleib in \xDCbung!`;
+    return `<button class="dailybar ${done ? "done" : ""} ${risk && !done ? "risk" : ""} ${cold && !done ? "cold" : ""}" data-act="daily" ${open ? "" : "disabled"}>${n ? egg(n, 44) : '<span data-pet="sternendrache" data-size="52"></span>'}<span class="dtxt"><b>Tagesaufgabe</b><small>${sub}</small></span>${n && open ? dots(n) : ""}${!open ? "" : done ? '<i class="cta ok">geschafft</i>' : '<i class="cta">Los!</i>'}</button>`;
   }
   function dailyCard(app, msg = "") {
-    const p = app.profile, n = nest(p), done = doneToday(p), st = dailyState(p), mic = app.audio.micState, noMic = !app.keysOn && (mic === "denied" || mic === "unsupported");
+    coolEgg(app.profile);
+    const p = app.profile, n = nest(p), done = doneToday(p), st = dailyState(p), cold = coldDays(p), risk = eggAtRisk(p), mic = app.audio.micState, noMic = !app.keysOn && (mic === "denied" || mic === "unsupported");
     const start2 = (input) => {
       app.runLevel(dailyLevel(p, input));
     };
@@ -6170,7 +6405,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       }
       start2("play");
     };
-    const nestHtml = n ? `<div class="nest">${egg(n, 132)}<div><p class="lead">${done ? `Dein Ei ist f\xFCr heute warm: <b>Tag ${n.warm} von ${n.days}</b>.` : n.warm ? `Dein Ei ist schon <b>${days(n.warm)}</b> warm. Es braucht <b>${days(n.days)}</b>.` : `In deinem Nest liegt ${st.egg ? "ein neues Ei" : "ein Ei"}. Es braucht <b>${days(n.days)}</b> W\xE4rme.`}</p>${dots(n)}<p class="muted">${n.tier < 2 ? "Kleine Eier schl\xFCpfen schnell. Sp\xE4ter kommen gro\xDFe Eier mit riesigen Tieren!" : n.tier < 5 ? "Je gr\xF6\xDFer das Ei, desto gr\xF6\xDFer das Tier \u2013 und desto l\xE4nger braucht es." : "Ein riesiges Ei! Darin w\xE4chst etwas ganz Besonderes."}</p></div></div>` : `<div class="nest"><span data-pet="sternendrache" data-size="132"></span><div><p class="lead">Alle ${EGGS.length} Eier sind geschl\xFCpft. Du hast sie alle!</p><p class="muted">Die Tagesaufgabe h\xE4lt dich weiter in \xDCbung.</p></div></div>`;
+    const nestHtml = n ? `<div class="nest">${egg(n, 132)}<div><p class="lead">${cold && !done ? `Dein Ei ist kalt geworden \u2013 es war schon ${days(cold)} warm. Im Nest liegt ein neues Ei: Es braucht <b>${days(n.days)}</b> W\xE4rme.` : done ? `Dein Ei ist f\xFCr heute warm: <b>Tag ${n.warm} von ${n.days}</b>.` : n.warm ? `Dein Ei ist schon <b>${days(n.warm)}</b> warm. Es braucht <b>${days(n.days)}</b>.` : `In deinem Nest liegt ${st.egg ? "ein neues Ei" : "ein Ei"}. Es braucht <b>${days(n.days)}</b> W\xE4rme.`}</p>${dots(n)}<p class="${risk || cold ? "note warn" : "muted"}" id="eggRule">Ein Ei muss <b>jeden Tag</b> gew\xE4rmt werden. Wer einen Tag ausl\xE4sst, verliert es.</p><p class="muted">${n.tier < 2 ? "Kleine Eier schl\xFCpfen schnell. Sp\xE4ter kommen gro\xDFe Eier mit riesigen Tieren!" : n.tier < 5 ? "Je gr\xF6\xDFer das Ei, desto gr\xF6\xDFer das Tier \u2013 und desto l\xE4nger braucht es." : "Ein riesiges Ei! Darin w\xE4chst etwas ganz Besonderes."}</p></div></div>` : `<div class="nest"><span data-pet="sternendrache" data-size="132"></span><div><p class="lead">Alle ${EGGS.length} Eier sind geschl\xFCpft. Du hast sie alle!</p><p class="muted">Die Tagesaufgabe h\xE4lt dich weiter in \xDCbung.</p></div></div>`;
     app.screen(
       `<div class="maphead"><div><small class="kicker">Jeden Tag einmal \xB7 etwa 2 Minuten</small><h2>Tagesaufgabe</h2></div><button class="btn sm" data-act="back">Zur\xFCck</button></div>${nestHtml}
     <p>${done ? "Du hast die Tagesaufgabe heute schon geschafft. Du kannst nochmal \xFCben \u2013 f\xFCrs Ei z\xE4hlt es erst morgen wieder." : `<b>${TRAIN_COUNT} Noten</b> aus allem, was du schon kennst. Was noch wackelt, kommt \xF6fter dran.`}</p>${msg ? `<p class="note warn" role="status">${esc(msg)}</p>` : ""}
@@ -6189,7 +6424,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     if (r.hatched) return hatch(app, before, r, raw);
     const n = r.nest;
     app.screen(`<div class="petcard"><small class="kicker">Tagesaufgabe</small><h2>${r.counted ? "Geschafft!" : "Gut ge\xFCbt!"}</h2>${n ? egg(n, 150, r.counted ? "warm" : "") : '<span data-pet="sternendrache" data-size="150"></span>'}
-    ${n ? `<p class="lead" id="dEgg">${r.counted ? `Dein Ei ist einen Tag w\xE4rmer: <b>Tag ${n.warm} von ${n.days}</b>.` : `Dein Ei war heute schon warm: <b>Tag ${n.warm} von ${n.days}</b>.`}</p>${dots(n)}<p>${r.counted ? `Noch ${days(n.left)}, dann schl\xFCpft es. Komm morgen wieder!` : "Morgen kannst du es weiter w\xE4rmen."}</p>` : '<p class="lead">Stark \u2013 du bleibst in \xDCbung!</p>'}
+    ${n ? `<p class="lead" id="dEgg">${r.counted ? `Dein Ei ist einen Tag w\xE4rmer: <b>Tag ${n.warm} von ${n.days}</b>.` : `Dein Ei war heute schon warm: <b>Tag ${n.warm} von ${n.days}</b>.`}</p>${dots(n)}<p>${r.counted ? `Noch ${days(n.left)}, dann schl\xFCpft es. Komm morgen wieder \u2013 sonst wird es kalt!` : "Morgen musst du es weiter w\xE4rmen, sonst wird es kalt."}</p>` : '<p class="lead">Stark \u2013 du bleibst in \xDCbung!</p>'}
     <p class="muted" id="dLine">${line(raw)}</p><div class="row"><button class="btn go big" data-act="map">Weiter</button></div></div>`, { map: () => map(app) });
     app.audio.fanfare(r.counted ? 2 : 1);
   }
@@ -6238,6 +6473,282 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
   init_levels();
   init_dailyui();
   init_endlessui();
+  init_songui();
+
+  // src/song.js
+  init_music();
+  init_srs();
+  init_gfx();
+  init_instrument();
+  init_text();
+  var PXB = 26;
+  var BAR_GAP = 8;
+  var X0 = 60;
+  var HIDE = 50;
+  var LAT_S = 0.26;
+  var EARLY = 0.4;
+  var freq = (m) => 440 * Math.pow(2, (m - 69) / 12);
+  var SongScene = class {
+    constructor(app, level) {
+      this.app = app;
+      this.level = level;
+      this.isLevel = true;
+    }
+    enter() {
+      const { app, level } = this, song2 = level.song;
+      this.mode = level.mode;
+      this.song = song2;
+      this.clef = "treble";
+      this.theme = level.theme;
+      this.bg = app.background(level.theme);
+      this.line = THEMES[level.theme].line;
+      let x = X0, bar = 0;
+      this.bars = [];
+      this.items = song2.notes.map((n) => {
+        if (n.t0 > 0 && Math.abs(n.t0 / song2.meter - Math.round(n.t0 / song2.meter)) < 1e-6) {
+          this.bars.push(x - 9 + BAR_GAP / 2);
+          x += BAR_GAP;
+          bar++;
+        }
+        const nn = N(n.key), it = { n: nn, key: n.key, midi: midiOf(nn), pos: staffPos(nn, this.clef), beats: n.beats, t0: n.t0, x, st: "todo" };
+        x += n.beats * PXB;
+        return it;
+      });
+      this.endX = x;
+      this.bars.push(x - 9 + BAR_GAP / 2);
+      this.i = 0;
+      this.t = 0;
+      this.first = 0;
+      this.hits = 0;
+      this.wrong = 0;
+      this.tries = 0;
+      this.done = false;
+      this.doneT = 0;
+      this.shake = 0;
+      this.hint = false;
+      this.parts = new Particles();
+      this.accMidi = null;
+      this.accAt = -1e9;
+      this.freed = [];
+      this.bpm = level.bpm || song2.bpm;
+      this.beat = this.mode === "step" ? 0 : -song2.meter;
+      this.lastClick = -99;
+      this.camX = 0;
+      this.started = false;
+      app.panel.showMic(this.mode !== "listen");
+      app.panel.keyboard(this.clef);
+      app.hud.show(song2.title, true);
+      app.hud.progress(0, this.items.length);
+      if (this.mode === "listen") {
+        app.panel.task("H\xF6r zu und <b>lies mit</b> \u2013 die leuchtende Note erklingt gerade.");
+        app.bubble("H\xF6r gut zu und lies mit!", 4);
+      } else if (this.mode === "tempo") {
+        app.panel.task(app.listening ? `Spiele <b>im Takt</b> ${INSTR.on}: jede Note, wenn sie die Linie erreicht.` : `Tippe <b>im Takt</b> ${INSTR.padWhere}: jede Note, wenn sie die Linie erreicht.`);
+        app.hud.extra(`<b>${Math.round(this.bpm)}</b> Schl\xE4ge pro Minute`);
+        app.bubble("Z\xE4hl mit: Nach dem Einz\xE4hlen geht es los!", 4);
+      } else {
+        this.prompt(true);
+      }
+    }
+    get cur() {
+      return this.items[this.i];
+    }
+    prompt(first) {
+      const { app } = this;
+      this.tries = 0;
+      this.hint = false;
+      app.panel.setHint(null);
+      app.hud.progress(this.i, this.items.length);
+      app.panel.task(app.listening ? `Spiele das Lied <b>Note f\xFCr Note</b> ${INSTR.on}.` : `Spiele das Lied <b>Note f\xFCr Note</b> \u2013 ${INSTR.tapPad}.`);
+      if (first) {
+        app.bubble("Lies die leuchtende Note und spiele sie. Lass dir Zeit!", 4);
+        app.panel.say(app.listening ? "Ich h\xF6re \u2026" : INSTR.pad, app.listening ? "Ich h\xF6re noch nichts." : "");
+      }
+    }
+    /** Bildschirm-x zu einem Zeitpunkt (in Schlägen): zwischen den Noten gleichmäßig. */
+    xAt(beat) {
+      const it = this.items;
+      if (beat <= 0) return it[0].x + beat * PXB;
+      for (let k = 0; k < it.length; k++) {
+        const a = it[k], nx = k + 1 < it.length ? it[k + 1].x : this.endX;
+        if (beat < a.t0 + a.beats) return a.x + (nx - a.x) * (beat - a.t0) / a.beats;
+      }
+      return this.endX + (beat - this.song.beats) * PXB;
+    }
+    get playX() {
+      return Math.max(60, Math.round(VIEW_W * 0.32));
+    }
+    onNote(midi) {
+      if (this.done || this.mode === "listen") return;
+      const { app } = this, p = app.profile, now = performance.now();
+      if (this.mode === "tempo") {
+        if (this.beat < -EARLY) return;
+        const lat = (app.listening ? LAT_S : 0.05) * this.bpm / 60, te = this.beat - lat;
+        let best = null;
+        for (const it2 of this.items) {
+          if (it2.st !== "todo") continue;
+          if (te < it2.t0 - EARLY) break;
+          if (it2.midi === midi && te <= it2.t0 + Math.max(it2.beats, 0.75) && (!best || Math.abs(te - it2.t0) < Math.abs(te - best.t0))) best = it2;
+        }
+        if (best) {
+          best.st = "ok";
+          this.hits++;
+          this.parts.burst(best.x, yOfPos(best.pos), [C.YE, C.W, C.GL], 10);
+          app.panel.flash(midi, "good");
+          p.notes[best.key] = update(p.notes[best.key] || newStat(), true);
+        } else {
+          this.wrong++;
+          app.panel.flash(midi, "bad");
+        }
+        return;
+      }
+      const it = this.cur;
+      if (!it) return;
+      if (midi === this.accMidi && (now - this.accAt < 350 || midi !== it.midi && now - this.accAt < 1200)) return;
+      this.started = true;
+      const cls = classify(it.midi, midi), heard = noteOfMidi(midi, it.n.alt < 0);
+      if (cls === "correct") {
+        const first = this.tries === 0;
+        if (first) this.first++;
+        p.notes[it.key] = update(p.notes[it.key] || newStat(), first);
+        it.st = "ok";
+        this.parts.burst(it.x, yOfPos(it.pos), [C.YE, C.W, C.GL], 12);
+        app.panel.say(app.listening ? "Ich h\xF6re \u2026" : INSTR.pad, `<b>${nameHtml(it.n)}</b> \u2013 richtig!`, "ok");
+        app.panel.flash(midi, "good");
+        app.audio.sfx("ok");
+        this.accMidi = midi;
+        this.accAt = now;
+        this.i++;
+        app.bubble(null);
+        if (this.i >= this.items.length) {
+          this.done = true;
+          app.hud.progress(this.i, this.items.length);
+          app.panel.setHint(null);
+        } else this.prompt(false);
+      } else {
+        this.tries++;
+        this.wrong++;
+        this.shake = 0.4;
+        const ck = `${it.key}>${heard.key}`;
+        p.conf[ck] = (p.conf[ck] || 0) + 1;
+        app.audio.sfx("oops");
+        app.panel.flash(midi, "bad");
+        app.panel.say(app.listening ? "Ich h\xF6re \u2026" : INSTR.pad, cls === "wrong" ? `Das war <b>${nameHtml(heard)}</b>. Schau nochmal genau hin!` : `Das ist ein <b>${letterName(it.n)}</b>, aber eine Oktave zu ${cls === "octave-high" ? "hoch" : "tief"}.`, "warn");
+        if (this.tries >= 2 && !this.hint) {
+          this.hint = true;
+          app.panel.setHint(it.midi);
+          app.bubble(isGuitar() ? `Tipp: Das ist <b>${nameHtml(it.n)}</b>. ${gripText(it.midi)}.` : `Tipp: Das ist <b>${nameHtml(it.n)}</b>. Die Taste leuchtet.`, 5);
+        }
+      }
+    }
+    click(strong) {
+      const a = this.app.audio;
+      if (a.muted || !a.ensure()) return;
+      try {
+        a.tone(strong ? 1568 : 1175, a.ctx.currentTime + 5e-3, 0.045, "square", strong ? 0.035 : 0.022);
+      } catch (e) {
+      }
+    }
+    update(dt) {
+      const { app, song: song2 } = this;
+      this.t += dt;
+      this.parts.update(dt);
+      if (this.shake > 0) this.shake -= dt;
+      if (this.done) {
+        this.doneT += dt;
+        if (this.doneT > 1 && !this.reported) {
+          this.reported = true;
+          if (this.mode === "listen") return app.finishSong(this.level, null);
+          app.audio.sfx("done");
+          app.finishSong(this.level, this.mode === "tempo" ? { ratio: this.hits / this.items.length, hits: this.hits, n: this.items.length, wrong: this.wrong } : { ratio: this.first / this.items.length, hits: this.first, n: this.items.length, wrong: this.wrong });
+        }
+      }
+      if (this.mode === "step") {
+        const it = this.cur || this.items[this.items.length - 1], want = Math.max(0, it.x - Math.round(VIEW_W * 0.36));
+        this.camX += (want - this.camX) * Math.min(1, dt * 7);
+        return;
+      }
+      if (this.done) return;
+      const before = this.beat;
+      this.beat += dt * this.bpm / 60;
+      const whole = Math.floor(this.beat + 1e-6);
+      if (whole > this.lastClick && this.beat < song2.beats) {
+        this.lastClick = whole;
+        if (this.mode === "tempo" || this.beat < 0) this.click((whole % song2.meter + song2.meter) % song2.meter === 0);
+      }
+      if (this.mode === "listen") {
+        for (const it of this.items) if (it.st === "todo" && before < it.t0 && this.beat >= it.t0) {
+          it.st = "ok";
+          const a = app.audio;
+          if (!a.muted && a.ensure()) {
+            try {
+              a.tone(freq(it.midi - INSTR.shift), a.ctx.currentTime + 5e-3, Math.min(1.6, it.beats * 60 / this.bpm * 0.92), "triangle", 0.11);
+            } catch (e) {
+            }
+          }
+          app.panel.flash(it.midi, "good");
+          this.i = this.items.indexOf(it) + 1;
+          app.hud.progress(this.i, this.items.length);
+        }
+      } else {
+        const lat = (app.listening ? LAT_S : 0.05) * this.bpm / 60, te = this.beat - lat;
+        let k = 0;
+        for (const it of this.items) {
+          if (it.st === "todo" && te > it.t0 + Math.max(it.beats, 0.75) + 0.1) {
+            it.st = "miss";
+            app.profile.notes[it.key] = update(app.profile.notes[it.key] || newStat(), false);
+          }
+          if (it.st !== "todo") k++;
+        }
+        if (k !== this.i) {
+          this.i = k;
+          app.hud.progress(k, this.items.length);
+        }
+      }
+      this.camX = this.xAt(this.beat) - this.playX;
+      if (this.beat >= song2.beats + (this.mode === "tempo" ? 1.2 : 0.6)) this.done = true;
+    }
+    draw(ctx, tx) {
+      const line2 = this.line, cam = Math.round(this.camX), { song: song2 } = this, top = yOfPos(8), bot = yOfPos(0);
+      drawBackground(ctx, this.bg, this.t * 3 + cam * 0.3, this.t);
+      drawStaff(ctx, line2, 4, VIEW_W - 4, this.clef);
+      ctx.fillStyle = line2;
+      for (const bx of this.bars) {
+        const sx = bx - cam;
+        if (sx > HIDE - 6 && sx < VIEW_W - 3) ctx.fillRect(sx, top, 1, bot - top + 1);
+      }
+      {
+        const ex = this.bars[this.bars.length - 1] - cam;
+        if (ex > HIDE - 6 && ex < VIEW_W - 6) ctx.fillRect(ex + 3, top, 2, bot - top + 1);
+      }
+      if (this.mode !== "step") {
+        const px2 = this.playX;
+        ctx.fillStyle = C.RED;
+        for (let y = yOfPos(11); y < yOfPos(-3); y += 4) ctx.fillRect(px2, y, 1, 2);
+      }
+      this.items.forEach((it, k) => {
+        const sx = it.x - cam;
+        if (sx < HIDE || sx > VIEW_W + 12) return;
+        const y = yOfPos(it.pos), cur = this.mode === "step" ? k === this.i && !this.done : it.st === "todo" && Math.abs(this.beat - it.t0) < 0.5 && this.beat >= it.t0 - 0.5;
+        const x = sx + (cur && this.shake > 0 ? Math.round(Math.sin(this.shake * 60) * 1.5) : 0), up = stemUp(it.pos, this.clef), col = it.st === "miss" ? C.RED : line2;
+        drawLedgers(ctx, x - 9, 19, ledgerPositions(it.pos, this.clef), line2);
+        if (cur) drawGlow(ctx, x, y, 0.6 + 0.3 * Math.sin(this.t * 6));
+        drawNote(ctx, x, y, { style: cur ? this.shake > 0 ? "ghost" : "gold" : it.st === "ok" ? "ok" : it.st === "miss" ? "ghost" : "ink", halo: cur ? "#FFF1D6" : null, up, alt: it.n.alt, line: cur && this.shake > 0 ? C.RED : cur ? C.K : col, beats: it.beats, stemLen: 19 });
+      });
+      drawClef(ctx, this.clef, 6, line2);
+      this.app.drawBuddy(ctx, this, 20, 36, this.t, 0);
+      this.parts.draw(ctx, cam);
+      label(tx, String(song2.meter), 40, yOfPos(6), { size: 30, color: this.theme === "himmel" ? "#26364B" : "#FFFFFF", stroke: this.theme === "himmel" ? null : C.K });
+      label(tx, "4", 40, yOfPos(2), { size: 30, color: this.theme === "himmel" ? "#26364B" : "#FFFFFF", stroke: this.theme === "himmel" ? null : C.K });
+      if (this.mode !== "step" && this.beat < 0) {
+        const n = song2.meter + Math.floor(this.beat) + 1;
+        label(tx, String(Math.max(1, n)), VIEW_W * 0.55, yOfPos(4), { size: 150, color: "#FFFFFF", stroke: C.K });
+      }
+    }
+  };
+
+  // src/main.js
+  init_songs();
   init_endless();
   init_music();
   init_save();
@@ -7542,7 +8053,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       this.audio.keepAwake(true);
       this.audio.stopMusic();
       track("levelstart/" + level.id);
-      const Cls = { jump: JumpScene, boss: JumpScene, regen: RegenScene, bau: BauScene, train: TrainScene }[level.type];
+      const Cls = { jump: JumpScene, boss: JumpScene, regen: RegenScene, bau: BauScene, train: TrainScene, song: SongScene }[level.type];
       this.scene = new Cls(this, level);
       this.scene.enter();
     }
@@ -7583,6 +8094,19 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
       this.bubble(null);
       this.$("hud").hidden = true;
       result(this, level, out);
+    }
+    /** Ende eines Lieds: beim Anhören zurück zur Lied-Karte, sonst Sterne eintragen und Ergebnis zeigen. */
+    finishSong(level, res) {
+      this.$("sndBtn").hidden = false;
+      this.scene.isLevel = false;
+      this.flush();
+      this.bubble(null);
+      this.$("hud").hidden = true;
+      if (!res) return songCard(this, level.song);
+      const before = songRec(this.profile, level.song.id).step, rec = recordSong(this.profile, level.song.id, level.mode, res.ratio, level.bpm);
+      track("lied/" + level.song.id + "/" + level.mode);
+      this.save();
+      songResult(this, level, { ...res, ...rec, first: level.mode === "step" && !before });
     }
     /** Ende einer Meisterprüfung: Krone ausrechnen, die beste behalten. Zählt nicht zu den Level-Sternen. */
     finishMaster(level, res) {
@@ -7675,6 +8199,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;text-decorat
     window.__levels = LEVELS;
     window.__lv = levels_exports;
     window.__mu = music_exports;
+    window.__gfx = gfx_exports;
     window.__screens = screens_exports;
     window.__config = CONFIG;
     window.__train = trainui_exports;

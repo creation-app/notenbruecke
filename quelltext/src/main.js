@@ -3,6 +3,9 @@ import { petName, owns } from './pets.js';
 import * as LV from './levels.js';
 import * as DU from './dailyui.js';
 import * as EU from './endlessui.js';
+import * as SU from './songui.js';
+import { SongScene } from './song.js';
+import { recordSong, songRec } from './songs.js';
 import { recordEndless } from './endless.js';
 import * as MU from './music.js';
 import { load, persist, addPractice, dayKey, importPayload } from './save.js';
@@ -136,7 +139,7 @@ class App {
     this.bubbleSide((level.notes || []).some(k => SP(NN(k), level.clef === 'grand' ? 'treble' : level.clef) <= -5));
     this.audio.keepAwake(true); this.audio.stopMusic();
     track('levelstart/' + level.id);
-    const Cls = { jump: JumpScene, boss: JumpScene, regen: RegenScene, bau: BauScene, train: TrainScene }[level.type]; this.scene = new Cls(this, level); this.scene.enter();
+    const Cls = { jump: JumpScene, boss: JumpScene, regen: RegenScene, bau: BauScene, train: TrainScene, song: SongScene }[level.type]; this.scene = new Cls(this, level); this.scene.enter();
   }
   finishLevel(level, res) {
     if (level.master) return this.finishMaster(level, res);
@@ -146,6 +149,13 @@ class App {
     if (res.time != null) { const nb = !rec.time || res.time < rec.time; if (nb) rec.time = Math.round(res.time * 10) / 10; if (p.mode === 'profi') { out.newBest = nb; out.bestTime = rec.time; } }
     if (res.score != null) { out.newBest = !rec.score || res.score > rec.score; rec.score = Math.max(rec.score || 0, res.score); out.bestScore = rec.score; p.regenBest = Math.max(p.regenBest || 0, res.score); }
     p.levels[level.id] = rec; this.$('sndBtn').hidden = false; this.scene.isLevel = false; track('level/' + level.id); this.flush(); this.bubble(null); this.$('hud').hidden = true; S.result(this, level, out);
+  }
+  /** Ende eines Lieds: beim Anhören zurück zur Lied-Karte, sonst Sterne eintragen und Ergebnis zeigen. */
+  finishSong(level, res) {
+    this.$('sndBtn').hidden = false; this.scene.isLevel = false; this.flush(); this.bubble(null); this.$('hud').hidden = true;
+    if (!res) return SU.songCard(this, level.song);
+    const before = songRec(this.profile, level.song.id).step, rec = recordSong(this.profile, level.song.id, level.mode, res.ratio, level.bpm); track('lied/' + level.song.id + '/' + level.mode); this.save();
+    SU.songResult(this, level, { ...res, ...rec, first: level.mode === 'step' && !before });
   }
   /** Ende einer Meisterprüfung: Krone ausrechnen, die beste behalten. Zählt nicht zu den Level-Sternen. */
   finishMaster(level, res) {
@@ -179,5 +189,5 @@ class App {
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) window.addEventListener('load', () => { navigator.serviceWorker.register((window.NB_SHOP ? '../' : './') + 'sw.js').catch(() => {}); });
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); window.__install = e; });
 window.addEventListener('appinstalled', () => { window.__install = null; });
-const start = () => { window.__nb = new App(); window.__levels = LEVELS; window.__lv = LV; window.__mu = MU; window.__screens = S; window.__config = CONFIG; window.__train = TU; window.__acc = ACC; window.__setInstr = setInstr; window.__flushStats = flushStats; };
+const start = () => { window.__nb = new App(); window.__levels = LEVELS; window.__lv = LV; window.__mu = MU; window.__gfx = G; window.__screens = S; window.__config = CONFIG; window.__train = TU; window.__acc = ACC; window.__setInstr = setInstr; window.__flushStats = flushStats; };
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(start, start); else start();
